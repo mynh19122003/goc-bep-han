@@ -1,0 +1,2998 @@
+[
+  {
+    "file": "expanded_001.png",
+    "source_bbox": [
+      385,
+      1,
+      722,
+      136
+    ],
+    "area": 45316,
+    "size": [
+      340,
+      138
+    ]
+  },
+  {
+    "file": "expanded_002.png",
+    "source_bbox": [
+      738,
+      1,
+      962,
+      150
+    ],
+    "area": 33010,
+    "size": [
+      226,
+      152
+    ]
+  },
+  {
+    "file": "expanded_003.png",
+    "source_bbox": [
+      3,
+      2,
+      381,
+      227
+    ],
+    "area": 75794,
+    "size": [
+      382,
+      226
+    ]
+  },
+  {
+    "file": "expanded_004.png",
+    "source_bbox": [
+      1002,
+      6,
+      1120,
+      108
+    ],
+    "area": 11266,
+    "size": [
+      122,
+      106
+    ]
+  },
+  {
+    "file": "expanded_005.png",
+    "source_bbox": [
+      1132,
+      6,
+      1224,
+      110
+    ],
+    "area": 8168,
+    "size": [
+      95,
+      107
+    ]
+  },
+  {
+    "file": "expanded_006.png",
+    "source_bbox": [
+      1237,
+      6,
+      1349,
+      44
+    ],
+    "area": 4218,
+    "size": [
+      113,
+      42
+    ]
+  },
+  {
+    "file": "expanded_007.png",
+    "source_bbox": [
+      971,
+      19,
+      1001,
+      99
+    ],
+    "area": 1774,
+    "size": [
+      33,
+      81
+    ]
+  },
+  {
+    "file": "expanded_008.png",
+    "source_bbox": [
+      1304,
+      27,
+      1432,
+      123
+    ],
+    "area": 9181,
+    "size": [
+      129,
+      98
+    ]
+  },
+  {
+    "file": "expanded_009.png",
+    "source_bbox": [
+      1240,
+      58,
+      1290,
+      123
+    ],
+    "area": 3168,
+    "size": [
+      51,
+      67
+    ]
+  },
+  {
+    "file": "expanded_010.png",
+    "source_bbox": [
+      1189,
+      82,
+      1225,
+      141
+    ],
+    "area": 1388,
+    "size": [
+      38,
+      63
+    ]
+  },
+  {
+    "file": "expanded_011.png",
+    "source_bbox": [
+      971,
+      106,
+      1034,
+      237
+    ],
+    "area": 6745,
+    "size": [
+      66,
+      133
+    ]
+  },
+  {
+    "file": "expanded_012.png",
+    "source_bbox": [
+      1046,
+      115,
+      1180,
+      186
+    ],
+    "area": 5831,
+    "size": [
+      136,
+      74
+    ]
+  },
+  {
+    "file": "expanded_013.png",
+    "source_bbox": [
+      1301,
+      121,
+      1437,
+      237
+    ],
+    "area": 11725,
+    "size": [
+      139,
+      117
+    ]
+  },
+  {
+    "file": "expanded_014.png",
+    "source_bbox": [
+      1191,
+      131,
+      1294,
+      239
+    ],
+    "area": 7031,
+    "size": [
+      103,
+      111
+    ]
+  },
+  {
+    "file": "expanded_015.png",
+    "source_bbox": [
+      391,
+      144,
+      503,
+      232
+    ],
+    "area": 7106,
+    "size": [
+      115,
+      90
+    ]
+  },
+  {
+    "file": "expanded_016.png",
+    "source_bbox": [
+      790,
+      154,
+      898,
+      231
+    ],
+    "area": 5667,
+    "size": [
+      110,
+      79
+    ]
+  },
+  {
+    "file": "expanded_017.png",
+    "source_bbox": [
+      520,
+      157,
+      646,
+      227
+    ],
+    "area": 6270,
+    "size": [
+      127,
+      72
+    ]
+  },
+  {
+    "file": "expanded_018.png",
+    "source_bbox": [
+      903,
+      159,
+      963,
+      235
+    ],
+    "area": 3046,
+    "size": [
+      64,
+      79
+    ]
+  },
+  {
+    "file": "expanded_019.png",
+    "source_bbox": [
+      656,
+      161,
+      678,
+      217
+    ],
+    "area": 1021,
+    "size": [
+      25,
+      56
+    ]
+  },
+  {
+    "file": "expanded_020.png",
+    "source_bbox": [
+      684,
+      166,
+      782,
+      229
+    ],
+    "area": 4415,
+    "size": [
+      100,
+      65
+    ]
+  },
+  {
+    "file": "expanded_021.png",
+    "source_bbox": [
+      1049,
+      184,
+      1078,
+      236
+    ],
+    "area": 1296,
+    "size": [
+      31,
+      55
+    ]
+  },
+  {
+    "file": "expanded_022.png",
+    "source_bbox": [
+      1137,
+      191,
+      1187,
+      241
+    ],
+    "area": 1749,
+    "size": [
+      53,
+      53
+    ]
+  },
+  {
+    "file": "expanded_023.png",
+    "source_bbox": [
+      1085,
+      193,
+      1127,
+      239
+    ],
+    "area": 1369,
+    "size": [
+      42,
+      48
+    ]
+  },
+  {
+    "file": "expanded_024.png",
+    "source_bbox": [
+      85,
+      237,
+      144,
+      350
+    ],
+    "area": 4989,
+    "size": [
+      62,
+      115
+    ]
+  },
+  {
+    "file": "expanded_025.png",
+    "source_bbox": [
+      9,
+      240,
+      76,
+      350
+    ],
+    "area": 5153,
+    "size": [
+      70,
+      113
+    ]
+  },
+  {
+    "file": "expanded_026.png",
+    "source_bbox": [
+      159,
+      240,
+      241,
+      351
+    ],
+    "area": 6257,
+    "size": [
+      84,
+      114
+    ]
+  },
+  {
+    "file": "expanded_027.png",
+    "source_bbox": [
+      1347,
+      240,
+      1443,
+      355
+    ],
+    "area": 7604,
+    "size": [
+      98,
+      118
+    ]
+  },
+  {
+    "file": "expanded_028.png",
+    "source_bbox": [
+      1265,
+      241,
+      1345,
+      355
+    ],
+    "area": 6569,
+    "size": [
+      84,
+      117
+    ]
+  },
+  {
+    "file": "expanded_029.png",
+    "source_bbox": [
+      692,
+      244,
+      748,
+      350
+    ],
+    "area": 4667,
+    "size": [
+      58,
+      108
+    ]
+  },
+  {
+    "file": "expanded_030.png",
+    "source_bbox": [
+      982,
+      244,
+      1055,
+      353
+    ],
+    "area": 5629,
+    "size": [
+      77,
+      112
+    ]
+  },
+  {
+    "file": "expanded_031.png",
+    "source_bbox": [
+      1153,
+      244,
+      1262,
+      353
+    ],
+    "area": 7222,
+    "size": [
+      112,
+      111
+    ]
+  },
+  {
+    "file": "expanded_032.png",
+    "source_bbox": [
+      256,
+      245,
+      312,
+      351
+    ],
+    "area": 4319,
+    "size": [
+      57,
+      108
+    ]
+  },
+  {
+    "file": "expanded_033.png",
+    "source_bbox": [
+      313,
+      245,
+      388,
+      349
+    ],
+    "area": 5466,
+    "size": [
+      77,
+      106
+    ]
+  },
+  {
+    "file": "expanded_034.png",
+    "source_bbox": [
+      1055,
+      245,
+      1151,
+      352
+    ],
+    "area": 6696,
+    "size": [
+      98,
+      110
+    ]
+  },
+  {
+    "file": "expanded_035.png",
+    "source_bbox": [
+      760,
+      246,
+      904,
+      352
+    ],
+    "area": 11245,
+    "size": [
+      146,
+      109
+    ]
+  },
+  {
+    "file": "expanded_036.png",
+    "source_bbox": [
+      392,
+      247,
+      482,
+      353
+    ],
+    "area": 6167,
+    "size": [
+      93,
+      109
+    ]
+  },
+  {
+    "file": "expanded_037.png",
+    "source_bbox": [
+      493,
+      248,
+      548,
+      348
+    ],
+    "area": 4286,
+    "size": [
+      57,
+      103
+    ]
+  },
+  {
+    "file": "expanded_038.png",
+    "source_bbox": [
+      558,
+      248,
+      618,
+      348
+    ],
+    "area": 4633,
+    "size": [
+      62,
+      104
+    ]
+  },
+  {
+    "file": "expanded_039.png",
+    "source_bbox": [
+      628,
+      248,
+      693,
+      349
+    ],
+    "area": 4829,
+    "size": [
+      67,
+      104
+    ]
+  },
+  {
+    "file": "expanded_040.png",
+    "source_bbox": [
+      923,
+      253,
+      977,
+      353
+    ],
+    "area": 4150,
+    "size": [
+      58,
+      102
+    ]
+  },
+  {
+    "file": "expanded_041.png",
+    "source_bbox": [
+      8,
+      354,
+      69,
+      454
+    ],
+    "area": 4891,
+    "size": [
+      64,
+      103
+    ]
+  },
+  {
+    "file": "expanded_042.png",
+    "source_bbox": [
+      472,
+      354,
+      562,
+      459
+    ],
+    "area": 7030,
+    "size": [
+      90,
+      108
+    ]
+  },
+  {
+    "file": "expanded_043.png",
+    "source_bbox": [
+      659,
+      355,
+      738,
+      461
+    ],
+    "area": 5969,
+    "size": [
+      80,
+      108
+    ]
+  },
+  {
+    "file": "expanded_044.png",
+    "source_bbox": [
+      576,
+      356,
+      647,
+      461
+    ],
+    "area": 5373,
+    "size": [
+      72,
+      105
+    ]
+  },
+  {
+    "file": "expanded_045.png",
+    "source_bbox": [
+      364,
+      358,
+      453,
+      458
+    ],
+    "area": 5953,
+    "size": [
+      90,
+      103
+    ]
+  },
+  {
+    "file": "expanded_046.png",
+    "source_bbox": [
+      1236,
+      359,
+      1339,
+      475
+    ],
+    "area": 8343,
+    "size": [
+      106,
+      118
+    ]
+  },
+  {
+    "file": "expanded_047.png",
+    "source_bbox": [
+      89,
+      360,
+      158,
+      457
+    ],
+    "area": 5031,
+    "size": [
+      70,
+      99
+    ]
+  },
+  {
+    "file": "expanded_048.png",
+    "source_bbox": [
+      170,
+      360,
+      249,
+      458
+    ],
+    "area": 5394,
+    "size": [
+      81,
+      100
+    ]
+  },
+  {
+    "file": "expanded_049.png",
+    "source_bbox": [
+      750,
+      360,
+      839,
+      470
+    ],
+    "area": 6868,
+    "size": [
+      91,
+      112
+    ]
+  },
+  {
+    "file": "expanded_050.png",
+    "source_bbox": [
+      845,
+      360,
+      920,
+      470
+    ],
+    "area": 5956,
+    "size": [
+      76,
+      110
+    ]
+  },
+  {
+    "file": "expanded_051.png",
+    "source_bbox": [
+      923,
+      360,
+      992,
+      470
+    ],
+    "area": 4859,
+    "size": [
+      73,
+      112
+    ]
+  },
+  {
+    "file": "expanded_052.png",
+    "source_bbox": [
+      1002,
+      360,
+      1079,
+      471
+    ],
+    "area": 5711,
+    "size": [
+      79,
+      114
+    ]
+  },
+  {
+    "file": "expanded_053.png",
+    "source_bbox": [
+      1162,
+      360,
+      1232,
+      473
+    ],
+    "area": 5500,
+    "size": [
+      74,
+      115
+    ]
+  },
+  {
+    "file": "expanded_054.png",
+    "source_bbox": [
+      1349,
+      360,
+      1441,
+      475
+    ],
+    "area": 7086,
+    "size": [
+      94,
+      118
+    ]
+  },
+  {
+    "file": "expanded_055.png",
+    "source_bbox": [
+      1089,
+      361,
+      1148,
+      473
+    ],
+    "area": 5039,
+    "size": [
+      60,
+      114
+    ]
+  },
+  {
+    "file": "expanded_056.png",
+    "source_bbox": [
+      1326,
+      364,
+      1346,
+      410
+    ],
+    "area": 877,
+    "size": [
+      24,
+      48
+    ]
+  },
+  {
+    "file": "expanded_057.png",
+    "source_bbox": [
+      264,
+      365,
+      348,
+      458
+    ],
+    "area": 5436,
+    "size": [
+      87,
+      96
+    ]
+  },
+  {
+    "file": "expanded_058.png",
+    "source_bbox": [
+      393,
+      463,
+      496,
+      582
+    ],
+    "area": 7514,
+    "size": [
+      106,
+      123
+    ]
+  },
+  {
+    "file": "expanded_059.png",
+    "source_bbox": [
+      7,
+      464,
+      185,
+      582
+    ],
+    "area": 14494,
+    "size": [
+      180,
+      122
+    ]
+  },
+  {
+    "file": "expanded_060.png",
+    "source_bbox": [
+      195,
+      466,
+      289,
+      582
+    ],
+    "area": 7676,
+    "size": [
+      96,
+      118
+    ]
+  },
+  {
+    "file": "expanded_061.png",
+    "source_bbox": [
+      292,
+      469,
+      397,
+      583
+    ],
+    "area": 7319,
+    "size": [
+      108,
+      117
+    ]
+  },
+  {
+    "file": "expanded_062.png",
+    "source_bbox": [
+      493,
+      470,
+      593,
+      586
+    ],
+    "area": 7052,
+    "size": [
+      102,
+      118
+    ]
+  },
+  {
+    "file": "expanded_063.png",
+    "source_bbox": [
+      680,
+      471,
+      769,
+      586
+    ],
+    "area": 6085,
+    "size": [
+      91,
+      117
+    ]
+  },
+  {
+    "file": "expanded_064.png",
+    "source_bbox": [
+      597,
+      472,
+      671,
+      586
+    ],
+    "area": 6111,
+    "size": [
+      76,
+      118
+    ]
+  },
+  {
+    "file": "expanded_065.png",
+    "source_bbox": [
+      854,
+      478,
+      913,
+      533
+    ],
+    "area": 2345,
+    "size": [
+      62,
+      56
+    ]
+  },
+  {
+    "file": "expanded_066.png",
+    "source_bbox": [
+      924,
+      478,
+      983,
+      533
+    ],
+    "area": 2342,
+    "size": [
+      60,
+      57
+    ]
+  },
+  {
+    "file": "expanded_067.png",
+    "source_bbox": [
+      993,
+      478,
+      1052,
+      533
+    ],
+    "area": 2332,
+    "size": [
+      60,
+      57
+    ]
+  },
+  {
+    "file": "expanded_068.png",
+    "source_bbox": [
+      1180,
+      483,
+      1221,
+      524
+    ],
+    "area": 1205,
+    "size": [
+      43,
+      43
+    ]
+  },
+  {
+    "file": "expanded_069.png",
+    "source_bbox": [
+      1236,
+      483,
+      1275,
+      524
+    ],
+    "area": 1176,
+    "size": [
+      40,
+      43
+    ]
+  },
+  {
+    "file": "expanded_070.png",
+    "source_bbox": [
+      1290,
+      483,
+      1331,
+      523
+    ],
+    "area": 1202,
+    "size": [
+      41,
+      43
+    ]
+  },
+  {
+    "file": "expanded_071.png",
+    "source_bbox": [
+      1345,
+      483,
+      1383,
+      523
+    ],
+    "area": 1162,
+    "size": [
+      41,
+      42
+    ]
+  },
+  {
+    "file": "expanded_072.png",
+    "source_bbox": [
+      779,
+      484,
+      842,
+      541
+    ],
+    "area": 2631,
+    "size": [
+      67,
+      59
+    ]
+  },
+  {
+    "file": "expanded_073.png",
+    "source_bbox": [
+      1093,
+      528,
+      1180,
+      606
+    ],
+    "area": 5509,
+    "size": [
+      91,
+      81
+    ]
+  },
+  {
+    "file": "expanded_074.png",
+    "source_bbox": [
+      1186,
+      535,
+      1291,
+      598
+    ],
+    "area": 4787,
+    "size": [
+      108,
+      64
+    ]
+  },
+  {
+    "file": "expanded_075.png",
+    "source_bbox": [
+      1392,
+      535,
+      1442,
+      571
+    ],
+    "area": 1445,
+    "size": [
+      52,
+      39
+    ]
+  },
+  {
+    "file": "expanded_076.png",
+    "source_bbox": [
+      855,
+      536,
+      938,
+      593
+    ],
+    "area": 3405,
+    "size": [
+      86,
+      60
+    ]
+  },
+  {
+    "file": "expanded_077.png",
+    "source_bbox": [
+      1299,
+      537,
+      1389,
+      604
+    ],
+    "area": 4498,
+    "size": [
+      94,
+      70
+    ]
+  },
+  {
+    "file": "expanded_078.png",
+    "source_bbox": [
+      943,
+      542,
+      1013,
+      590
+    ],
+    "area": 2800,
+    "size": [
+      74,
+      52
+    ]
+  },
+  {
+    "file": "expanded_079.png",
+    "source_bbox": [
+      1018,
+      542,
+      1086,
+      595
+    ],
+    "area": 3039,
+    "size": [
+      72,
+      57
+    ]
+  },
+  {
+    "file": "expanded_080.png",
+    "source_bbox": [
+      776,
+      547,
+      852,
+      595
+    ],
+    "area": 2793,
+    "size": [
+      80,
+      52
+    ]
+  },
+  {
+    "file": "expanded_081.png",
+    "source_bbox": [
+      1396,
+      576,
+      1443,
+      610
+    ],
+    "area": 1219,
+    "size": [
+      49,
+      38
+    ]
+  },
+  {
+    "file": "expanded_082.png",
+    "source_bbox": [
+      136,
+      588,
+      259,
+      666
+    ],
+    "area": 6409,
+    "size": [
+      124,
+      81
+    ]
+  },
+  {
+    "file": "expanded_083.png",
+    "source_bbox": [
+      261,
+      588,
+      386,
+      673
+    ],
+    "area": 7695,
+    "size": [
+      127,
+      89
+    ]
+  },
+  {
+    "file": "expanded_084.png",
+    "source_bbox": [
+      358,
+      588,
+      605,
+      892
+    ],
+    "area": 39475,
+    "size": [
+      249,
+      307
+    ]
+  },
+  {
+    "file": "expanded_085.png",
+    "source_bbox": [
+      8,
+      590,
+      129,
+      677
+    ],
+    "area": 8618,
+    "size": [
+      124,
+      90
+    ]
+  },
+  {
+    "file": "expanded_086.png",
+    "source_bbox": [
+      612,
+      592,
+      729,
+      680
+    ],
+    "area": 8172,
+    "size": [
+      120,
+      92
+    ]
+  },
+  {
+    "file": "expanded_087.png",
+    "source_bbox": [
+      916,
+      594,
+      990,
+      649
+    ],
+    "area": 3309,
+    "size": [
+      78,
+      58
+    ]
+  },
+  {
+    "file": "expanded_088.png",
+    "source_bbox": [
+      504,
+      597,
+      606,
+      672
+    ],
+    "area": 5625,
+    "size": [
+      104,
+      78
+    ]
+  },
+  {
+    "file": "expanded_089.png",
+    "source_bbox": [
+      837,
+      597,
+      910,
+      655
+    ],
+    "area": 3353,
+    "size": [
+      75,
+      60
+    ]
+  },
+  {
+    "file": "expanded_090.png",
+    "source_bbox": [
+      737,
+      598,
+      828,
+      659
+    ],
+    "area": 4532,
+    "size": [
+      95,
+      65
+    ]
+  },
+  {
+    "file": "expanded_091.png",
+    "source_bbox": [
+      1238,
+      603,
+      1341,
+      665
+    ],
+    "area": 5512,
+    "size": [
+      106,
+      64
+    ]
+  },
+  {
+    "file": "expanded_092.png",
+    "source_bbox": [
+      996,
+      604,
+      1093,
+      662
+    ],
+    "area": 4340,
+    "size": [
+      101,
+      62
+    ]
+  },
+  {
+    "file": "expanded_093.png",
+    "source_bbox": [
+      1099,
+      607,
+      1231,
+      669
+    ],
+    "area": 6461,
+    "size": [
+      136,
+      65
+    ]
+  },
+  {
+    "file": "expanded_094.png",
+    "source_bbox": [
+      1348,
+      613,
+      1440,
+      666
+    ],
+    "area": 4676,
+    "size": [
+      96,
+      57
+    ]
+  },
+  {
+    "file": "expanded_095.png",
+    "source_bbox": [
+      881,
+      653,
+      965,
+      709
+    ],
+    "area": 3811,
+    "size": [
+      86,
+      60
+    ]
+  },
+  {
+    "file": "expanded_096.png",
+    "source_bbox": [
+      807,
+      659,
+      868,
+      702
+    ],
+    "area": 2058,
+    "size": [
+      63,
+      43
+    ]
+  },
+  {
+    "file": "expanded_097.png",
+    "source_bbox": [
+      731,
+      662,
+      798,
+      712
+    ],
+    "area": 2605,
+    "size": [
+      68,
+      52
+    ]
+  },
+  {
+    "file": "expanded_098.png",
+    "source_bbox": [
+      979,
+      662,
+      1045,
+      715
+    ],
+    "area": 2843,
+    "size": [
+      68,
+      55
+    ]
+  },
+  {
+    "file": "expanded_099.png",
+    "source_bbox": [
+      109,
+      670,
+      215,
+      736
+    ],
+    "area": 5692,
+    "size": [
+      109,
+      68
+    ]
+  },
+  {
+    "file": "expanded_100.png",
+    "source_bbox": [
+      227,
+      671,
+      304,
+      736
+    ],
+    "area": 3945,
+    "size": [
+      81,
+      67
+    ]
+  },
+  {
+    "file": "expanded_101.png",
+    "source_bbox": [
+      1348,
+      672,
+      1440,
+      716
+    ],
+    "area": 3971,
+    "size": [
+      96,
+      47
+    ]
+  },
+  {
+    "file": "expanded_102.png",
+    "source_bbox": [
+      1058,
+      673,
+      1120,
+      717
+    ],
+    "area": 2177,
+    "size": [
+      64,
+      47
+    ]
+  },
+  {
+    "file": "expanded_103.png",
+    "source_bbox": [
+      1280,
+      673,
+      1341,
+      716
+    ],
+    "area": 2579,
+    "size": [
+      64,
+      45
+    ]
+  },
+  {
+    "file": "expanded_104.png",
+    "source_bbox": [
+      1133,
+      674,
+      1191,
+      717
+    ],
+    "area": 1985,
+    "size": [
+      60,
+      47
+    ]
+  },
+  {
+    "file": "expanded_105.png",
+    "source_bbox": [
+      1204,
+      674,
+      1266,
+      718
+    ],
+    "area": 2168,
+    "size": [
+      64,
+      45
+    ]
+  },
+  {
+    "file": "expanded_106.png",
+    "source_bbox": [
+      317,
+      676,
+      422,
+      734
+    ],
+    "area": 5684,
+    "size": [
+      107,
+      62
+    ]
+  },
+  {
+    "file": "expanded_107.png",
+    "source_bbox": [
+      8,
+      682,
+      110,
+      737
+    ],
+    "area": 4799,
+    "size": [
+      104,
+      59
+    ]
+  },
+  {
+    "file": "expanded_108.png",
+    "source_bbox": [
+      619,
+      686,
+      716,
+      771
+    ],
+    "area": 7955,
+    "size": [
+      101,
+      86
+    ]
+  },
+  {
+    "file": "expanded_109.png",
+    "source_bbox": [
+      788,
+      714,
+      858,
+      750
+    ],
+    "area": 2387,
+    "size": [
+      73,
+      39
+    ]
+  },
+  {
+    "file": "expanded_110.png",
+    "source_bbox": [
+      870,
+      715,
+      951,
+      812
+    ],
+    "area": 6143,
+    "size": [
+      84,
+      101
+    ]
+  },
+  {
+    "file": "expanded_111.png",
+    "source_bbox": [
+      725,
+      721,
+      780,
+      762
+    ],
+    "area": 2075,
+    "size": [
+      58,
+      45
+    ]
+  },
+  {
+    "file": "expanded_112.png",
+    "source_bbox": [
+      953,
+      722,
+      1205,
+      918
+    ],
+    "area": 48093,
+    "size": [
+      256,
+      200
+    ]
+  },
+  {
+    "file": "expanded_113.png",
+    "source_bbox": [
+      1314,
+      725,
+      1350,
+      763
+    ],
+    "area": 1248,
+    "size": [
+      39,
+      40
+    ]
+  },
+  {
+    "file": "expanded_114.png",
+    "source_bbox": [
+      1271,
+      726,
+      1306,
+      761
+    ],
+    "area": 990,
+    "size": [
+      38,
+      38
+    ]
+  },
+  {
+    "file": "expanded_115.png",
+    "source_bbox": [
+      1359,
+      726,
+      1391,
+      763
+    ],
+    "area": 892,
+    "size": [
+      34,
+      40
+    ]
+  },
+  {
+    "file": "expanded_116.png",
+    "source_bbox": [
+      1400,
+      726,
+      1436,
+      762
+    ],
+    "area": 1082,
+    "size": [
+      36,
+      39
+    ]
+  },
+  {
+    "file": "expanded_117.png",
+    "source_bbox": [
+      1233,
+      728,
+      1264,
+      760
+    ],
+    "area": 796,
+    "size": [
+      34,
+      33
+    ]
+  },
+  {
+    "file": "expanded_118.png",
+    "source_bbox": [
+      291,
+      742,
+      364,
+      830
+    ],
+    "area": 5817,
+    "size": [
+      77,
+      91
+    ]
+  },
+  {
+    "file": "expanded_119.png",
+    "source_bbox": [
+      8,
+      745,
+      86,
+      840
+    ],
+    "area": 6437,
+    "size": [
+      78,
+      99
+    ]
+  },
+  {
+    "file": "expanded_120.png",
+    "source_bbox": [
+      86,
+      746,
+      280,
+      901
+    ],
+    "area": 21741,
+    "size": [
+      195,
+      159
+    ]
+  },
+  {
+    "file": "expanded_121.png",
+    "source_bbox": [
+      781,
+      755,
+      858,
+      827
+    ],
+    "area": 4854,
+    "size": [
+      79,
+      72
+    ]
+  },
+  {
+    "file": "expanded_122.png",
+    "source_bbox": [
+      744,
+      768,
+      769,
+      823
+    ],
+    "area": 1195,
+    "size": [
+      27,
+      57
+    ]
+  },
+  {
+    "file": "expanded_123.png",
+    "source_bbox": [
+      1221,
+      773,
+      1351,
+      805
+    ],
+    "area": 3660,
+    "size": [
+      133,
+      35
+    ]
+  },
+  {
+    "file": "expanded_124.png",
+    "source_bbox": [
+      1356,
+      776,
+      1439,
+      802
+    ],
+    "area": 1730,
+    "size": [
+      86,
+      27
+    ]
+  },
+  {
+    "file": "expanded_125.png",
+    "source_bbox": [
+      620,
+      777,
+      655,
+      815
+    ],
+    "area": 816,
+    "size": [
+      39,
+      40
+    ]
+  },
+  {
+    "file": "expanded_126.png",
+    "source_bbox": [
+      656,
+      778,
+      736,
+      814
+    ],
+    "area": 2387,
+    "size": [
+      82,
+      38
+    ]
+  },
+  {
+    "file": "expanded_127.png",
+    "source_bbox": [
+      514,
+      781,
+      559,
+      826
+    ],
+    "area": 1761,
+    "size": [
+      47,
+      48
+    ]
+  },
+  {
+    "file": "expanded_128.png",
+    "source_bbox": [
+      568,
+      781,
+      612,
+      825
+    ],
+    "area": 1709,
+    "size": [
+      46,
+      48
+    ]
+  },
+  {
+    "file": "expanded_129.png",
+    "source_bbox": [
+      1362,
+      812,
+      1437,
+      854
+    ],
+    "area": 2990,
+    "size": [
+      76,
+      46
+    ]
+  },
+  {
+    "file": "expanded_130.png",
+    "source_bbox": [
+      1220,
+      815,
+      1350,
+      847
+    ],
+    "area": 3463,
+    "size": [
+      132,
+      34
+    ]
+  },
+  {
+    "file": "expanded_131.png",
+    "source_bbox": [
+      871,
+      819,
+      937,
+      873
+    ],
+    "area": 3487,
+    "size": [
+      68,
+      57
+    ]
+  },
+  {
+    "file": "expanded_132.png",
+    "source_bbox": [
+      702,
+      823,
+      742,
+      858
+    ],
+    "area": 1135,
+    "size": [
+      41,
+      38
+    ]
+  },
+  {
+    "file": "expanded_133.png",
+    "source_bbox": [
+      610,
+      825,
+      650,
+      862
+    ],
+    "area": 1177,
+    "size": [
+      44,
+      38
+    ]
+  },
+  {
+    "file": "expanded_134.png",
+    "source_bbox": [
+      655,
+      825,
+      696,
+      860
+    ],
+    "area": 1170,
+    "size": [
+      45,
+      36
+    ]
+  },
+  {
+    "file": "expanded_135.png",
+    "source_bbox": [
+      522,
+      830,
+      604,
+      909
+    ],
+    "area": 5286,
+    "size": [
+      84,
+      82
+    ]
+  },
+  {
+    "file": "expanded_136.png",
+    "source_bbox": [
+      809,
+      833,
+      844,
+      866
+    ],
+    "area": 918,
+    "size": [
+      37,
+      35
+    ]
+  },
+  {
+    "file": "expanded_137.png",
+    "source_bbox": [
+      765,
+      834,
+      801,
+      868
+    ],
+    "area": 976,
+    "size": [
+      39,
+      36
+    ]
+  },
+  {
+    "file": "expanded_138.png",
+    "source_bbox": [
+      292,
+      843,
+      346,
+      891
+    ],
+    "area": 2316,
+    "size": [
+      56,
+      49
+    ]
+  },
+  {
+    "file": "expanded_139.png",
+    "source_bbox": [
+      234,
+      844,
+      288,
+      891
+    ],
+    "area": 2321,
+    "size": [
+      58,
+      48
+    ]
+  },
+  {
+    "file": "expanded_140.png",
+    "source_bbox": [
+      8,
+      851,
+      28,
+      904
+    ],
+    "area": 918,
+    "size": [
+      22,
+      55
+    ]
+  },
+  {
+    "file": "expanded_141.png",
+    "source_bbox": [
+      36,
+      851,
+      66,
+      908
+    ],
+    "area": 902,
+    "size": [
+      32,
+      58
+    ]
+  },
+  {
+    "file": "expanded_142.png",
+    "source_bbox": [
+      1220,
+      858,
+      1322,
+      889
+    ],
+    "area": 2694,
+    "size": [
+      104,
+      34
+    ]
+  },
+  {
+    "file": "expanded_143.png",
+    "source_bbox": [
+      1325,
+      859,
+      1355,
+      888
+    ],
+    "area": 815,
+    "size": [
+      33,
+      31
+    ]
+  },
+  {
+    "file": "expanded_144.png",
+    "source_bbox": [
+      1367,
+      859,
+      1398,
+      891
+    ],
+    "area": 850,
+    "size": [
+      33,
+      34
+    ]
+  },
+  {
+    "file": "expanded_145.png",
+    "source_bbox": [
+      1404,
+      860,
+      1437,
+      891
+    ],
+    "area": 957,
+    "size": [
+      35,
+      33
+    ]
+  },
+  {
+    "file": "expanded_146.png",
+    "source_bbox": [
+      732,
+      861,
+      758,
+      906
+    ],
+    "area": 1083,
+    "size": [
+      29,
+      49
+    ]
+  },
+  {
+    "file": "expanded_147.png",
+    "source_bbox": [
+      777,
+      872,
+      840,
+      911
+    ],
+    "area": 1894,
+    "size": [
+      64,
+      43
+    ]
+  },
+  {
+    "file": "expanded_148.png",
+    "source_bbox": [
+      871,
+      880,
+      938,
+      967
+    ],
+    "area": 5625,
+    "size": [
+      67,
+      91
+    ]
+  },
+  {
+    "file": "expanded_149.png",
+    "source_bbox": [
+      1224,
+      899,
+      1351,
+      934
+    ],
+    "area": 3936,
+    "size": [
+      130,
+      39
+    ]
+  },
+  {
+    "file": "expanded_150.png",
+    "source_bbox": [
+      1358,
+      900,
+      1441,
+      934
+    ],
+    "area": 2602,
+    "size": [
+      87,
+      37
+    ]
+  },
+  {
+    "file": "expanded_151.png",
+    "source_bbox": [
+      258,
+      904,
+      338,
+      968
+    ],
+    "area": 3818,
+    "size": [
+      84,
+      67
+    ]
+  },
+  {
+    "file": "expanded_152.png",
+    "source_bbox": [
+      92,
+      905,
+      152,
+      973
+    ],
+    "area": 2786,
+    "size": [
+      64,
+      71
+    ]
+  },
+  {
+    "file": "expanded_153.png",
+    "source_bbox": [
+      197,
+      906,
+      254,
+      969
+    ],
+    "area": 1748,
+    "size": [
+      59,
+      64
+    ]
+  },
+  {
+    "file": "expanded_154.png",
+    "source_bbox": [
+      139,
+      907,
+      210,
+      971
+    ],
+    "area": 1906,
+    "size": [
+      72,
+      67
+    ]
+  },
+  {
+    "file": "expanded_155.png",
+    "source_bbox": [
+      396,
+      908,
+      435,
+      967
+    ],
+    "area": 1149,
+    "size": [
+      41,
+      62
+    ]
+  },
+  {
+    "file": "expanded_156.png",
+    "source_bbox": [
+      426,
+      908,
+      521,
+      972
+    ],
+    "area": 5076,
+    "size": [
+      97,
+      65
+    ]
+  },
+  {
+    "file": "expanded_157.png",
+    "source_bbox": [
+      662,
+      912,
+      700,
+      940
+    ],
+    "area": 845,
+    "size": [
+      42,
+      32
+    ]
+  },
+  {
+    "file": "expanded_158.png",
+    "source_bbox": [
+      710,
+      913,
+      777,
+      933
+    ],
+    "area": 1140,
+    "size": [
+      70,
+      22
+    ]
+  },
+  {
+    "file": "expanded_159.png",
+    "source_bbox": [
+      339,
+      915,
+      395,
+      970
+    ],
+    "area": 2206,
+    "size": [
+      58,
+      55
+    ]
+  },
+  {
+    "file": "expanded_160.png",
+    "source_bbox": [
+      815,
+      916,
+      854,
+      973
+    ],
+    "area": 1869,
+    "size": [
+      42,
+      59
+    ]
+  },
+  {
+    "file": "expanded_161.png",
+    "source_bbox": [
+      518,
+      917,
+      588,
+      971
+    ],
+    "area": 3212,
+    "size": [
+      73,
+      57
+    ]
+  },
+  {
+    "file": "expanded_162.png",
+    "source_bbox": [
+      586,
+      917,
+      655,
+      971
+    ],
+    "area": 3218,
+    "size": [
+      73,
+      57
+    ]
+  },
+  {
+    "file": "expanded_163.png",
+    "source_bbox": [
+      8,
+      919,
+      84,
+      974
+    ],
+    "area": 3331,
+    "size": [
+      78,
+      58
+    ]
+  },
+  {
+    "file": "expanded_164.png",
+    "source_bbox": [
+      764,
+      919,
+      810,
+      974
+    ],
+    "area": 1423,
+    "size": [
+      50,
+      58
+    ]
+  },
+  {
+    "file": "expanded_165.png",
+    "source_bbox": [
+      957,
+      923,
+      1016,
+      976
+    ],
+    "area": 2961,
+    "size": [
+      63,
+      57
+    ]
+  },
+  {
+    "file": "expanded_166.png",
+    "source_bbox": [
+      1022,
+      924,
+      1080,
+      976
+    ],
+    "area": 2871,
+    "size": [
+      61,
+      56
+    ]
+  },
+  {
+    "file": "expanded_167.png",
+    "source_bbox": [
+      1085,
+      924,
+      1143,
+      976
+    ],
+    "area": 2853,
+    "size": [
+      62,
+      56
+    ]
+  },
+  {
+    "file": "expanded_168.png",
+    "source_bbox": [
+      1148,
+      924,
+      1206,
+      977
+    ],
+    "area": 2889,
+    "size": [
+      61,
+      57
+    ]
+  },
+  {
+    "file": "expanded_169.png",
+    "source_bbox": [
+      710,
+      937,
+      756,
+      969
+    ],
+    "area": 1176,
+    "size": [
+      48,
+      36
+    ]
+  },
+  {
+    "file": "expanded_170.png",
+    "source_bbox": [
+      1220,
+      940,
+      1443,
+      979
+    ],
+    "area": 8626,
+    "size": [
+      226,
+      43
+    ]
+  },
+  {
+    "file": "expanded_171.png",
+    "source_bbox": [
+      653,
+      946,
+      701,
+      997
+    ],
+    "area": 1893,
+    "size": [
+      50,
+      55
+    ]
+  },
+  {
+    "file": "expanded_172.png",
+    "source_bbox": [
+      215,
+      968,
+      273,
+      1028
+    ],
+    "area": 2348,
+    "size": [
+      60,
+      62
+    ]
+  },
+  {
+    "file": "expanded_173.png",
+    "source_bbox": [
+      868,
+      970,
+      944,
+      1038
+    ],
+    "area": 4626,
+    "size": [
+      78,
+      71
+    ]
+  },
+  {
+    "file": "expanded_174.png",
+    "source_bbox": [
+      351,
+      973,
+      424,
+      1018
+    ],
+    "area": 2481,
+    "size": [
+      74,
+      46
+    ]
+  },
+  {
+    "file": "expanded_175.png",
+    "source_bbox": [
+      169,
+      975,
+      209,
+      1022
+    ],
+    "area": 1384,
+    "size": [
+      40,
+      49
+    ]
+  },
+  {
+    "file": "expanded_176.png",
+    "source_bbox": [
+      282,
+      975,
+      340,
+      1021
+    ],
+    "area": 1869,
+    "size": [
+      58,
+      49
+    ]
+  },
+  {
+    "file": "expanded_177.png",
+    "source_bbox": [
+      589,
+      975,
+      640,
+      1017
+    ],
+    "area": 1617,
+    "size": [
+      54,
+      46
+    ]
+  },
+  {
+    "file": "expanded_178.png",
+    "source_bbox": [
+      86,
+      976,
+      155,
+      1025
+    ],
+    "area": 2591,
+    "size": [
+      73,
+      52
+    ]
+  },
+  {
+    "file": "expanded_179.png",
+    "source_bbox": [
+      514,
+      976,
+      582,
+      1019
+    ],
+    "area": 2264,
+    "size": [
+      71,
+      46
+    ]
+  },
+  {
+    "file": "expanded_180.png",
+    "source_bbox": [
+      434,
+      977,
+      503,
+      1020
+    ],
+    "area": 2258,
+    "size": [
+      73,
+      47
+    ]
+  },
+  {
+    "file": "expanded_181.png",
+    "source_bbox": [
+      788,
+      978,
+      810,
+      1019
+    ],
+    "area": 740,
+    "size": [
+      24,
+      44
+    ]
+  },
+  {
+    "file": "expanded_182.png",
+    "source_bbox": [
+      12,
+      979,
+      79,
+      1034
+    ],
+    "area": 3043,
+    "size": [
+      68,
+      59
+    ]
+  },
+  {
+    "file": "expanded_183.png",
+    "source_bbox": [
+      708,
+      980,
+      777,
+      1013
+    ],
+    "area": 1521,
+    "size": [
+      70,
+      36
+    ]
+  },
+  {
+    "file": "expanded_184.png",
+    "source_bbox": [
+      823,
+      982,
+      855,
+      1018
+    ],
+    "area": 901,
+    "size": [
+      33,
+      39
+    ]
+  },
+  {
+    "file": "expanded_185.png",
+    "source_bbox": [
+      949,
+      984,
+      1033,
+      1039
+    ],
+    "area": 4465,
+    "size": [
+      88,
+      56
+    ]
+  },
+  {
+    "file": "expanded_186.png",
+    "source_bbox": [
+      1036,
+      984,
+      1104,
+      1040
+    ],
+    "area": 3573,
+    "size": [
+      72,
+      58
+    ]
+  },
+  {
+    "file": "expanded_187.png",
+    "source_bbox": [
+      1240,
+      984,
+      1304,
+      1039
+    ],
+    "area": 3309,
+    "size": [
+      68,
+      58
+    ]
+  },
+  {
+    "file": "expanded_188.png",
+    "source_bbox": [
+      1107,
+      985,
+      1172,
+      1039
+    ],
+    "area": 3333,
+    "size": [
+      69,
+      57
+    ]
+  },
+  {
+    "file": "expanded_189.png",
+    "source_bbox": [
+      1174,
+      985,
+      1238,
+      1039
+    ],
+    "area": 3304,
+    "size": [
+      68,
+      57
+    ]
+  },
+  {
+    "file": "expanded_190.png",
+    "source_bbox": [
+      1307,
+      985,
+      1372,
+      1039
+    ],
+    "area": 3344,
+    "size": [
+      69,
+      57
+    ]
+  },
+  {
+    "file": "expanded_191.png",
+    "source_bbox": [
+      1373,
+      985,
+      1436,
+      1039
+    ],
+    "area": 3278,
+    "size": [
+      66,
+      57
+    ]
+  },
+  {
+    "file": "expanded_192.png",
+    "source_bbox": [
+      316,
+      1019,
+      356,
+      1073
+    ],
+    "area": 1746,
+    "size": [
+      42,
+      54
+    ]
+  },
+  {
+    "file": "expanded_193.png",
+    "source_bbox": [
+      685,
+      1021,
+      705,
+      1072
+    ],
+    "area": 857,
+    "size": [
+      24,
+      53
+    ]
+  },
+  {
+    "file": "expanded_194.png",
+    "source_bbox": [
+      370,
+      1022,
+      416,
+      1071
+    ],
+    "area": 1651,
+    "size": [
+      47,
+      52
+    ]
+  },
+  {
+    "file": "expanded_195.png",
+    "source_bbox": [
+      615,
+      1022,
+      647,
+      1072
+    ],
+    "area": 1437,
+    "size": [
+      36,
+      52
+    ]
+  },
+  {
+    "file": "expanded_196.png",
+    "source_bbox": [
+      654,
+      1022,
+      681,
+      1072
+    ],
+    "area": 1223,
+    "size": [
+      30,
+      52
+    ]
+  },
+  {
+    "file": "expanded_197.png",
+    "source_bbox": [
+      723,
+      1022,
+      755,
+      1073
+    ],
+    "area": 1451,
+    "size": [
+      32,
+      53
+    ]
+  },
+  {
+    "file": "expanded_198.png",
+    "source_bbox": [
+      766,
+      1023,
+      798,
+      1071
+    ],
+    "area": 1397,
+    "size": [
+      36,
+      52
+    ]
+  },
+  {
+    "file": "expanded_199.png",
+    "source_bbox": [
+      495,
+      1024,
+      548,
+      1071
+    ],
+    "area": 1367,
+    "size": [
+      54,
+      50
+    ]
+  },
+  {
+    "file": "expanded_200.png",
+    "source_bbox": [
+      549,
+      1025,
+      603,
+      1072
+    ],
+    "area": 1820,
+    "size": [
+      57,
+      49
+    ]
+  },
+  {
+    "file": "expanded_201.png",
+    "source_bbox": [
+      428,
+      1027,
+      488,
+      1070
+    ],
+    "area": 1808,
+    "size": [
+      63,
+      45
+    ]
+  },
+  {
+    "file": "expanded_202.png",
+    "source_bbox": [
+      806,
+      1027,
+      859,
+      1073
+    ],
+    "area": 2114,
+    "size": [
+      55,
+      48
+    ]
+  },
+  {
+    "file": "expanded_203.png",
+    "source_bbox": [
+      251,
+      1028,
+      305,
+      1074
+    ],
+    "area": 1821,
+    "size": [
+      58,
+      47
+    ]
+  },
+  {
+    "file": "expanded_204.png",
+    "source_bbox": [
+      134,
+      1032,
+      182,
+      1073
+    ],
+    "area": 1514,
+    "size": [
+      50,
+      41
+    ]
+  },
+  {
+    "file": "expanded_205.png",
+    "source_bbox": [
+      192,
+      1034,
+      243,
+      1074
+    ],
+    "area": 1621,
+    "size": [
+      52,
+      42
+    ]
+  },
+  {
+    "file": "expanded_206.png",
+    "source_bbox": [
+      71,
+      1041,
+      122,
+      1076
+    ],
+    "area": 1403,
+    "size": [
+      53,
+      35
+    ]
+  },
+  {
+    "file": "expanded_207.png",
+    "source_bbox": [
+      9,
+      1042,
+      61,
+      1076
+    ],
+    "area": 1423,
+    "size": [
+      53,
+      37
+    ]
+  },
+  {
+    "file": "expanded_208.png",
+    "source_bbox": [
+      870,
+      1044,
+      969,
+      1073
+    ],
+    "area": 2638,
+    "size": [
+      100,
+      31
+    ]
+  },
+  {
+    "file": "expanded_209.png",
+    "source_bbox": [
+      980,
+      1044,
+      1010,
+      1073
+    ],
+    "area": 800,
+    "size": [
+      34,
+      31
+    ]
+  },
+  {
+    "file": "expanded_210.png",
+    "source_bbox": [
+      1087,
+      1045,
+      1171,
+      1075
+    ],
+    "area": 2427,
+    "size": [
+      88,
+      32
+    ]
+  },
+  {
+    "file": "expanded_211.png",
+    "source_bbox": [
+      1175,
+      1045,
+      1205,
+      1074
+    ],
+    "area": 836,
+    "size": [
+      34,
+      32
+    ]
+  },
+  {
+    "file": "expanded_212.png",
+    "source_bbox": [
+      1210,
+      1045,
+      1238,
+      1074
+    ],
+    "area": 771,
+    "size": [
+      32,
+      31
+    ]
+  },
+  {
+    "file": "expanded_213.png",
+    "source_bbox": [
+      1243,
+      1045,
+      1272,
+      1074
+    ],
+    "area": 799,
+    "size": [
+      32,
+      31
+    ]
+  },
+  {
+    "file": "expanded_214.png",
+    "source_bbox": [
+      1279,
+      1045,
+      1309,
+      1074
+    ],
+    "area": 830,
+    "size": [
+      33,
+      31
+    ]
+  }
+]

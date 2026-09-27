@@ -1,0 +1,584 @@
+'use client';
+
+import React, { useState } from 'react';
+import Image from 'next/image';
+import { motion, AnimatePresence } from 'framer-motion';
+import { IngredientId, Ingredient } from '@/types/game';
+import { GAME_ASSETS } from '@/game/assets/gameAssets';
+import {
+  getRecipeConfig,
+  validateDishQuality,
+  DishValidationResult,
+} from '@/config/recipes';
+import { ToppingSelector } from './ToppingSelector';
+import { GameAssetIcon } from '@/components/ui/game/GameAssetIcon';
+import { soundManager } from '@/utils/audio';
+
+export interface CookingTargetOrder {
+  orderType: 'dine_in' | 'delivery' | 'free_cook';
+  orderId?: string;
+  tableId?: number;
+  customerName: string;
+  customerAvatar?: string;
+  dishId: string;
+  dishName: string;
+  dishEmoji?: string;
+  requiredToppings?: IngredientId[];
+  excludedToppings?: IngredientId[];
+  spiceLevel?: number;
+  price?: number;
+  timeRemaining?: number;
+}
+
+interface CookingEngineProps {
+  order: CookingTargetOrder;
+  inventory: Record<string, Ingredient>;
+  onClose: () => void;
+  onFinishCook: (result: {
+    order: CookingTargetOrder;
+    validation: DishValidationResult;
+    usedIngredients: IngredientId[];
+    toppings: IngredientId[];
+    spiceLevel: number;
+  }) => void;
+}
+
+// Predefined safe coordinate slots inside the cookware vessel (percentages)
+const TOPPING_SLOTS = [
+  { left: '44%', top: '38%' },
+  { left: '26%', top: '30%' },
+  { left: '60%', top: '28%' },
+  { left: '24%', top: '54%' },
+  { left: '62%', top: '52%' },
+  { left: '42%', top: '60%' },
+  { left: '44%', top: '20%' },
+];
+
+export const CookingEngine: React.FC<CookingEngineProps> = ({
+  order,
+  inventory,
+  onClose,
+  onFinishCook,
+}) => {
+  const recipe = getRecipeConfig(order.dishId);
+
+  // Cooking state
+  const [baseAdded, setBaseAdded] = useState(false);
+  const [selectedToppings, setSelectedToppings] = useState<IngredientId[]>([]);
+  const [currentSpice, setCurrentSpice] = useState<number>(
+    order.spiceLevel !== undefined ? order.spiceLevel : recipe.defaultSpiceLevel
+  );
+  const [isCookingActive, setIsCookingActive] = useState(false);
+  const [validationResult, setValidationResult] = useState<DishValidationResult | null>(null);
+
+  // Add topping
+  const handleAddTopping = (toppingId: IngredientId) => {
+    const item = inventory[toppingId];
+    const stock = item ? item.stock : 0;
+    const currentCount = selectedToppings.filter((t) => t === toppingId).length;
+
+    if (stock - currentCount <= 0) {
+      soundManager.playError();
+      return;
+    }
+
+    soundManager.playClick();
+    setSelectedToppings((prev) => [...prev, toppingId]);
+  };
+
+  // Remove topping
+  const handleRemoveTopping = (toppingId: IngredientId) => {
+    soundManager.playClick();
+    setSelectedToppings((prev) => {
+      const idx = prev.lastIndexOf(toppingId);
+      if (idx === -1) return prev;
+      const next = [...prev];
+      next.splice(idx, 1);
+      return next;
+    });
+  };
+
+  // Toggle base ingredients
+  const handleToggleBase = () => {
+    soundManager.playClick();
+    setBaseAdded((prev) => !prev);
+  };
+
+  // Spice level adjusters
+  const handleSpiceDecrease = () => {
+    if (currentSpice > 0) {
+      soundManager.playClick();
+      setCurrentSpice((s) => s - 1);
+    }
+  };
+
+  const handleSpiceIncrease = () => {
+    if (currentSpice < recipe.maxSpiceLevel) {
+      soundManager.playClick();
+      setCurrentSpice((s) => s + 1);
+    }
+  };
+
+  // Execute dish evaluation
+  const handleServeDish = () => {
+    setIsCookingActive(true);
+    soundManager.playClick();
+
+    setTimeout(() => {
+      setIsCookingActive(false);
+
+      const validation = validateDishQuality({
+        dishId: order.dishId,
+        cookedToppings: selectedToppings,
+        cookedSpiceLevel: currentSpice,
+        baseAdded,
+        requiredToppings: order.requiredToppings,
+        excludedToppings: order.excludedToppings,
+        targetSpiceLevel: order.spiceLevel,
+      });
+
+      setValidationResult(validation);
+
+      if (validation.quality === 'perfect' || validation.quality === 'good') {
+        soundManager.playSuccess();
+        soundManager.playCoin();
+      } else {
+        soundManager.playError();
+      }
+    }, 500);
+  };
+
+  // Confirm result
+  const handleConfirmResult = () => {
+    if (!validationResult) return;
+
+    const usedIngredients: IngredientId[] = [
+      ...(baseAdded ? recipe.baseIngredients : []),
+      ...selectedToppings,
+    ];
+
+    onFinishCook({
+      order,
+      validation: validationResult,
+      usedIngredients,
+      toppings: selectedToppings,
+      spiceLevel: currentSpice,
+    });
+  };
+
+  // Base ingredient names
+  const baseIngredientNames = recipe.baseIngredients
+    .map((id) => inventory[id]?.vietnameseName || id)
+    .join(' + ');
+
+  return (
+    <div className="w-full flex flex-col justify-between select-none font-baloo relative pb-4">
+      {/* ========================================================================= */}
+      {/* 1. COMPACT COOKING HEADER                                                 */}
+      {/* ========================================================================= */}
+      <div className="bg-stone-950/80 border border-amber-600/40 p-2.5 sm:p-3 rounded-2xl mb-2 sm:mb-3 shadow-md flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-600/20 border border-amber-400/40 flex items-center justify-center shrink-0">
+            <Image
+              src={recipe.containerAsset}
+              alt={recipe.name}
+              width={28}
+              height={28}
+              className="object-contain"
+            />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-xs font-bold text-amber-300 truncate">
+                {order.orderType === 'dine_in'
+                  ? `Khách Bàn ${order.tableId} • ${order.customerName}`
+                  : order.orderType === 'delivery'
+                  ? `Đơn Giao Hàng • ${order.customerName}`
+                  : 'Nấu Tự Do Sáng Tạo'}
+              </span>
+            </div>
+            <h2 className="text-sm sm:text-base font-black text-amber-100 truncate leading-tight">
+              {recipe.name}
+            </h2>
+          </div>
+        </div>
+
+        {/* Close Button */}
+        <button
+          type="button"
+          onClick={onClose}
+          className="w-8 h-8 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 border border-stone-600 flex items-center justify-center shrink-0 cursor-pointer active:scale-90 transition-transform"
+          title="Đóng chế biến"
+        >
+          <GameAssetIcon name="close" size={16} />
+        </button>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 2. ORDER REQUIREMENTS SUMMARY PILL                                        */}
+      {/* ========================================================================= */}
+      <div className="bg-stone-900/90 border border-amber-600/30 px-3 py-1.5 rounded-xl mb-2 flex items-center justify-between flex-wrap gap-1.5 text-xs">
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span className="text-[11px] font-bold text-amber-300">Yêu cầu:</span>
+          {order.requiredToppings && order.requiredToppings.length > 0 ? (
+            order.requiredToppings.map((topId) => {
+              const item = inventory[topId];
+              const asset =
+                (GAME_ASSETS.toppings as Record<string, string>)[topId] ||
+                (GAME_ASSETS.ingredients as Record<string, string>)[topId];
+              return (
+                <span
+                  key={topId}
+                  className="inline-flex items-center gap-1 bg-amber-950/80 border border-amber-500/50 text-amber-100 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                >
+                  {asset && (
+                    <Image
+                      src={asset}
+                      alt={topId}
+                      width={12}
+                      height={12}
+                      className="w-3 h-3 object-contain"
+                    />
+                  )}
+                  {item ? item.vietnameseName : topId}
+                </span>
+              );
+            })
+          ) : (
+            <span className="text-[10px] text-amber-200/80 italic">
+              Theo khẩu vị tự do
+            </span>
+          )}
+
+          {/* Excluded Toppings */}
+          {order.excludedToppings && order.excludedToppings.length > 0 && (
+            <span className="inline-flex items-center gap-1 ml-1 text-red-300 text-[10px] font-bold">
+              <span>(Tránh:</span>
+              {order.excludedToppings.map((excId) => inventory[excId]?.vietnameseName || excId).join(', ')}
+              <span>)</span>
+            </span>
+          )}
+        </div>
+
+        {/* Spice Requirement */}
+        {recipe.supportsSpiceLevel && (
+          <div className="flex items-center gap-1 text-[11px] font-bold text-amber-200 shrink-0">
+            <GameAssetIcon name="chilli" size={14} />
+            <span>
+              Cần cay:{' '}
+              <strong className="text-red-400">
+                {order.spiceLevel !== undefined
+                  ? order.spiceLevel === 0
+                    ? 'Cấp 0 (Không Cay)'
+                    : `Cấp ${order.spiceLevel}`
+                  : 'Tự Chọn'}
+              </strong>
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 3. COOKING WORKSPACE: COOKWARE + BOUNDED INGREDIENT OVERLAY               */}
+      {/* ========================================================================= */}
+      <div className="relative w-full flex flex-col items-center justify-center my-1 bg-stone-950/70 border border-amber-600/30 rounded-2xl p-2 sm:p-3">
+        {/* Cookware Vessel Wrapper with clamp width and exact aspect ratio */}
+        <div className="relative w-[min(70vw,260px)] sm:w-[clamp(240px,30vw,340px)] aspect-square flex items-center justify-center">
+          {/* Stove shadow glow */}
+          <div className="absolute -bottom-1 w-3/4 h-5 bg-black/60 rounded-full blur-md" />
+
+          {/* Cookware Image (Object Contain, No Stretch, No Transform Scale Hacks) */}
+          <Image
+            src={recipe.containerAsset}
+            alt={recipe.stationType}
+            width={340}
+            height={340}
+            className="w-full h-full object-contain pointer-events-none drop-shadow-xl z-10"
+            priority
+          />
+
+          {/* Inner Ingredient Clip Area: strictly constrained inside bowl/pot bounds */}
+          <div className="absolute inset-[16%] sm:inset-[18%] rounded-full overflow-hidden flex items-center justify-center z-20 pointer-events-auto">
+            {/* Base broth/rice/sauce texture */}
+            {baseAdded ? (
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className={`absolute inset-0 rounded-full flex items-center justify-center ${
+                  recipe.stationType === 'board'
+                    ? 'bg-[#18391E]/80 border-2 border-black/40' // seaweed nori
+                    : recipe.stationType === 'pan'
+                    ? 'bg-[#A82B14] shadow-inner' // gochujang tok sauce
+                    : 'bg-[#B45309]/85 shadow-inner' // ramen spicy broth
+                }`}
+              >
+                {/* Steam/broth effect without plastered text */}
+                <div className="absolute inset-0 bg-radial-gradient animate-pulse opacity-30 pointer-events-none" />
+              </motion.div>
+            ) : (
+              <div className="absolute inset-0 rounded-full border-2 border-dashed border-amber-500/40 flex items-center justify-center bg-black/40 p-2 text-center">
+                <span className="text-[11px] font-bold text-amber-300/80 animate-pulse">
+                  Chạm nút bên dưới để cho nguyên liệu nền
+                </span>
+              </div>
+            )}
+
+            {/* Bounded Topping Sprites using predefined coordinates */}
+            <div className="relative w-full h-full pointer-events-auto">
+              <AnimatePresence>
+                {selectedToppings.slice(0, 7).map((topId, index) => {
+                  const item = inventory[topId];
+                  const asset =
+                    (GAME_ASSETS.toppings as Record<string, string>)[topId] ||
+                    (GAME_ASSETS.ingredients as Record<string, string>)[topId] ||
+                    GAME_ASSETS.ingredients.trung;
+
+                  const slot = TOPPING_SLOTS[index % TOPPING_SLOTS.length];
+
+                  return (
+                    <motion.button
+                      key={`${topId}_${index}`}
+                      type="button"
+                      initial={{ scale: 0, y: -10 }}
+                      animate={{ scale: 1, y: 0 }}
+                      exit={{ scale: 0, opacity: 0 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => handleRemoveTopping(topId)}
+                      style={{
+                        position: 'absolute',
+                        left: slot.left,
+                        top: slot.top,
+                        transform: 'translate(-50%, -50%)',
+                      }}
+                      title={`Bấm để gỡ ${item ? item.vietnameseName : topId}`}
+                      className="w-8 h-8 sm:w-10 sm:h-10 p-0.5 rounded-full bg-black/40 border border-white/60 shadow-md cursor-pointer hover:border-red-400 active:scale-90 transition-transform flex items-center justify-center z-20"
+                    >
+                      <Image
+                        src={asset}
+                        alt={topId}
+                        width={36}
+                        height={36}
+                        className="w-full h-full object-contain pointer-events-none drop-shadow"
+                      />
+                    </motion.button>
+                  );
+                })}
+              </AnimatePresence>
+
+              {/* Extra toppings counter pill if > 7 */}
+              {selectedToppings.length > 7 && (
+                <div className="absolute bottom-2 right-2 bg-red-600 text-white font-black text-[10px] px-1.5 py-0.5 rounded-full shadow border border-white/60">
+                  +{selectedToppings.length - 7}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Clean Base State Indicator Pill below vessel */}
+        <div className="mt-1 flex items-center gap-1.5 text-[11px] font-bold text-amber-200">
+          <span>Nguyên liệu nền:</span>
+          <span
+            className={`px-2 py-0.5 rounded-full border ${
+              baseAdded
+                ? 'bg-emerald-950 text-emerald-300 border-emerald-500/50'
+                : 'bg-stone-900 text-stone-400 border-stone-700'
+            }`}
+          >
+            {baseAdded ? `Đã cho: ${baseIngredientNames}` : 'Chưa cho vào nồi'}
+          </span>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 4. BASE INGREDIENT & SPICE LEVEL CONTROLS (Touch Targets >= 44px)        */}
+      {/* ========================================================================= */}
+      <div className="w-full flex items-center justify-between gap-2 flex-wrap bg-stone-900/90 border border-amber-600/40 p-2 sm:p-2.5 rounded-2xl mb-2 shadow-inner">
+        {/* Base Ingredient Toggle Button */}
+        <button
+          type="button"
+          onClick={handleToggleBase}
+          className={`flex-1 min-w-[160px] h-11 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow cursor-pointer active:scale-95 ${
+            baseAdded
+              ? 'bg-emerald-700 hover:bg-emerald-600 text-white border-2 border-emerald-400'
+              : 'bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 text-white border-2 border-amber-300 animate-pulse'
+          }`}
+        >
+          <GameAssetIcon
+            name={recipe.stationType === 'board' ? 'board' : 'pot'}
+            size={18}
+          />
+          <span>
+            {baseAdded ? '✓ Đã Cho Nền' : `+ Cho ${baseIngredientNames}`}
+          </span>
+        </button>
+
+        {/* Spice Level Stepper (Touch targets >= 44px) */}
+        {recipe.supportsSpiceLevel && (
+          <div className="flex items-center gap-1 bg-stone-950 p-1 rounded-xl border border-amber-600/50 shadow">
+            <button
+              type="button"
+              onClick={handleSpiceDecrease}
+              disabled={currentSpice <= 0}
+              className="w-11 h-11 rounded-lg bg-stone-850 hover:bg-stone-800 disabled:opacity-30 border border-stone-700 flex items-center justify-center text-amber-200 font-black text-base active:scale-90 cursor-pointer"
+              title="Giảm độ cay"
+            >
+              <GameAssetIcon name="minus" size={16} />
+            </button>
+
+            <div className="flex items-center gap-1 px-2 text-center">
+              <GameAssetIcon name="chilli" size={18} />
+              <span className="font-black text-xs sm:text-sm text-amber-100 min-w-[50px]">
+                {currentSpice === 0 ? 'Cấp 0' : `Cấp ${currentSpice}`}
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleSpiceIncrease}
+              disabled={currentSpice >= recipe.maxSpiceLevel}
+              className="w-11 h-11 rounded-lg bg-red-700 hover:bg-red-600 disabled:opacity-30 border border-red-500 flex items-center justify-center text-white font-black text-base active:scale-90 cursor-pointer"
+              title="Tăng độ cay"
+            >
+              <GameAssetIcon name="plus" size={16} />
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 5. TOPPING SELECTOR BAR                                                    */}
+      {/* ========================================================================= */}
+      <div className="w-full bg-stone-900/90 border border-amber-600/40 p-2 sm:p-2.5 rounded-2xl mb-2.5 shadow">
+        <ToppingSelector
+          allowedToppings={recipe.allowedToppings}
+          selectedToppings={selectedToppings}
+          onAddTopping={handleAddTopping}
+          onRemoveTopping={handleRemoveTopping}
+          inventory={inventory}
+          disabled={isCookingActive}
+        />
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 6. PRIMARY ACTION BUTTONS                                                 */}
+      {/* ========================================================================= */}
+      <div className="w-full flex items-center gap-2 pt-1 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+        {/* Back / Cancel button */}
+        <button
+          type="button"
+          onClick={onClose}
+          className="h-11 sm:h-12 px-4 rounded-xl bg-stone-800 hover:bg-stone-700 border border-stone-600 text-stone-300 font-bold text-xs sm:text-sm flex items-center gap-1 active:scale-95 transition-transform cursor-pointer shrink-0"
+        >
+          <span>Quay lại</span>
+        </button>
+
+        {/* Primary Finish Cooking Button */}
+        <button
+          type="button"
+          onClick={handleServeDish}
+          disabled={isCookingActive}
+          className="flex-1 h-11 sm:h-12 px-4 rounded-xl bg-gradient-to-r from-red-600 via-amber-600 to-red-600 hover:brightness-110 disabled:opacity-50 text-white font-black text-xs sm:text-base shadow-lg border-2 border-amber-300 flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
+        >
+          <div className="w-5 h-5 relative shrink-0">
+            <Image
+              src={GAME_ASSETS.actions.complete}
+              alt="Hoàn thành"
+              width={20}
+              height={20}
+              className="object-contain"
+            />
+          </div>
+          <span>
+            {isCookingActive ? 'Đang Nấu Món...' : 'Hoàn Thành & Giao Món'}
+          </span>
+        </button>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 7. EVALUATION & QUALITY DIALOG MODAL                                      */}
+      {/* ========================================================================= */}
+      <AnimatePresence>
+        {validationResult && (
+          <div className="fixed inset-0 z-[120] flex items-center justify-center p-3 bg-stone-950/80 backdrop-blur-sm select-none font-baloo">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 15 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 15 }}
+              className="relative w-full max-w-sm bg-stone-900 border-2 border-amber-500/80 rounded-3xl p-4 sm:p-5 shadow-2xl text-center text-stone-100 flex flex-col items-center"
+            >
+              {/* Quality Badge Asset */}
+              <div className="w-16 h-16 relative mb-2">
+                <Image
+                  src={
+                    validationResult.quality === 'perfect' ||
+                    validationResult.quality === 'good'
+                      ? GAME_ASSETS.props.heart_icon
+                      : GAME_ASSETS.props.rice_bowl
+                  }
+                  alt="Kết quả"
+                  width={64}
+                  height={64}
+                  className="object-contain drop-shadow"
+                />
+              </div>
+
+              <h3
+                className={`text-lg font-black uppercase ${
+                  validationResult.quality === 'perfect'
+                    ? 'text-amber-300'
+                    : validationResult.quality === 'good'
+                    ? 'text-emerald-300'
+                    : 'text-amber-200'
+                }`}
+              >
+                {validationResult.quality === 'perfect'
+                  ? 'Hoàn Hảo! Đúng Chuẩn Vị'
+                  : validationResult.quality === 'good'
+                  ? 'Món Rất Ngon!'
+                  : 'Tạm Được'}
+              </h3>
+
+              <p className="text-xs text-stone-300 my-1 font-bold">
+                {validationResult.feedbackText}
+              </p>
+
+              <div className="my-2 bg-stone-950/90 border border-amber-500/40 rounded-2xl p-2.5 w-full flex items-center justify-around text-xs">
+                <div>
+                  <span className="text-[10px] text-stone-400 block font-bold">Điểm</span>
+                  <span className="text-base font-black text-amber-300">
+                    {validationResult.score}/100
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-stone-400 block font-bold">Tiền Thưởng</span>
+                  <span className="text-base font-black text-emerald-400">
+                    +{Math.round(
+                      (order.price || 50) *
+                        (validationResult.quality === 'perfect'
+                          ? 1.3
+                          : validationResult.quality === 'good'
+                          ? 1.15
+                          : validationResult.quality === 'ok'
+                          ? 1.0
+                          : 0.6)
+                    )}{' '}
+                    Xu
+                  </span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleConfirmResult}
+                className="w-full mt-2 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-green-600 hover:brightness-110 text-white font-black text-sm shadow-lg border border-emerald-300 active:scale-95 cursor-pointer"
+              >
+                Giao Món Ngay
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};

@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #1c1917;
+  --foreground: #fef3c7;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-game), cursive, sans-serif;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 100vh;
+}
+
+*, button, input, select, textarea {
+  font-family: var(--font-game), cursive, sans-serif !important;
+}
+
+/* Custom Cozy Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f4ece4;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb {
+  background: #d4c2b0;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #bfa792;
+}
+
+/* Subtle Korean Tile Background Pattern */
+.bg-kitchen-pattern {
+  background-color: #fdf8f3;
+  background-image: radial-gradient(#e5d7c5 0.75px, transparent 0.75px), radial-gradient(#e5d7c5 0.75px, #fdf8f3 0.75px);
+  background-size: 30px 30px;
+  background-position: 0 0, 15px 15px;
+}

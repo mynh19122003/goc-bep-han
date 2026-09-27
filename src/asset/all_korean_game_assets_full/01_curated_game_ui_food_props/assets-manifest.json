@@ -1,0 +1,793 @@
+{
+  "ui": [
+    {
+      "file": "ui/btn_start.png",
+      "bbox": [
+        25,
+        64,
+        289,
+        166
+      ]
+    },
+    {
+      "file": "ui/btn_buy_cart.png",
+      "bbox": [
+        297,
+        64,
+        513,
+        165
+      ]
+    },
+    {
+      "file": "ui/btn_buy_coin.png",
+      "bbox": [
+        972,
+        64,
+        1199,
+        166
+      ]
+    },
+    {
+      "file": "ui/btn_complete.png",
+      "bbox": [
+        517,
+        65,
+        742,
+        166
+      ]
+    },
+    {
+      "file": "ui/btn_lock.png",
+      "bbox": [
+        1208,
+        65,
+        1424,
+        165
+      ]
+    },
+    {
+      "file": "ui/btn_back.png",
+      "bbox": [
+        754,
+        68,
+        964,
+        163
+      ]
+    },
+    {
+      "file": "ui/btn_buy_coin_alt.png",
+      "bbox": [
+        973,
+        172,
+        1198,
+        274
+      ]
+    },
+    {
+      "file": "ui/btn_unlock.png",
+      "bbox": [
+        1210,
+        172,
+        1424,
+        270
+      ]
+    },
+    {
+      "file": "ui/btn_start_alt.png",
+      "bbox": [
+        26,
+        174,
+        289,
+        271
+      ]
+    },
+    {
+      "file": "ui/btn_buy_cart_disabled.png",
+      "bbox": [
+        297,
+        174,
+        512,
+        271
+      ]
+    },
+    {
+      "file": "ui/btn_complete_alt.png",
+      "bbox": [
+        518,
+        174,
+        742,
+        271
+      ]
+    },
+    {
+      "file": "ui/btn_back_alt.png",
+      "bbox": [
+        755,
+        176,
+        964,
+        269
+      ]
+    },
+    {
+      "file": "ui/tab_main.png",
+      "bbox": [
+        36,
+        295,
+        268,
+        397
+      ]
+    },
+    {
+      "file": "ui/tab_side.png",
+      "bbox": [
+        276,
+        303,
+        489,
+        394
+      ]
+    },
+    {
+      "file": "ui/tab_drink.png",
+      "bbox": [
+        498,
+        303,
+        713,
+        394
+      ]
+    },
+    {
+      "file": "ui/tab_dessert.png",
+      "bbox": [
+        722,
+        303,
+        950,
+        394
+      ]
+    },
+    {
+      "file": "ui/tab_ingredient.png",
+      "bbox": [
+        959,
+        305,
+        1186,
+        395
+      ]
+    },
+    {
+      "file": "ui/tab_recipe.png",
+      "bbox": [
+        1195,
+        306,
+        1420,
+        396
+      ]
+    },
+    {
+      "file": "ui/sign_menu.png",
+      "bbox": [
+        452,
+        414,
+        704,
+        538
+      ]
+    },
+    {
+      "file": "ui/sign_ingredient.png",
+      "bbox": [
+        711,
+        414,
+        952,
+        538
+      ]
+    },
+    {
+      "file": "ui/sign_recipe.png",
+      "bbox": [
+        960,
+        414,
+        1199,
+        542
+      ]
+    },
+    {
+      "file": "ui/sign_cooking.png",
+      "bbox": [
+        1207,
+        414,
+        1424,
+        546
+      ]
+    },
+    {
+      "file": "ui/icon_plus.png",
+      "bbox": [
+        33,
+        429,
+        148,
+        541
+      ]
+    },
+    {
+      "file": "ui/icon_close.png",
+      "bbox": [
+        287,
+        432,
+        420,
+        543
+      ]
+    },
+    {
+      "file": "ui/icon_minus.png",
+      "bbox": [
+        169,
+        433,
+        272,
+        540
+      ]
+    },
+    {
+      "file": "ui/card_pho_bo.png",
+      "bbox": [
+        42,
+        565,
+        305,
+        875
+      ]
+    },
+    {
+      "file": "ui/card_kimbap.png",
+      "bbox": [
+        322,
+        565,
+        585,
+        875
+      ]
+    },
+    {
+      "file": "ui/card_banh_xeo.png",
+      "bbox": [
+        603,
+        565,
+        865,
+        875
+      ]
+    },
+    {
+      "file": "ui/counter_coin.png",
+      "bbox": [
+        916,
+        590,
+        1222,
+        700
+      ]
+    },
+    {
+      "file": "ui/badge_heart.png",
+      "bbox": [
+        1262,
+        596,
+        1392,
+        698
+      ]
+    },
+    {
+      "file": "ui/badge_new.png",
+      "bbox": [
+        1036,
+        714,
+        1279,
+        841
+      ]
+    },
+    {
+      "file": "ui/step_4_finish.png",
+      "bbox": [
+        1094,
+        885,
+        1428,
+        1055
+      ]
+    },
+    {
+      "file": "ui/step_3_decorate.png",
+      "bbox": [
+        735,
+        887,
+        1092,
+        1054
+      ]
+    },
+    {
+      "file": "ui/step_1_prepare.png",
+      "bbox": [
+        18,
+        888,
+        372,
+        1054
+      ]
+    },
+    {
+      "file": "ui/step_2_cook.png",
+      "bbox": [
+        381,
+        888,
+        732,
+        1054
+      ]
+    }
+  ],
+  "ingredients": [
+    {
+      "file": "ingredients/banh_gao.png",
+      "bbox": [
+        22,
+        53,
+        271,
+        275
+      ]
+    },
+    {
+      "file": "ingredients/cha_ca.png",
+      "bbox": [
+        304,
+        64,
+        567,
+        275
+      ]
+    },
+    {
+      "file": "ingredients/trung.png",
+      "bbox": [
+        596,
+        61,
+        862,
+        275
+      ]
+    },
+    {
+      "file": "ingredients/rong_bien.png",
+      "bbox": [
+        886,
+        56,
+        1149,
+        275
+      ]
+    },
+    {
+      "file": "ingredients/ca_rot.png",
+      "bbox": [
+        1184,
+        46,
+        1417,
+        275
+      ]
+    },
+    {
+      "file": "ingredients/dua_leo.png",
+      "bbox": [
+        21,
+        306,
+        274,
+        525
+      ]
+    },
+    {
+      "file": "ingredients/cai_bo_xoi.png",
+      "bbox": [
+        309,
+        288,
+        570,
+        525
+      ]
+    },
+    {
+      "file": "ingredients/hanh_la.png",
+      "bbox": [
+        600,
+        292,
+        856,
+        527
+      ]
+    },
+    {
+      "file": "ingredients/toi.png",
+      "bbox": [
+        887,
+        293,
+        1135,
+        527
+      ]
+    },
+    {
+      "file": "ingredients/ot_do.png",
+      "bbox": [
+        1178,
+        296,
+        1422,
+        527
+      ]
+    },
+    {
+      "file": "ingredients/nam.png",
+      "bbox": [
+        20,
+        548,
+        284,
+        784
+      ]
+    },
+    {
+      "file": "ingredients/bap_cai_kimchi.png",
+      "bbox": [
+        310,
+        546,
+        570,
+        785
+      ]
+    },
+    {
+      "file": "ingredients/mi_ramyeon.png",
+      "bbox": [
+        595,
+        545,
+        860,
+        784
+      ]
+    },
+    {
+      "file": "ingredients/xuc_xich.png",
+      "bbox": [
+        890,
+        550,
+        1157,
+        783
+      ]
+    },
+    {
+      "file": "ingredients/pho_mai_lat.png",
+      "bbox": [
+        1178,
+        550,
+        1431,
+        784
+      ]
+    },
+    {
+      "file": "ingredients/me_rang.png",
+      "bbox": [
+        30,
+        816,
+        283,
+        1040
+      ]
+    },
+    {
+      "file": "ingredients/nuoc_dung.png",
+      "bbox": [
+        316,
+        794,
+        574,
+        1039
+      ]
+    },
+    {
+      "file": "ingredients/tuong_ot_gochujang.png",
+      "bbox": [
+        604,
+        810,
+        858,
+        1040
+      ]
+    },
+    {
+      "file": "ingredients/nuoc_tuong.png",
+      "bbox": [
+        899,
+        815,
+        1140,
+        1040
+      ]
+    },
+    {
+      "file": "ingredients/duong.png",
+      "bbox": [
+        1183,
+        803,
+        1415,
+        1040
+      ]
+    }
+  ],
+  "dishes": [
+    {
+      "file": "dishes/tokbokki.png",
+      "bbox": [
+        14,
+        72,
+        373,
+        359
+      ]
+    },
+    {
+      "file": "dishes/kimbap.png",
+      "bbox": [
+        373,
+        59,
+        742,
+        359
+      ]
+    },
+    {
+      "file": "dishes/ramyeon.png",
+      "bbox": [
+        742,
+        27,
+        1110,
+        359
+      ]
+    },
+    {
+      "file": "dishes/ga_ran_han_quoc.png",
+      "bbox": [
+        1110,
+        73,
+        1432,
+        360
+      ]
+    },
+    {
+      "file": "dishes/bibimbap.png",
+      "bbox": [
+        27,
+        380,
+        368,
+        696
+      ]
+    },
+    {
+      "file": "dishes/banh_xeo_han.png",
+      "bbox": [
+        386,
+        401,
+        742,
+        693
+      ]
+    },
+    {
+      "file": "dishes/pho_mai_que.png",
+      "bbox": [
+        746,
+        387,
+        1110,
+        696
+      ]
+    },
+    {
+      "file": "dishes/mandu.png",
+      "bbox": [
+        1110,
+        407,
+        1430,
+        693
+      ]
+    },
+    {
+      "file": "dishes/canh_kimchi.png",
+      "bbox": [
+        26,
+        696,
+        373,
+        1031
+      ]
+    },
+    {
+      "file": "dishes/com_nam.png",
+      "bbox": [
+        388,
+        732,
+        739,
+        1031
+      ]
+    },
+    {
+      "file": "dishes/pho_bo.png",
+      "bbox": [
+        758,
+        696,
+        1110,
+        1031
+      ]
+    },
+    {
+      "file": "dishes/tra_dao.png",
+      "bbox": [
+        1110,
+        698,
+        1427,
+        1031
+      ]
+    }
+  ],
+  "props": [
+    {
+      "file": "props/food_stall.png",
+      "bbox": [
+        28,
+        15,
+        397,
+        375
+      ]
+    },
+    {
+      "file": "props/rice_sack.png",
+      "bbox": [
+        1114,
+        45,
+        1425,
+        385
+      ]
+    },
+    {
+      "file": "props/veggie_basket.png",
+      "bbox": [
+        398,
+        60,
+        796,
+        366
+      ]
+    },
+    {
+      "file": "props/egg_basket.png",
+      "bbox": [
+        800,
+        80,
+        1117,
+        368
+      ]
+    },
+    {
+      "file": "props/cooking_pot.png",
+      "bbox": [
+        1069,
+        373,
+        1427,
+        598
+      ]
+    },
+    {
+      "file": "props/condiment_tray.png",
+      "bbox": [
+        30,
+        377,
+        429,
+        585
+      ]
+    },
+    {
+      "file": "props/kitchen_knife.png",
+      "bbox": [
+        805,
+        393,
+        1028,
+        599
+      ]
+    },
+    {
+      "file": "props/cutting_board.png",
+      "bbox": [
+        446,
+        400,
+        767,
+        611
+      ]
+    },
+    {
+      "file": "props/red_lantern.png",
+      "bbox": [
+        1012,
+        584,
+        1169,
+        873
+      ]
+    },
+    {
+      "file": "props/menu_sign.png",
+      "bbox": [
+        1192,
+        596,
+        1426,
+        855
+      ]
+    },
+    {
+      "file": "props/ladle.png",
+      "bbox": [
+        613,
+        603,
+        786,
+        858
+      ]
+    },
+    {
+      "file": "props/frying_pan.png",
+      "bbox": [
+        348,
+        615,
+        662,
+        828
+      ]
+    },
+    {
+      "file": "props/gas_stove.png",
+      "bbox": [
+        21,
+        625,
+        329,
+        824
+      ]
+    },
+    {
+      "file": "props/rice_bowl.png",
+      "bbox": [
+        801,
+        641,
+        988,
+        851
+      ]
+    },
+    {
+      "file": "props/herb_plant.png",
+      "bbox": [
+        19,
+        826,
+        262,
+        1062
+      ]
+    },
+    {
+      "file": "props/delivery_crate.png",
+      "bbox": [
+        702,
+        860,
+        963,
+        1057
+      ]
+    },
+    {
+      "file": "props/drinks_carrier.png",
+      "bbox": [
+        1214,
+        862,
+        1421,
+        1063
+      ]
+    },
+    {
+      "file": "props/takeaway_boxes.png",
+      "bbox": [
+        983,
+        877,
+        1200,
+        1052
+      ]
+    },
+    {
+      "file": "props/coin_stack.png",
+      "bbox": [
+        254,
+        888,
+        478,
+        1042
+      ]
+    },
+    {
+      "file": "props/heart_icon.png",
+      "bbox": [
+        521,
+        900,
+        685,
+        1039
+      ]
+    }
+  ]
+}

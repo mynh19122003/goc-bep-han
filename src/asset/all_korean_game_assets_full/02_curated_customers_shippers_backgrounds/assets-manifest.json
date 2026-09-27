@@ -1,0 +1,84 @@
+{
+  "customers": [
+    {
+      "name": "adult_male_01",
+      "file": "customers/adult_male_01.png"
+    },
+    {
+      "name": "student_female_01",
+      "file": "customers/student_female_01.png"
+    },
+    {
+      "name": "student_male_01",
+      "file": "customers/student_male_01.png"
+    },
+    {
+      "name": "adult_female_01",
+      "file": "customers/adult_female_01.png"
+    },
+    {
+      "name": "office_male_01",
+      "file": "customers/office_male_01.png"
+    },
+    {
+      "name": "office_female_01",
+      "file": "customers/office_female_01.png"
+    },
+    {
+      "name": "adult_male_cap_01",
+      "file": "customers/adult_male_cap_01.png"
+    },
+    {
+      "name": "adult_female_02",
+      "file": "customers/adult_female_02.png"
+    },
+    {
+      "name": "adult_male_backpack_01",
+      "file": "customers/adult_male_backpack_01.png"
+    },
+    {
+      "name": "adult_female_03",
+      "file": "customers/adult_female_03.png"
+    },
+    {
+      "name": "gym_male_01",
+      "file": "customers/gym_male_01.png"
+    },
+    {
+      "name": "gym_female_01",
+      "file": "customers/gym_female_01.png"
+    },
+    {
+      "name": "elderly_male_01",
+      "file": "customers/elderly_male_01.png"
+    },
+    {
+      "name": "elderly_female_01",
+      "file": "customers/elderly_female_01.png"
+    }
+  ],
+  "shippers": [
+    {
+      "name": "shipper_orange_01",
+      "file": "shippers/shipper_orange_01.png"
+    },
+    {
+      "name": "shipper_green_01",
+      "file": "shippers/shipper_green_01.png"
+    }
+  ],
+  "backgrounds": [
+    {
+      "name": "korean_storefront",
+      "file": "backgrounds/korean_storefront.png"
+    },
+    {
+      "name": "korean_dining_room",
+      "file": "backgrounds/korean_dining_room.png"
+    },
+    {
+      "name": "korean_kitchen",
+      "file": "backgrounds/korean_kitchen.png"
+    }
+  ]
+}

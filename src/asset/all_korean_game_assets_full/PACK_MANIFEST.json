@@ -1,0 +1,11 @@
+{
+  "curated_game_ui_food_props": "see 01_curated_game_ui_food_props",
+  "curated_customers_shippers_backgrounds": "see 02_curated_customers_shippers_backgrounds",
+  "auto_sliced_counts": {
+    "03_expanded_atlas": 214,
+    "04_labeled_atlas": 197,
+    "05_concept_atlas": 106
+  },
+  "total_auto_sliced": 517,
+  "total_png_files_in_pack": 639
+}
