@@ -149,6 +149,7 @@ interface GameState {
   // Tactile Cooking: Ramyeon
   startRamyeon: (dishId: string) => boolean;
   pourRamyeonWater: (delta: number) => void;
+  confirmRamyeonWater: () => boolean;
   addRamyeonContents: () => void;
   tapEggCrack: () => void;
   finishRamyeon: () => boolean;
@@ -1413,14 +1414,33 @@ export const useGameStore = create<GameState>()(
         if (session.step !== 'pouring_water') return;
 
         soundManager.playBoil();
-        const nextLevel = Math.min(100, session.waterLevel + delta);
+        const nextLevel = Math.max(0, Math.min(100, session.waterLevel + delta));
         set({
           ramyeonSession: {
             ...session,
             waterLevel: nextLevel,
-            step: nextLevel >= 75 ? 'adding_contents' : 'pouring_water',
           },
         });
+      },
+
+      confirmRamyeonWater: () => {
+        const state = get();
+        const session = state.ramyeonSession;
+        if (session.step !== 'pouring_water') return false;
+
+        if (session.waterLevel < 70 || session.waterLevel > 80) {
+          soundManager.playError();
+          return false;
+        }
+
+        soundManager.playSuccess();
+        set({
+          ramyeonSession: {
+            ...session,
+            step: 'adding_contents',
+          },
+        });
+        return true;
       },
 
       addRamyeonContents: () => {
