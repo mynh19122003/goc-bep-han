@@ -10,12 +10,14 @@ import { GameButton } from '@/components/ui/game/GameButton';
 interface HeaderHUDProps {
   onOpenDelivery?: () => void;
   onOpenSettings?: () => void;
+  onOpenReviews?: () => void;
   onOpenGuide?: () => void;
 }
 
 export const HeaderHUD: React.FC<HeaderHUDProps> = ({
   onOpenDelivery,
   onOpenSettings,
+  onOpenReviews,
   onOpenGuide,
 }) => {
   const {
@@ -80,7 +82,10 @@ export const HeaderHUD: React.FC<HeaderHUDProps> = ({
 
           <button
             type="button"
-            onClick={() => setActiveModal('reviews')}
+            onClick={() => {
+              if (onOpenReviews) onOpenReviews();
+              else setActiveModal('reviews');
+            }}
             className="flex h-9 items-center gap-1 rounded-xl border border-amber-500/30 bg-amber-950/70 px-2 text-[11px] font-black text-amber-200 transition hover:bg-amber-900 active:scale-95 sm:h-10 sm:gap-1.5 sm:rounded-2xl sm:px-2.5 sm:text-xs"
             title="Đánh giá khách hàng"
           >
