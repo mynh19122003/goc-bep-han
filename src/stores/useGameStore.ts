@@ -33,6 +33,15 @@ import {
 import { CUSTOMER_VISUAL_POOL, SHIPPER_LIST } from '@/config/gameAssets';
 import { soundManager } from '@/utils/audio';
 import { generateOrderCustomization } from '@/config/recipes';
+import {
+  buildConsumptionRequirements,
+  cloneDishes,
+  cloneInventory,
+  createGameId,
+  deductIngredients,
+  preparedDishMatchesOrder,
+  restaurantLevelFromReputation,
+} from '@/core/gameCore';
 
 interface GameState {
   // Progression & Economy
@@ -86,6 +95,7 @@ interface GameState {
   endDay: () => void;
   advanceToNextDay: () => void;
   gameTick: (deltaSeconds: number) => void;
+  cookingTick: (deltaSeconds: number) => void;
 
   // Dine-In Table Actions
   serveTable: (tableId: number) => boolean;
@@ -156,6 +166,43 @@ interface GameState {
 
 const DAY_DURATION_SECONDS = 100;
 
+const createInitialTokbokkiSession = (): TokbokkiCookSession => ({
+  status: 'idle',
+  dishId: null,
+  gochujangSpoons: 0,
+  soySauceSpoons: 0,
+  sugarSpoons: 0,
+  spicyMeter: 0,
+  saltyMeter: 0,
+  sweetMeter: 0,
+  heatNeedle: 20,
+  heatDirection: 1,
+  isStirring: false,
+  greenZoneTime: 0,
+  totalCookTime: 0,
+  requiredCookTime: 7,
+  flipCount: 0,
+});
+
+const createInitialKimbapSession = (): KimbapCookSession => ({
+  dishId: null,
+  step: 'idle',
+  placedIngredients: [],
+  requiredIngredientsQueue: ['rice', 'carrot', 'cucumber', 'egg', 'fish_cake'],
+  rollProgress: 0,
+  slicesMade: 0,
+});
+
+const createInitialRamyeonSession = (): RamyeonCookSession => ({
+  dishId: null,
+  step: 'idle',
+  waterLevel: 0,
+  noodlesAdded: false,
+  soupAdded: false,
+  eggCrackTaps: 0,
+  boilProgress: 0,
+});
+
 export const useGameStore = create<GameState>()(
   persist(
     (set, get) => ({
@@ -181,8 +228,8 @@ export const useGameStore = create<GameState>()(
       bgmEnabled: false,
       sfxEnabled: true,
 
-      inventory: { ...INITIAL_INGREDIENTS },
-      dishes: { ...INITIAL_DISHES },
+      inventory: cloneInventory(INITIAL_INGREDIENTS),
+      dishes: cloneDishes(INITIAL_DISHES),
       upgrades: [...INITIAL_UPGRADES],
       currentNews: MARKET_NEWS_LIST[0],
       bannedMarketItemsToday: [],
@@ -193,41 +240,9 @@ export const useGameStore = create<GameState>()(
       reviews: [...INITIAL_REVIEWS],
       preparedDishes: [],
 
-      tokbokkiSession: {
-        status: 'idle',
-        dishId: null,
-        gochujangSpoons: 2,
-        soySauceSpoons: 1,
-        sugarSpoons: 1,
-        spicyMeter: 60,
-        saltyMeter: 35,
-        sweetMeter: 40,
-        heatNeedle: 20,
-        heatDirection: 1,
-        isStirring: false,
-        greenZoneTime: 0,
-        totalCookTime: 0,
-        requiredCookTime: 6,
-      },
-
-      kimbapSession: {
-        dishId: null,
-        step: 'idle',
-        placedIngredients: [],
-        requiredIngredientsQueue: ['rice', 'carrot', 'cucumber', 'egg', 'fish_cake'],
-        rollProgress: 0,
-        slicesMade: 0,
-      },
-
-      ramyeonSession: {
-        dishId: null,
-        step: 'idle',
-        waterLevel: 0,
-        noodlesAdded: false,
-        soupAdded: false,
-        eggCrackTaps: 0,
-        boilProgress: 0,
-      },
+      tokbokkiSession: createInitialTokbokkiSession(),
+      kimbapSession: createInitialKimbapSession(),
+      ramyeonSession: createInitialRamyeonSession(),
 
       // --- GAME FLOW ---
       startDay: () => {
@@ -247,6 +262,7 @@ export const useGameStore = create<GameState>()(
         // Spawn first dine-in customer
         setTimeout(() => {
           const state = get();
+          if (!state.isDayActive || state.isPaused) return;
           const emptyTable = state.tables.find((t) => t.status === 'empty');
           if (emptyTable) {
             const unlockedDishes = Object.values(state.dishes).filter((d) => d.isUnlocked);
@@ -342,9 +358,13 @@ export const useGameStore = create<GameState>()(
           bannedMarketItemsToday: [],
           tables: JSON.parse(JSON.stringify(INITIAL_TABLES)),
           deliveryQueue: [],
+          preparedDishes: [],
           dailyReport: null,
           activeModal: 'none',
           inventory: updatedInventory,
+          tokbokkiSession: createInitialTokbokkiSession(),
+          kimbapSession: createInitialKimbapSession(),
+          ramyeonSession: createInitialRamyeonSession(),
         });
       },
 
@@ -524,54 +544,76 @@ export const useGameStore = create<GameState>()(
           }
         }
 
-        // --- 3. Tick Tokbokki Stir Session (if active) ---
+        set({
+          dayTimeSeconds: newDayTime,
+          tables: updatedTables,
+          deliveryQueue: updatedDeliveryQueue,
+          rating: Math.max(1, Math.min(5, Number((state.rating + ratingDelta).toFixed(2)))),
+          dailyCustomersLost: state.dailyCustomersLost + lostCountDelta,
+        });
+      },
+
+      cookingTick: (deltaSeconds: number) => {
+        const state = get();
+        if (state.isPaused) return;
+
+        const stoveLevel = state.upgrades.find((u) => u.id === 'stove_speed')?.level || 0;
+        const stoveSpeed = 1 + stoveLevel * 0.25;
+
         let tokSession = { ...state.tokbokkiSession };
         if (tokSession.status === 'cooking_stir') {
-          tokSession.totalCookTime += deltaSeconds;
+          tokSession.totalCookTime += deltaSeconds * stoveSpeed;
 
-          // Heat needle dynamics: rises when hold-to-stir, falls when released
           if (tokSession.isStirring) {
-            tokSession.heatNeedle = Math.min(100, tokSession.heatNeedle + deltaSeconds * 28);
+            tokSession.heatNeedle = Math.min(100, tokSession.heatNeedle + deltaSeconds * 28 * stoveSpeed);
           } else {
             tokSession.heatNeedle = Math.max(0, tokSession.heatNeedle - deltaSeconds * 22);
           }
 
-          // Green zone is 50 to 80
           if (tokSession.heatNeedle >= 50 && tokSession.heatNeedle <= 80) {
-            tokSession.greenZoneTime += deltaSeconds;
+            tokSession.greenZoneTime += deltaSeconds * stoveSpeed;
           }
 
           if (tokSession.totalCookTime >= tokSession.requiredCookTime) {
-            // Determine quality
-            const ratio = tokSession.greenZoneTime / tokSession.requiredCookTime;
-            if (tokSession.heatNeedle > 95 || ratio < 0.25) {
+            const heatRatio = tokSession.greenZoneTime / tokSession.requiredCookTime;
+            const sauceTotal =
+              tokSession.gochujangSpoons + tokSession.soySauceSpoons + tokSession.sugarSpoons;
+            const sauceOk =
+              sauceTotal > 0 &&
+              Math.abs(tokSession.gochujangSpoons / sauceTotal - 0.5) <= 0.18 &&
+              Math.abs(tokSession.soySauceSpoons / sauceTotal - 0.25) <= 0.15 &&
+              Math.abs(tokSession.sugarSpoons / sauceTotal - 0.25) <= 0.15;
+            const enoughFlips = tokSession.flipCount >= 2;
+
+            if (tokSession.heatNeedle > 95 || heatRatio < 0.25 || !sauceOk) {
               tokSession.status = 'burned';
               soundManager.playError();
-            } else {
+            } else if (enoughFlips || heatRatio >= 0.55) {
               tokSession.status = 'perfect';
               soundManager.playSuccess();
+            } else {
+              tokSession.status = 'burned';
+              soundManager.playError();
             }
+            tokSession.isStirring = false;
           }
         }
 
-        // --- 4. Tick Ramyeon Boil Session (if boiling) ---
         let ramSession = { ...state.ramyeonSession };
         if (ramSession.step === 'boiling') {
-          ramSession.boilProgress = Math.min(100, ramSession.boilProgress + deltaSeconds * 18);
-          if (ramSession.boilProgress >= 100) {
+          ramSession.boilProgress += deltaSeconds * 18 * stoveSpeed;
+          if (ramSession.boilProgress >= 125) {
+            ramSession.step = 'burned';
+            soundManager.playError();
+          } else if (ramSession.boilProgress >= 100) {
             ramSession.step = 'ready';
             soundManager.playSuccess();
           }
         }
 
         set({
-          dayTimeSeconds: newDayTime,
-          tables: updatedTables,
-          deliveryQueue: updatedDeliveryQueue,
           tokbokkiSession: tokSession,
           ramyeonSession: ramSession,
-          rating: Math.max(1, Math.min(5, Number((state.rating + ratingDelta).toFixed(2)))),
-          dailyCustomersLost: state.dailyCustomersLost + lostCountDelta,
         });
       },
 
