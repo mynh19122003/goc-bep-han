@@ -38,8 +38,8 @@ export const SettingsModal: React.FC = () => {
 
           {/* Modal Header */}
           <div className="flex items-center gap-2.5 mb-4">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center">
-              <GameAssetIcon name="settings" size={24} />
+            <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-[10px] font-black text-amber-200">
+              SET
             </div>
             <div>
               <h2 className="text-base sm:text-lg font-black text-amber-200 tracking-wide uppercase">
@@ -61,10 +61,8 @@ export const SettingsModal: React.FC = () => {
               {/* SFX Toggle */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-xl bg-stone-800 flex items-center justify-center">
-                    <GameAssetIcon name="sound" size={16} />
-                  </div>
-                  <span className="text-xs font-bold text-stone-200">Hiệu ứng âm thanh (SFX)</span>
+                  <span className="text-[10px] font-black text-emerald-300 bg-emerald-950/70 border border-emerald-500/30 px-2 py-1 rounded-lg">SFX</span>
+                  <span className="text-xs font-bold text-stone-200">Hiệu ứng âm thanh</span>
                 </div>
                 <button
                   type="button"
@@ -82,10 +80,8 @@ export const SettingsModal: React.FC = () => {
               {/* BGM Toggle */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-xl bg-stone-800 flex items-center justify-center">
-                    <GameAssetIcon name="sound" size={16} />
-                  </div>
-                  <span className="text-xs font-bold text-stone-200">Nhạc nền quán ăn (BGM)</span>
+                  <span className="text-[10px] font-black text-amber-300 bg-amber-950/70 border border-amber-500/30 px-2 py-1 rounded-lg">BGM</span>
+                  <span className="text-xs font-bold text-stone-200">Nhạc nền quán ăn</span>
                 </div>
                 <button
                   type="button"
