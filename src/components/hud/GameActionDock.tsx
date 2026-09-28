@@ -45,7 +45,9 @@ export const GameActionDock: React.FC<GameActionDockProps> = ({
               key={String(item.key)}
               type="button"
               onClick={() => onSelectPanel(selected && item.key !== null ? null : item.key)}
-              className={`relative flex min-w-0 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1.5 transition active:scale-95 ${
+              aria-label={item.label}
+              aria-pressed={selected}
+              className={`relative flex min-h-[48px] min-w-0 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1.5 outline-none transition active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-300/70 ${
                 selected
                   ? 'bg-amber-500/18 text-amber-200 ring-1 ring-amber-400/45'
                   : 'text-stone-300 hover:bg-white/5'
