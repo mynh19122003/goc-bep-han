@@ -32,10 +32,10 @@ export const GameModal: React.FC<GameModalProps> = ({
       animate={{ y: 0, opacity: 1, scale: 1 }}
       exit={{ y: 28, opacity: 0, scale: 0.98 }}
       transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-      className={`relative z-10 flex max-h-[88dvh] w-full flex-col overflow-hidden rounded-t-3xl border-t border-amber-500/30 bg-[#1a1411]/98 text-stone-100 shadow-2xl sm:rounded-3xl sm:border ${maxWidth} ${className}`}
+      className={`relative z-10 flex h-[88dvh] max-h-[88dvh] w-full flex-col overflow-hidden rounded-t-3xl border-t border-amber-500/30 bg-[#1a1411]/98 text-stone-100 shadow-2xl sm:h-auto sm:max-h-[88dvh] sm:rounded-3xl sm:border ${maxWidth} ${className}`}
     >
       <div className="mx-auto mt-2 h-1.5 w-12 rounded-full bg-stone-600/70 sm:hidden" />
-      <header className="flex shrink-0 items-center justify-between gap-2 border-b border-amber-500/20 px-3 py-3 sm:px-4">
+      <header className="flex shrink-0 items-center justify-between gap-2 border-b border-amber-500/20 px-3 py-2.5 sm:px-4 sm:py-3">
         <div className="flex min-w-0 items-center gap-2">
           {icon && <div className="shrink-0">{icon}</div>}
           <div className="min-w-0">
