@@ -4,6 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useGameStore } from '@/stores/useGameStore';
 import { GameAssetIcon } from '@/components/ui/game/GameAssetIcon';
+import { preparedDishMatchesOrder } from '@/core/gameCore';
 
 export const TableView: React.FC = () => {
   const { tables, preparedDishes, isDayActive, startDay, serveTable, cleanTable } = useGameStore();
@@ -30,7 +31,16 @@ export const TableView: React.FC = () => {
           const isDirty = table.status === 'dirty';
 
           const canServe =
-            hasCustomer && preparedDishes.some((p) => p.dishId === table.customer?.orderDishId);
+            hasCustomer && preparedDishes.some((p) =>
+              preparedDishMatchesOrder({
+                prepared: p,
+                orderId: table.customer?.id,
+                dishId: table.customer?.orderDishId || '',
+                requiredToppings: table.customer?.requiredToppings,
+                excludedToppings: table.customer?.excludedToppings,
+                spiceLevel: table.customer?.spiceLevel,
+              })
+            );
 
           const patiencePercent = hasCustomer
             ? Math.max(0, Math.min(100, (table.customer!.currentPatience / table.customer!.maxPatience) * 100))
