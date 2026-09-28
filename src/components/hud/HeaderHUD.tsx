@@ -4,7 +4,6 @@ import React from 'react';
 import Image from 'next/image';
 import { useGameStore } from '@/stores/useGameStore';
 import { GAME_ASSETS } from '@/game/assets/gameAssets';
-import { GameIconButton } from '@/components/ui/game/GameIconButton';
 import { restaurantProgress } from '@/core/gameCore';
 
 interface HeaderHUDProps {
@@ -24,7 +23,6 @@ export const HeaderHUD: React.FC<HeaderHUDProps> = ({
     isPaused,
     rating,
     reputationPoints,
-    deliveryQueue,
     sfxEnabled,
     startDay,
     pauseGame,
@@ -127,16 +125,18 @@ export const HeaderHUD: React.FC<HeaderHUDProps> = ({
 
         {/* Right: Sound, Day Action & Settings */}
         <div className="flex items-center gap-1.5 sm:gap-2">
-          {/* Sound Toggle (28-32px icon) */}
-          <GameIconButton
-            asset={GAME_ASSETS.hud.sound}
-            size="sm"
-            variant="glass"
-            active={sfxEnabled}
+          <button
+            type="button"
             onClick={toggleSfx}
-            title={sfxEnabled ? 'Âm thanh: Đang bật' : 'Âm thanh: Đang tắt'}
-            className={sfxEnabled ? 'opacity-100' : 'opacity-40 grayscale'}
-          />
+            title={sfxEnabled ? 'Hiệu ứng âm thanh đang bật' : 'Hiệu ứng âm thanh đang tắt'}
+            className={`min-w-[44px] h-9 px-2 rounded-xl border text-[10px] font-black transition-all active:scale-95 ${
+              sfxEnabled
+                ? 'bg-emerald-950/80 border-emerald-500/50 text-emerald-300'
+                : 'bg-stone-950/80 border-stone-700 text-stone-500'
+            }`}
+          >
+            SFX {sfxEnabled ? 'ON' : 'OFF'}
+          </button>
 
           {/* Day Open/Pause Toggle */}
           {!isDayActive ? (
@@ -166,17 +166,17 @@ export const HeaderHUD: React.FC<HeaderHUDProps> = ({
             </button>
           )}
 
-          {/* Settings Modal Button */}
-          <GameIconButton
-            asset={GAME_ASSETS.hud.settings}
-            size="sm"
-            variant="glass"
+          <button
+            type="button"
             onClick={() => {
               if (onOpenSettings) onOpenSettings();
               else setActiveModal('settings');
             }}
+            className="min-w-[44px] h-9 px-2 rounded-xl bg-stone-950/80 hover:bg-stone-800 border border-amber-500/30 text-amber-200 text-[10px] font-black active:scale-95 transition-all"
             title="Cài đặt trò chơi"
-          />
+          >
+            CÀI ĐẶT
+          </button>
         </div>
       </div>
 
