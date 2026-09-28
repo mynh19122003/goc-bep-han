@@ -24,9 +24,9 @@ export const CustomerSprite: React.FC<CustomerSpriteProps> = ({
   isEating = false,
 }) => {
   const sizeMap = {
-    sm: { width: 65, height: 110 },
-    md: { width: 85, height: 145 },
-    lg: { width: 110, height: 180 },
+    sm: { width: 58, height: 96 },
+    md: { width: 74, height: 124 },
+    lg: { width: 96, height: 158 },
   };
 
   const { width, height } = sizeMap[size];
@@ -52,7 +52,7 @@ export const CustomerSprite: React.FC<CustomerSpriteProps> = ({
               : { y: [0, -3, 0] }
           }
           transition={{ repeat: Infinity, duration: isEating ? 0.9 : 2 }}
-          className="absolute -top-3 z-20 bg-stone-900/90 border border-amber-400/70 rounded-full p-1 shadow-md flex items-center justify-center w-6 h-6"
+          className="absolute -top-2 z-20 bg-stone-900/90 border border-amber-400/70 rounded-full p-1 shadow-md flex items-center justify-center w-6 h-6"
         >
           <Image
             src={moodAsset}
