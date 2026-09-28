@@ -40,8 +40,8 @@ export const GameButton: React.FC<GameButtonProps> = ({
       type="button"
       disabled={disabled}
       className={[
-        'inline-flex items-center justify-center gap-2 rounded-xl border font-black',
-        'shadow-[0_3px_0_rgba(0,0,0,0.28)] transition-all active:translate-y-[1px] active:shadow-none',
+        'inline-flex items-center justify-center gap-2 rounded-xl border font-black outline-none',
+        'shadow-[0_3px_0_rgba(0,0,0,0.28)] transition-all active:translate-y-[1px] active:shadow-none focus-visible:ring-2 focus-visible:ring-amber-300/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[#17110f]',
         'disabled:opacity-40 disabled:cursor-not-allowed disabled:active:translate-y-0 disabled:shadow-none',
         compact ? 'min-h-[40px] px-3 py-2 text-[11px]' : 'min-h-[44px] px-4 py-2.5 text-xs sm:text-sm',
         fullWidth ? 'w-full' : '',
@@ -55,7 +55,7 @@ export const GameButton: React.FC<GameButtonProps> = ({
           <Image src={iconSrc} alt="" fill sizes="20px" className="object-contain" />
         </span>
       )}
-      <span className="leading-none">{children}</span>
+      <span className="min-w-0 leading-tight">{children}</span>
     </button>
   );
 };
