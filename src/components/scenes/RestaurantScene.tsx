@@ -246,7 +246,6 @@ export const RestaurantScene: React.FC<RestaurantSceneProps> = ({
                           : 'bg-amber-950/90 text-amber-300 border-amber-500/50'
                       }`}
                     >
-                      <GameAssetIcon name="clock" size={11} />
                       <span>{Math.ceil(table.customer!.currentPatience)}s</span>
                     </span>
                   )}
