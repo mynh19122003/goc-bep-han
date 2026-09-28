@@ -224,7 +224,7 @@ export const useGameStore = create<GameState>()(
 
       activeScene: 'kitchen',
       activeTab: 'kitchen',
-      activeStation: 'tokbokki',
+      activeStation: null,
       activeModal: 'none',
       bgmEnabled: false,
       sfxEnabled: true,
@@ -993,15 +993,10 @@ export const useGameStore = create<GameState>()(
         if (!dish || state.tokbokkiSession.status !== 'idle') return false;
 
         // Check ingredients
-        const inventory = { ...state.inventory };
-        for (const [ingId, qty] of Object.entries(dish.requiredIngredients)) {
-          if (!inventory[ingId] || inventory[ingId].stock < (qty || 1)) {
-            soundManager.playError();
-            return false;
-          }
-        }
-        for (const [ingId, qty] of Object.entries(dish.requiredIngredients)) {
-          inventory[ingId].stock -= qty || 1;
+        const inventory = deductIngredients(state.inventory, dish.requiredIngredients);
+        if (!inventory) {
+          soundManager.playError();
+          return false;
         }
 
         soundManager.playSizzle();
@@ -1107,12 +1102,13 @@ export const useGameStore = create<GameState>()(
           preparedDishes: [
             ...state.preparedDishes,
             {
-              id: `dish_${Date.now()}`,
+              id: createGameId('prep'),
               dishId: dish.id,
               name: dish.name,
               emoji: dish.emoji,
               quality: session.status === 'perfect' ? 'perfect' : 'burned',
               preparedAt: Date.now(),
+              preparedOnDay: state.day,
             },
           ],
           tokbokkiSession: {
@@ -1141,15 +1137,10 @@ export const useGameStore = create<GameState>()(
         const dish = state.dishes[dishId];
         if (!dish || state.kimbapSession.step !== 'idle') return false;
 
-        const inventory = { ...state.inventory };
-        for (const [ingId, qty] of Object.entries(dish.requiredIngredients)) {
-          if (!inventory[ingId] || inventory[ingId].stock < (qty || 1)) {
-            soundManager.playError();
-            return false;
-          }
-        }
-        for (const [ingId, qty] of Object.entries(dish.requiredIngredients)) {
-          inventory[ingId].stock -= qty || 1;
+        const inventory = deductIngredients(state.inventory, dish.requiredIngredients);
+        if (!inventory) {
+          soundManager.playError();
+          return false;
         }
 
         soundManager.playClick();
@@ -1159,7 +1150,9 @@ export const useGameStore = create<GameState>()(
             dishId,
             step: 'ingredients',
             placedIngredients: [],
-            requiredIngredientsQueue: ['rice', 'carrot', 'cucumber', 'egg', 'fish_cake'],
+            requiredIngredientsQueue: (Object.keys(dish.requiredIngredients) as IngredientId[]).filter(
+              (id) => !['seaweed'].includes(id)
+            ),
             rollProgress: 0,
             slicesMade: 0,
           },
@@ -1236,12 +1229,13 @@ export const useGameStore = create<GameState>()(
           preparedDishes: [
             ...state.preparedDishes,
             {
-              id: `dish_${Date.now()}`,
+              id: createGameId('prep'),
               dishId: dish.id,
               name: dish.name,
               emoji: dish.emoji,
               quality: 'perfect',
               preparedAt: Date.now(),
+              preparedOnDay: state.day,
             },
           ],
           kimbapSession: {
@@ -1270,15 +1264,10 @@ export const useGameStore = create<GameState>()(
         const dish = state.dishes[dishId];
         if (!dish || state.ramyeonSession.step !== 'idle') return false;
 
-        const inventory = { ...state.inventory };
-        for (const [ingId, qty] of Object.entries(dish.requiredIngredients)) {
-          if (!inventory[ingId] || inventory[ingId].stock < (qty || 1)) {
-            soundManager.playError();
-            return false;
-          }
-        }
-        for (const [ingId, qty] of Object.entries(dish.requiredIngredients)) {
-          inventory[ingId].stock -= qty || 1;
+        const inventory = deductIngredients(state.inventory, dish.requiredIngredients);
+        if (!inventory) {
+          soundManager.playError();
+          return false;
         }
 
         soundManager.playClick();
@@ -1357,12 +1346,13 @@ export const useGameStore = create<GameState>()(
           preparedDishes: [
             ...state.preparedDishes,
             {
-              id: `dish_${Date.now()}`,
+              id: createGameId('prep'),
               dishId: dish.id,
               name: dish.name,
               emoji: dish.emoji,
               quality: 'perfect',
               preparedAt: Date.now(),
+              preparedOnDay: state.day,
             },
           ],
           ramyeonSession: {
@@ -1483,8 +1473,8 @@ export const useGameStore = create<GameState>()(
           dailyCustomersLost: 0,
           dailyTips: 0,
           dailyReport: null,
-          inventory: { ...INITIAL_INGREDIENTS },
-          dishes: { ...INITIAL_DISHES },
+          inventory: cloneInventory(INITIAL_INGREDIENTS),
+          dishes: cloneDishes(INITIAL_DISHES),
           upgrades: [...INITIAL_UPGRADES],
           currentNews: MARKET_NEWS_LIST[0],
           bannedMarketItemsToday: [],
@@ -1498,7 +1488,7 @@ export const useGameStore = create<GameState>()(
           ramyeonSession: createInitialRamyeonSession(),
           activeScene: 'dining',
           activeTab: 'kitchen',
-          activeStation: 'tokbokki',
+          activeStation: null,
           activeModal: 'none',
         });
       },
