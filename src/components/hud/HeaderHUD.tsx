@@ -116,10 +116,10 @@ export const HeaderHUD: React.FC<HeaderHUDProps> = ({
           <button
             type="button"
             onClick={onOpenGuide}
-            className="hidden h-10 min-w-[44px] rounded-xl border border-teal-500/25 bg-teal-950/35 px-2 text-[10px] font-black text-teal-200 transition hover:bg-teal-900/40 active:scale-95 md:block"
+            className="h-10 min-w-[40px] rounded-xl border border-teal-500/25 bg-teal-950/35 px-2 text-[10px] font-black text-teal-200 transition hover:bg-teal-900/40 active:scale-95"
             title="Giới thiệu & hướng dẫn chơi"
           >
-            HDSD
+            <span className="sm:hidden">?</span><span className="hidden sm:inline">HDSD</span>
           </button>
 
           <button
