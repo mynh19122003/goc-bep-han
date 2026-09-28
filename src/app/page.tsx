@@ -33,10 +33,13 @@ export default function GamePage() {
   // Handle panel selection from bottom dock
   const handleSelectDockPanel = (panel: GamePanelType) => {
     if (panel === 'menu') {
+      setActivePanel(null);
       setActiveModal('menu');
     } else if (panel === 'inventory') {
+      setActivePanel(null);
       setActiveModal('market');
     } else if (panel === 'upgrade') {
+      setActivePanel(null);
       setActiveModal('upgrades');
     } else {
       setActivePanel(panel);
@@ -50,7 +53,7 @@ export default function GamePage() {
   };
 
   return (
-    <div className="w-full h-screen overflow-hidden flex flex-col font-baloo bg-stone-950 text-stone-100 select-none relative">
+    <div className="w-full h-dvh overflow-hidden flex flex-col font-baloo bg-stone-950 text-stone-100 select-none relative">
       {/* ========================================================================= */}
       {/* 1. TOP GLOBAL HUD (28-34px standardized icons, day/time, coin, rating)    */}
       {/* ========================================================================= */}
