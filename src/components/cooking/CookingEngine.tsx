@@ -12,6 +12,7 @@ import {
 } from '@/config/recipes';
 import { ToppingSelector } from './ToppingSelector';
 import { GameAssetIcon } from '@/components/ui/game/GameAssetIcon';
+import { CloseButton } from '@/components/ui/game/CloseButton';
 import { soundManager } from '@/utils/audio';
 import { buildConsumptionRequirements, hasIngredients } from '@/core/gameCore';
 
@@ -324,15 +325,7 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
           </div>
         </div>
 
-        {/* Close Button */}
-        <button
-          type="button"
-          onClick={onClose}
-          className="w-8 h-8 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 border border-stone-600 flex items-center justify-center shrink-0 cursor-pointer active:scale-90 transition-transform"
-          title="Đóng chế biến"
-        >
-          <GameAssetIcon name="close" size={16} />
-        </button>
+        <CloseButton onClick={onClose} label="Đóng" />
       </div>
 
       {/* ========================================================================= */}
