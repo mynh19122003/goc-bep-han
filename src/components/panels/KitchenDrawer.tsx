@@ -195,10 +195,14 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
             </div>
           </header>
 
-          <div className="game-scrollbar flex shrink-0 items-center gap-1.5 overflow-x-auto border-b border-stone-800 bg-black/20 px-3 py-2">
-            <span className="shrink-0 text-[9px] font-black uppercase tracking-wider text-stone-500">
-              Đơn chờ
-            </span>
+          <div className="border-b border-stone-800 bg-black/20 px-3 py-2">
+            <div className="mb-1.5 flex items-center justify-between gap-2">
+              <span className="text-[9px] font-black uppercase tracking-wider text-stone-500">Đơn chờ</span>
+              <span className="rounded-full border border-stone-700 bg-stone-900/80 px-2 py-0.5 text-[8px] font-black text-stone-400">
+                {waitingOrders.length} đơn
+              </span>
+            </div>
+            <div className="game-scrollbar flex items-center gap-1.5 overflow-x-auto">
 
             {waitingOrders.length === 0 ? (
               <span className="text-[10px] font-bold text-stone-400">Không có đơn đang chờ</span>
@@ -212,7 +216,7 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
                     key={`${order.orderType}-${order.orderId}`}
                     type="button"
                     onClick={() => setCurrentOrder(order)}
-                    className={`flex h-9 shrink-0 items-center gap-1.5 rounded-xl border px-2.5 text-[10px] font-black transition active:scale-95 ${
+                    className={`flex min-h-[42px] shrink-0 items-center gap-1.5 rounded-xl border px-2.5 py-1 text-[10px] font-black transition active:scale-95 ${
                       selected
                         ? 'border-amber-300/60 bg-amber-600/70 text-white'
                         : 'border-stone-700 bg-stone-900/80 text-stone-300 hover:bg-stone-800'
@@ -224,10 +228,14 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
                       </span>
                     )}
                     <span className="max-w-[92px] truncate">{order.customerName}</span>
+                    <span className="rounded-md border border-white/10 bg-black/20 px-1.5 py-0.5 text-[8px] font-black opacity-80">
+                      {order.orderType === 'delivery' ? 'SHIP' : `B${order.tableId}`}
+                    </span>
                   </button>
                 );
               })
             )}
+            </div>
           </div>
 
           <main className="game-scrollbar min-h-0 flex-1 overflow-y-auto p-2.5 pb-[max(1rem,env(safe-area-inset-bottom))] sm:p-4">
@@ -256,24 +264,34 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
           </main>
 
           {preparedDishes.length > 0 && (
-            <footer className="shrink-0 border-t border-amber-500/20 bg-black/25 px-3 py-2">
+            <footer className="shrink-0 border-t border-amber-500/20 bg-black/30 px-3 py-2">
+              <div className="mb-1 flex items-center justify-between">
+                <span className="text-[9px] font-black uppercase tracking-wider text-amber-200/60">Khay giữ nóng</span>
+                <span className="text-[8px] font-bold text-stone-500">Chạm giao món ở bàn/shipper</span>
+              </div>
               <div className="game-scrollbar flex items-center gap-1.5 overflow-x-auto">
-                <span className="shrink-0 text-[9px] font-black uppercase text-amber-200/60">
-                  Khay món
-                </span>
                 {preparedDishes.map((dish) => {
                   const dishAsset = (GAME_ASSETS.dishes as Record<string, string>)[dish.dishId];
                   return (
                     <div
                       key={dish.id}
-                      className="flex h-9 shrink-0 items-center gap-1.5 rounded-xl border border-amber-500/25 bg-amber-950/40 px-2"
+                      className="flex h-10 shrink-0 items-center gap-1.5 rounded-xl border border-amber-500/25 bg-amber-950/40 px-2"
                     >
                       {dishAsset && (
                         <span className="relative h-5 w-5">
                           <Image src={dishAsset} alt="" fill sizes="20px" className="object-contain" />
                         </span>
                       )}
-                      <span className="max-w-[90px] truncate text-[10px] font-black text-amber-100">{dish.name}</span>
+                      <div className="min-w-0">
+                        <span className="block max-w-[96px] truncate text-[10px] font-black text-amber-100">{dish.name}</span>
+                        <span className="block text-[8px] font-bold text-stone-500">
+                          {dish.targetOrderType === 'delivery'
+                            ? 'Đơn giao hàng'
+                            : dish.targetTableId
+                            ? `Bàn ${dish.targetTableId}`
+                            : 'Nấu tự do'}
+                        </span>
+                      </div>
                       <button
                         type="button"
                         onClick={() => discardPreparedDish(dish.id)}
