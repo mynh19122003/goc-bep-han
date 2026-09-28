@@ -142,8 +142,7 @@ export const MenuModal: React.FC = () => {
                           </span>
                           <span className="text-stone-600">|</span>
                           <span className="text-stone-400 flex items-center gap-1">
-                            <GameAssetIcon name="clock" size={14} />
-                            Nấu trong: {dish.prepTime}s
+                              Nấu trong: {dish.prepTime}s
                           </span>
                         </div>
                       </div>
