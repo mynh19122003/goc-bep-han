@@ -34,6 +34,7 @@ import { CUSTOMER_VISUAL_POOL, SHIPPER_LIST } from '@/config/gameAssets';
 import { soundManager } from '@/utils/audio';
 import { generateOrderCustomization } from '@/config/recipes';
 import {
+  averageFreshnessForRequirements,
   buildConsumptionRequirements,
   cloneDishes,
   cloneInventory,
@@ -889,23 +890,39 @@ export const useGameStore = create<GameState>()(
         }
 
         const requirements = buildConsumptionRequirements(dish, params.toppings);
+        const averageFreshness = averageFreshnessForRequirements(
+          state.inventory,
+          requirements
+        );
         const updatedInventory = deductIngredients(state.inventory, requirements);
         if (!updatedInventory) {
           soundManager.playError();
           return false;
         }
 
+        let finalQuality: 'perfect' | 'good' | 'burned' =
+          params.quality === 'perfect'
+            ? 'perfect'
+            : params.quality === 'good'
+            ? 'good'
+            : 'burned';
+
+        if (averageFreshness < 35) {
+          finalQuality = 'burned';
+        } else if (averageFreshness < 60 && finalQuality === 'perfect') {
+          finalQuality = 'good';
+        }
+
+        const freshnessPenalty =
+          averageFreshness >= 80 ? 0 : averageFreshness >= 60 ? 5 : averageFreshness >= 35 ? 15 : 35;
+        const finalScore = Math.max(0, params.score - freshnessPenalty);
+
         const prepared: PreparedDish = {
           id: createGameId('prep'),
           dishId: params.dishId,
           name: dish.name,
           emoji: dish.emoji,
-          quality:
-            params.quality === 'perfect'
-              ? 'perfect'
-              : params.quality === 'good'
-              ? 'good'
-              : 'burned',
+          quality: finalQuality,
           preparedAt: Date.now(),
           preparedOnDay: state.day,
           toppings: [...params.toppings],
@@ -913,7 +930,7 @@ export const useGameStore = create<GameState>()(
           targetOrderId: params.orderId,
           targetOrderType: params.orderType,
           targetTableId: params.tableId,
-          score: params.score,
+          score: finalScore,
         };
 
         // Cooking creates a prepared dish. Revenue is awarded only when the
