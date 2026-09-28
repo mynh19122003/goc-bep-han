@@ -39,6 +39,8 @@ import {
   cloneInventory,
   createGameId,
   deductIngredients,
+  mergeDishesWithDefaults,
+  mergeInventoryWithDefaults,
   preparedDishMatchesOrder,
   restaurantLevelFromReputation,
 } from '@/core/gameCore';
@@ -662,8 +664,19 @@ export const useGameStore = create<GameState>()(
         const dish = state.dishes[table.customer.orderDishId];
 
         const patienceRatio = table.customer.currentPatience / table.customer.maxPatience;
-        const tip = Math.round(dish.price * (patienceRatio > 0.5 ? 0.25 : 0.1));
-        const total = dish.price + tip;
+        const qualityMultiplier =
+          prepared.quality === 'perfect' ? 1 : prepared.quality === 'good' ? 0.9 : 0.55;
+        const baseRevenue = Math.round(dish.price * qualityMultiplier);
+        const tipRate =
+          prepared.quality === 'perfect' && patienceRatio > 0.5
+            ? 0.25
+            : prepared.quality === 'good'
+            ? 0.1
+            : 0;
+        const tip = Math.round(dish.price * tipRate * table.customer.tipMultiplier);
+        const total = baseRevenue + tip;
+        const reputationGain =
+          prepared.quality === 'perfect' ? 12 : prepared.quality === 'good' ? 7 : 1;
 
         const updatedDishes = [...state.preparedDishes];
         updatedDishes.splice(preparedIdx, 1);
@@ -676,11 +689,14 @@ export const useGameStore = create<GameState>()(
           id: `rev_${Date.now()}`,
           author: table.customer.name,
           avatar: table.customer.avatar,
-          rating: prepared.quality === 'perfect' ? 5 : 4,
+          rating:
+            prepared.quality === 'perfect' ? 5 : prepared.quality === 'good' ? 4 : 2,
           comment:
             prepared.quality === 'perfect'
               ? `Món ${dish.name} ở đây đỉnh chóp luôn! Nóng hổi và đậm đà tuyệt đối.`
-              : `Món ${dish.name} vị khá ổn, quán phục vụ chu đáo.`,
+              : prepared.quality === 'good'
+              ? `Món ${dish.name} vị khá ổn, quán phục vụ chu đáo.`
+              : `Món ${dish.name} chưa đạt yêu cầu, lần sau quán cố gắng hơn nhé.`,
           dishName: dish.name,
           orderType: 'dine_in',
           timeAgo: 'Vừa xong',
@@ -695,7 +711,23 @@ export const useGameStore = create<GameState>()(
 
         set({
           coins: state.coins + total,
-          rating: Math.min(5, Number((state.rating + 0.03).toFixed(2))),
+          rating: Math.max(
+            1,
+            Math.min(
+              5,
+              Number(
+                (
+                  state.rating +
+                  (prepared.quality === 'perfect'
+                    ? 0.04
+                    : prepared.quality === 'good'
+                    ? 0.01
+                    : -0.08)
+                ).toFixed(2)
+              )
+            )
+          ),
+          reputationPoints: state.reputationPoints + reputationGain,
           dailyRevenue: state.dailyRevenue + total,
           dailyTips: state.dailyTips + tip,
           dailyCustomersServed: state.dailyCustomersServed + 1,
@@ -739,8 +771,15 @@ export const useGameStore = create<GameState>()(
 
         const prepared = state.preparedDishes[preparedIdx];
         const ebikeLevel = state.upgrades.find((u) => u.id === 'delivery_ebike')?.level || 0;
-        const boostedTip = Math.round(order.tip * (1 + ebikeLevel * 0.3));
-        const totalEarned = order.price + boostedTip;
+        const qualityMultiplier =
+          prepared.quality === 'perfect' ? 1 : prepared.quality === 'good' ? 0.9 : 0.55;
+        const boostedTip =
+          prepared.quality === 'burned'
+            ? 0
+            : Math.round(order.tip * (1 + ebikeLevel * 0.3));
+        const totalEarned = Math.round(order.price * qualityMultiplier) + boostedTip;
+        const reputationGain =
+          prepared.quality === 'perfect' ? 10 : prepared.quality === 'good' ? 6 : 0;
 
         const updatedDishes = [...state.preparedDishes];
         updatedDishes.splice(preparedIdx, 1);
@@ -762,7 +801,23 @@ export const useGameStore = create<GameState>()(
 
         set({
           coins: state.coins + totalEarned,
-          rating: Math.min(5, Number((state.rating + 0.04).toFixed(2))),
+          rating: Math.max(
+            1,
+            Math.min(
+              5,
+              Number(
+                (
+                  state.rating +
+                  (prepared.quality === 'perfect'
+                    ? 0.04
+                    : prepared.quality === 'good'
+                    ? 0.01
+                    : -0.08)
+                ).toFixed(2)
+              )
+            )
+          ),
+          reputationPoints: state.reputationPoints + reputationGain,
           dailyRevenue: state.dailyRevenue + totalEarned,
           dailyTips: state.dailyTips + boostedTip,
           dailyDeliveriesCompleted: state.dailyDeliveriesCompleted + 1,
@@ -788,6 +843,22 @@ export const useGameStore = create<GameState>()(
         const state = get();
         const dish = state.dishes[params.dishId];
         if (!dish) return false;
+
+        if (params.orderType === 'dine_in') {
+          const targetTable = state.tables.find((table) => table.id === params.tableId);
+          if (!targetTable?.customer || targetTable.customer.id !== params.orderId) {
+            soundManager.playError();
+            return false;
+          }
+        }
+
+        if (
+          params.orderType === 'delivery' &&
+          !state.deliveryQueue.some((order) => order.id === params.orderId)
+        ) {
+          soundManager.playError();
+          return false;
+        }
 
         const requirements = buildConsumptionRequirements(dish, params.toppings);
         const updatedInventory = deductIngredients(state.inventory, requirements);
@@ -1501,8 +1572,8 @@ export const useGameStore = create<GameState>()(
         const persisted = persistedState || {};
         return {
           ...persisted,
-          inventory: cloneInventory({ ...INITIAL_INGREDIENTS, ...(persisted.inventory || {}) }),
-          dishes: cloneDishes({ ...INITIAL_DISHES, ...(persisted.dishes || {}) }),
+          inventory: mergeInventoryWithDefaults(INITIAL_INGREDIENTS, persisted.inventory),
+          dishes: mergeDishesWithDefaults(INITIAL_DISHES, persisted.dishes),
           reputationPoints: persisted.reputationPoints ?? 25,
           currentNews: persisted.currentNews ?? MARKET_NEWS_LIST[0],
         };
