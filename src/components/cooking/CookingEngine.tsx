@@ -294,6 +294,26 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
     .map((id) => inventory[id]?.vietnameseName || id)
     .join(' + ');
 
+  const requiredToppings = order.requiredToppings || [];
+  const excludedToppings = order.excludedToppings || [];
+  const missingRequired = requiredToppings.filter((id) => !selectedToppings.includes(id));
+  const forbiddenSelected = excludedToppings.filter((id) => selectedToppings.includes(id));
+  const spiceMatches =
+    !recipe.supportsSpiceLevel ||
+    order.spiceLevel === undefined ||
+    currentSpice === order.spiceLevel;
+
+  const techniqueReady =
+    recipe.stationType === 'pan'
+      ? panFlipCount >= 2
+      : recipe.stationType === 'board'
+      ? boardRollProgress >= 100 && boardSliceCount >= 8
+      : recipe.stationType === 'pot'
+      ? potWaterLevel >= 70 && potWaterLevel <= 80
+      : true;
+
+  const canEvaluate = baseAdded && techniqueReady && !isCookingActive;
+
   return (
     <div className="relative flex w-full flex-col gap-2 select-none pb-2 font-baloo">
       {/* ========================================================================= */}
@@ -330,68 +350,101 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
       </div>
 
       {/* ========================================================================= */}
-      {/* 2. ORDER REQUIREMENTS SUMMARY PILL                                        */}
+      {/* 2. LIVE ORDER REQUIREMENTS                                                */}
       {/* ========================================================================= */}
-      <div className="flex flex-wrap items-center justify-between gap-1.5 rounded-xl border border-stone-700 bg-stone-900/55 px-2.5 py-2 text-xs">
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <span className="text-[11px] font-bold text-amber-300">Yêu cầu:</span>
-          {order.requiredToppings && order.requiredToppings.length > 0 ? (
-            order.requiredToppings.map((topId) => {
-              const item = inventory[topId];
-              const asset =
-                (GAME_ASSETS.toppings as Record<string, string>)[topId] ||
-                (GAME_ASSETS.ingredients as Record<string, string>)[topId];
-              return (
-                <span
-                  key={topId}
-                  className="inline-flex items-center gap-1 bg-amber-950/80 border border-amber-500/50 text-amber-100 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-                >
-                  {asset && (
-                    <Image
-                      src={asset}
-                      alt={topId}
-                      width={12}
-                      height={12}
-                      className="w-3 h-3 object-contain"
-                    />
-                  )}
-                  {item ? item.vietnameseName : topId}
-                </span>
-              );
-            })
-          ) : (
-            <span className="text-[10px] text-amber-200/80 italic">
-              Theo khẩu vị tự do
-            </span>
-          )}
-
-          {/* Excluded Toppings */}
-          {order.excludedToppings && order.excludedToppings.length > 0 && (
-            <span className="inline-flex items-center gap-1 ml-1 text-red-300 text-[10px] font-bold">
-              <span>(Tránh:</span>
-              {order.excludedToppings.map((excId) => inventory[excId]?.vietnameseName || excId).join(', ')}
-              <span>)</span>
-            </span>
-          )}
+      <section className="rounded-2xl border border-stone-700 bg-stone-900/55 p-2.5">
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <div>
+            <span className="text-[9px] font-black uppercase tracking-wider text-stone-500">Order hiện tại</span>
+            <p className="text-[11px] font-black text-amber-100">Làm đúng yêu cầu trước khi hoàn thành</p>
+          </div>
+          <span className={`rounded-full border px-2 py-1 text-[9px] font-black ${
+            missingRequired.length === 0 && forbiddenSelected.length === 0 && spiceMatches
+              ? 'border-emerald-500/30 bg-emerald-950/45 text-emerald-300'
+              : 'border-amber-500/25 bg-amber-950/40 text-amber-300'
+          }`}>
+            {missingRequired.length === 0 && forbiddenSelected.length === 0 && spiceMatches
+              ? 'Đang đúng yêu cầu'
+              : 'Cần kiểm tra'}
+          </span>
         </div>
 
-        {/* Spice Requirement */}
-        {recipe.supportsSpiceLevel && (
-          <div className="flex items-center gap-1 text-[11px] font-bold text-amber-200 shrink-0">
-            <GameAssetIcon name="chilli" size={14} />
-            <span>
-              Cần cay:{' '}
-              <strong className="text-red-400">
-                {order.spiceLevel !== undefined
-                  ? order.spiceLevel === 0
-                    ? 'Cấp 0 (Không Cay)'
-                    : `Cấp ${order.spiceLevel}`
-                  : 'Tự Chọn'}
-              </strong>
-            </span>
+        <div className="grid gap-2 sm:grid-cols-3">
+          <div className="rounded-xl border border-amber-500/20 bg-black/20 p-2">
+            <span className="text-[9px] font-black uppercase text-amber-300">Cần có</span>
+            <div className="mt-1 flex min-h-[28px] flex-wrap gap-1">
+              {requiredToppings.length > 0 ? (
+                requiredToppings.map((topId) => {
+                  const item = inventory[topId];
+                  const asset =
+                    (GAME_ASSETS.toppings as Record<string, string>)[topId] ||
+                    (GAME_ASSETS.ingredients as Record<string, string>)[topId];
+                  const selected = selectedToppings.includes(topId);
+                  return (
+                    <span
+                      key={topId}
+                      className={`inline-flex items-center gap-1 rounded-lg border px-1.5 py-1 text-[9px] font-black ${
+                        selected
+                          ? 'border-emerald-500/30 bg-emerald-950/45 text-emerald-300'
+                          : 'border-amber-500/25 bg-amber-950/35 text-amber-100'
+                      }`}
+                    >
+                      {asset && (
+                        <span className="relative h-3.5 w-3.5">
+                          <Image src={asset} alt="" fill sizes="14px" className="object-contain" />
+                        </span>
+                      )}
+                      {item?.vietnameseName || topId}
+                    </span>
+                  );
+                })
+              ) : (
+                <span className="text-[9px] font-bold text-stone-500">Không bắt buộc topping</span>
+              )}
+            </div>
           </div>
-        )}
-      </div>
+
+          <div className="rounded-xl border border-red-500/15 bg-black/20 p-2">
+            <span className="text-[9px] font-black uppercase text-red-300">Không cho</span>
+            <div className="mt-1 flex min-h-[28px] flex-wrap gap-1">
+              {excludedToppings.length > 0 ? (
+                excludedToppings.map((topId) => (
+                  <span
+                    key={topId}
+                    className={`rounded-lg border px-1.5 py-1 text-[9px] font-black ${
+                      selectedToppings.includes(topId)
+                        ? 'border-red-500/50 bg-red-950/60 text-red-200'
+                        : 'border-stone-700 bg-stone-950/40 text-stone-400'
+                    }`}
+                  >
+                    {inventory[topId]?.vietnameseName || topId}
+                  </span>
+                ))
+              ) : (
+                <span className="text-[9px] font-bold text-stone-500">Không có nguyên liệu cấm</span>
+              )}
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-red-500/15 bg-black/20 p-2">
+            <span className="text-[9px] font-black uppercase text-red-300">Độ cay</span>
+            <div className="mt-1 flex min-h-[28px] items-center gap-1.5">
+              {recipe.supportsSpiceLevel ? (
+                <>
+                  <GameAssetIcon name="chilli" size={15} />
+                  <span className={`text-[10px] font-black ${
+                    spiceMatches ? 'text-emerald-300' : 'text-red-300'
+                  }`}>
+                    Khách cần {order.spiceLevel === undefined ? 'tự chọn' : `cấp ${order.spiceLevel}`}
+                  </span>
+                </>
+              ) : (
+                <span className="text-[9px] font-bold text-stone-500">Món không dùng cấp cay</span>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* ========================================================================= */}
       {/* 3. COOKING WORKSPACE: COOKWARE + BOUNDED INGREDIENT OVERLAY               */}
@@ -529,72 +582,97 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
         </div>
 
         {recipe.stationType === 'pan' && (
-          <div className="mt-2 w-full max-w-[340px] flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handlePanFlip}
-              className="flex-1 h-11 rounded-xl border border-amber-400/50 bg-amber-700/80 hover:bg-amber-600 text-white font-black text-xs active:scale-95 transition-all"
-            >
-              Lật chảo ({panFlipCount}/2)
-            </button>
-            <span className="text-[10px] text-amber-200/80 font-bold text-right max-w-[130px]">
-              Vuốt chảo lên hoặc bấm nút ít nhất 2 lần
-            </span>
+          <div className="mt-2 w-full max-w-[380px] rounded-xl border border-amber-500/20 bg-amber-950/20 p-2">
+            <div className="flex items-center gap-2">
+              <GameButton
+                fullWidth
+                compact
+                tone={panFlipCount >= 2 ? 'success' : 'primary'}
+                onClick={handlePanFlip}
+                disabled={!baseAdded}
+              >
+                Lật chảo {panFlipCount}/2
+              </GameButton>
+              <span className={`shrink-0 rounded-lg border px-2 py-1 text-[9px] font-black ${
+                panFlipCount >= 2
+                  ? 'border-emerald-500/25 bg-emerald-950/45 text-emerald-300'
+                  : 'border-amber-500/20 bg-black/25 text-amber-300'
+              }`}>
+                {panFlipCount >= 2 ? 'Đạt' : 'Chưa đủ'}
+              </span>
+            </div>
+            <p className="mt-1.5 text-center text-[9px] font-bold text-amber-200/60">Vuốt chảo lên hoặc bấm nút để lật</p>
           </div>
         )}
 
         {recipe.stationType === 'board' && (
-          <div className="mt-2 w-full max-w-[420px] grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={handleBoardRoll}
-              disabled={boardRollProgress >= 100}
-              className="h-11 rounded-xl border border-emerald-400/50 bg-emerald-800/80 disabled:opacity-50 text-white font-black text-xs active:scale-95"
-            >
-              Cuộn kimbap ({boardRollProgress}%)
-            </button>
-            <button
-              type="button"
-              onClick={handleBoardSlice}
-              disabled={boardRollProgress < 100 || boardSliceCount >= 8}
-              className="h-11 rounded-xl border border-amber-400/50 bg-amber-700/80 disabled:opacity-50 text-white font-black text-xs active:scale-95"
-            >
-              Cắt khoanh ({boardSliceCount}/8)
-            </button>
-            <span className="col-span-2 text-[10px] text-emerald-200/80 font-bold text-center">
-              Vuốt lên để cuộn • Khi đủ 100%, vuốt ngang để cắt
-            </span>
+          <div className="mt-2 w-full max-w-[420px] rounded-xl border border-emerald-500/20 bg-emerald-950/15 p-2">
+            <div className="grid grid-cols-2 gap-2">
+              <GameButton
+                compact
+                tone={boardRollProgress >= 100 ? 'success' : 'neutral'}
+                onClick={handleBoardRoll}
+                disabled={!baseAdded || boardRollProgress >= 100}
+              >
+                Cuộn {boardRollProgress}%
+              </GameButton>
+              <GameButton
+                compact
+                tone={boardSliceCount >= 8 ? 'success' : 'primary'}
+                onClick={handleBoardSlice}
+                disabled={boardRollProgress < 100 || boardSliceCount >= 8}
+              >
+                Cắt {boardSliceCount}/8
+              </GameButton>
+            </div>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <div className="h-1.5 overflow-hidden rounded-full bg-stone-800">
+                <div className="h-full bg-emerald-500 transition-all" style={{ width: `${boardRollProgress}%` }} />
+              </div>
+              <div className="h-1.5 overflow-hidden rounded-full bg-stone-800">
+                <div className="h-full bg-amber-500 transition-all" style={{ width: `${Math.min(100, (boardSliceCount / 8) * 100)}%` }} />
+              </div>
+            </div>
+            <p className="mt-1.5 text-center text-[9px] font-bold text-emerald-200/60">Vuốt lên để cuộn • Vuốt ngang để cắt</p>
           </div>
         )}
 
         {recipe.stationType === 'pot' && (
-          <div className="mt-2 w-full max-w-[360px] rounded-xl border border-blue-400/30 bg-blue-950/30 p-2">
-            <div className="flex items-center justify-between gap-2">
+          <div className="mt-2 w-full max-w-[380px] rounded-xl border border-blue-400/20 bg-blue-950/20 p-2">
+            <div className="mb-1.5 flex items-center justify-between gap-2">
+              <div>
+                <span className="text-[9px] font-black uppercase text-blue-300">Mực nước</span>
+                <p className="text-xs font-black text-blue-100">{potWaterLevel}%</p>
+              </div>
+              <span className={`rounded-lg border px-2 py-1 text-[9px] font-black ${
+                techniqueReady
+                  ? 'border-emerald-500/25 bg-emerald-950/45 text-emerald-300'
+                  : 'border-blue-500/20 bg-black/25 text-blue-300'
+              }`}>
+                Chuẩn 70–80%
+              </span>
+            </div>
+            <div className="grid grid-cols-[44px_minmax(0,1fr)_44px] items-center gap-2">
               <button
                 type="button"
                 onClick={() => setPotWaterLevel((value) => Math.max(0, value - 5))}
-                className="w-11 h-11 rounded-xl bg-stone-800 border border-stone-600 text-white font-black"
+                className="h-11 rounded-xl border border-stone-600 bg-stone-800 text-xs font-black text-white transition active:scale-95"
               >
-                -5
+                −5
               </button>
-              <div className="flex-1 text-center">
-                <div className="text-xs font-black text-blue-200">Mực nước {potWaterLevel}%</div>
-                <div className="mt-1 h-2 rounded-full bg-stone-950 overflow-hidden border border-blue-500/30">
-                  <div
-                    className={`h-full transition-all ${
-                      potWaterLevel >= 70 && potWaterLevel <= 80
-                        ? 'bg-emerald-500'
-                        : 'bg-blue-500'
-                    }`}
-                    style={{ width: `${potWaterLevel}%` }}
-                  />
-                </div>
-                <div className="text-[10px] mt-1 text-blue-300/80">Chuẩn: 70–80%</div>
+              <div className="relative h-3 overflow-hidden rounded-full border border-blue-500/20 bg-stone-950">
+                <div className="absolute inset-y-0 left-[70%] w-[10%] bg-emerald-500/20" />
+                <div
+                  className={`h-full rounded-full transition-all ${
+                    techniqueReady ? 'bg-emerald-500' : 'bg-blue-500'
+                  }`}
+                  style={{ width: `${potWaterLevel}%` }}
+                />
               </div>
               <button
                 type="button"
                 onClick={() => setPotWaterLevel((value) => Math.min(100, value + 5))}
-                className="w-11 h-11 rounded-xl bg-blue-700 border border-blue-400 text-white font-black"
+                className="h-11 rounded-xl border border-blue-400 bg-blue-700 text-xs font-black text-white transition active:scale-95"
               >
                 +5
               </button>
@@ -606,15 +684,15 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
       {/* ========================================================================= */}
       {/* 4. BASE INGREDIENT & SPICE LEVEL CONTROLS (Touch Targets >= 44px)        */}
       {/* ========================================================================= */}
-      <div className="flex w-full flex-wrap items-center justify-between gap-2 rounded-2xl border border-stone-700 bg-stone-900/55 p-2">
+      <div className="grid w-full gap-2 rounded-2xl border border-stone-700 bg-stone-900/55 p-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
         {/* Base Ingredient Toggle Button */}
         <button
           type="button"
           onClick={handleToggleBase}
-          className={`flex-1 min-w-[160px] h-11 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow cursor-pointer active:scale-95 ${
+          className={`h-11 w-full px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow cursor-pointer active:scale-95 ${
             baseAdded
               ? 'bg-emerald-700 hover:bg-emerald-600 text-white border-2 border-emerald-400'
-              : 'bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 text-white border-2 border-amber-300 animate-pulse'
+              : 'bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 text-white border-2 border-amber-300'
           }`}
         >
           <GameAssetIcon
@@ -628,7 +706,7 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
 
         {/* Spice Level Stepper (Touch targets >= 44px) */}
         {recipe.supportsSpiceLevel && (
-          <div className="flex items-center gap-1 bg-stone-950 p-1 rounded-xl border border-amber-600/50 shadow">
+          <div className="grid grid-cols-[44px_minmax(76px,1fr)_44px] items-center gap-1 rounded-xl border border-amber-600/35 bg-stone-950 p-1 shadow">
             <button
               type="button"
               onClick={handleSpiceDecrease}
@@ -669,7 +747,7 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
           onAddTopping={handleAddTopping}
           onRemoveTopping={handleRemoveTopping}
           inventory={inventory}
-          disabled={isCookingActive}
+          disabled={!canEvaluate}
         />
       </div>
 
@@ -695,68 +773,83 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
           iconSrc={GAME_ASSETS.cooking.bowl}
           className="flex-1"
         >
-          {isCookingActive ? 'Đang nấu món...' : 'Hoàn thành món'}
+          {isCookingActive
+            ? 'Đang nấu món...'
+            : !baseAdded
+            ? 'Thêm nguyên liệu nền'
+            : !techniqueReady
+            ? 'Hoàn tất thao tác nấu'
+            : 'Hoàn thành món'}
         </GameButton>
       </div>
 
       {/* ========================================================================= */}
-      {/* 7. EVALUATION & QUALITY DIALOG MODAL                                      */}
+      {/* 7. DISH RESULT                                                           */}
       {/* ========================================================================= */}
       <AnimatePresence>
         {validationResult && (
-          <div className="fixed inset-0 z-[120] flex items-center justify-center p-3 bg-stone-950/80 backdrop-blur-sm select-none font-baloo">
+          <div className="fixed inset-0 z-[120] flex items-end justify-center bg-black/78 p-0 backdrop-blur-sm sm:items-center sm:p-3">
             <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 15 }}
+              initial={{ scale: 0.96, opacity: 0, y: 28 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 15 }}
-              className="relative w-full max-w-sm bg-stone-900 border-2 border-amber-500/80 rounded-3xl p-4 sm:p-5 shadow-2xl text-center text-stone-100 flex flex-col items-center"
+              exit={{ scale: 0.96, opacity: 0, y: 28 }}
+              className="w-full max-w-sm rounded-t-3xl border-t border-amber-500/40 bg-[#191310]/98 p-4 text-stone-100 shadow-2xl sm:rounded-3xl sm:border"
             >
-              {/* Quality Badge Asset */}
-              <div className="w-16 h-16 relative mb-2">
-                <Image
-                  src={
-                    validationResult.quality === 'perfect' ||
-                    validationResult.quality === 'good'
-                      ? GAME_ASSETS.props.heart_icon
-                      : GAME_ASSETS.props.rice_bowl
-                  }
-                  alt="Kết quả"
-                  width={64}
-                  height={64}
-                  className="object-contain drop-shadow"
-                />
-              </div>
-
-              <h3
-                className={`text-lg font-black uppercase ${
+              <div className="flex items-center gap-3">
+                <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border ${
                   validationResult.quality === 'perfect'
-                    ? 'text-amber-300'
+                    ? 'border-amber-400/35 bg-amber-950/45'
                     : validationResult.quality === 'good'
-                    ? 'text-emerald-300'
-                    : 'text-amber-200'
-                }`}
-              >
-                {validationResult.quality === 'perfect'
-                  ? 'Hoàn Hảo! Đúng Chuẩn Vị'
-                  : validationResult.quality === 'good'
-                  ? 'Món Rất Ngon!'
-                  : 'Tạm Được'}
-              </h3>
-
-              <p className="text-xs text-stone-300 my-1 font-bold">
-                {validationResult.feedbackText}
-              </p>
-
-              <div className="my-2 bg-stone-950/90 border border-amber-500/40 rounded-2xl p-2.5 w-full flex items-center justify-around text-xs">
-                <div>
-                  <span className="text-[10px] text-stone-400 block font-bold">Điểm</span>
-                  <span className="text-base font-black text-amber-300">
-                    {validationResult.score}/100
+                    ? 'border-emerald-400/30 bg-emerald-950/35'
+                    : validationResult.quality === 'ok'
+                    ? 'border-orange-400/30 bg-orange-950/30'
+                    : 'border-red-500/30 bg-red-950/35'
+                }`}>
+                  <span className="relative h-10 w-10">
+                    <Image
+                      src={
+                        validationResult.quality === 'perfect' || validationResult.quality === 'good'
+                          ? GAME_ASSETS.props.heart_icon
+                          : GAME_ASSETS.props.rice_bowl
+                      }
+                      alt=""
+                      fill
+                      sizes="40px"
+                      className="object-contain"
+                    />
                   </span>
                 </div>
-                <div>
-                  <span className="text-[10px] text-stone-400 block font-bold">Giá trị dự kiến</span>
-                  <span className="text-base font-black text-emerald-400">
+                <div className="min-w-0 flex-1">
+                  <span className="text-[9px] font-black uppercase tracking-wider text-stone-500">Kết quả món ăn</span>
+                  <h3 className={`text-base font-black ${
+                    validationResult.quality === 'perfect'
+                      ? 'text-amber-300'
+                      : validationResult.quality === 'good'
+                      ? 'text-emerald-300'
+                      : validationResult.quality === 'ok'
+                      ? 'text-orange-300'
+                      : 'text-red-300'
+                  }`}>
+                    {validationResult.quality === 'perfect'
+                      ? 'Hoàn hảo'
+                      : validationResult.quality === 'good'
+                      ? 'Rất ngon'
+                      : validationResult.quality === 'ok'
+                      ? 'Tạm ổn'
+                      : 'Chưa đạt'}
+                  </h3>
+                  <p className="mt-0.5 text-[10px] leading-relaxed text-stone-400">{validationResult.feedbackText}</p>
+                </div>
+              </div>
+
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <div className="rounded-xl border border-stone-700 bg-black/25 p-2.5 text-center">
+                  <span className="block text-[9px] font-black uppercase text-stone-500">Điểm</span>
+                  <strong className="text-lg font-black text-amber-300">{validationResult.score}/100</strong>
+                </div>
+                <div className="rounded-xl border border-stone-700 bg-black/25 p-2.5 text-center">
+                  <span className="block text-[9px] font-black uppercase text-stone-500">Giá trị dự kiến</span>
+                  <strong className="text-lg font-black text-emerald-300">
                     +{Math.round(
                       (order.price || 50) *
                         (validationResult.quality === 'perfect'
@@ -764,21 +857,49 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
                           : validationResult.quality === 'good'
                           ? 1.15
                           : validationResult.quality === 'ok'
-                          ? 1.0
+                          ? 1
                           : 0.6)
-                    )}{' '}
-                    Xu
-                  </span>
+                    )} Xu
+                  </strong>
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={handleConfirmResult}
-                className="w-full mt-2 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-green-600 hover:brightness-110 text-white font-black text-sm shadow-lg border border-emerald-300 active:scale-95 cursor-pointer"
-              >
-                Đặt Lên Khay Giữ Nóng
-              </button>
+              {(validationResult.missingToppings.length > 0 ||
+                validationResult.wrongToppings.length > 0 ||
+                !validationResult.isSpiceCorrect) && (
+                <div className="mt-3 rounded-xl border border-red-500/20 bg-red-950/20 p-2.5">
+                  <span className="text-[9px] font-black uppercase text-red-300">Cần xem lại</span>
+                  <div className="mt-1 space-y-1 text-[10px] font-bold text-stone-300">
+                    {validationResult.missingToppings.length > 0 && (
+                      <p>• Thiếu: {validationResult.missingToppings.map((id) => inventory[id]?.vietnameseName || id).join(', ')}</p>
+                    )}
+                    {validationResult.wrongToppings.length > 0 && (
+                      <p>• Không nên có: {validationResult.wrongToppings.map((id) => inventory[id]?.vietnameseName || id).join(', ')}</p>
+                    )}
+                    {!validationResult.isSpiceCorrect && <p>• Cấp cay chưa đúng yêu cầu khách</p>}
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                {(validationResult.quality === 'ok' || validationResult.quality === 'fail') && (
+                  <GameButton
+                    fullWidth
+                    tone="neutral"
+                    onClick={() => setValidationResult(null)}
+                  >
+                    Chỉnh lại
+                  </GameButton>
+                )}
+                <GameButton
+                  fullWidth
+                  tone="success"
+                  onClick={handleConfirmResult}
+                  className={validationResult.quality === 'perfect' || validationResult.quality === 'good' ? 'col-span-2' : ''}
+                >
+                  Đặt lên khay
+                </GameButton>
+              </div>
             </motion.div>
           </div>
         )}
