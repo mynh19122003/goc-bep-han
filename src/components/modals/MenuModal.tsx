@@ -2,11 +2,12 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/stores/useGameStore';
 import { DishCategory } from '@/types/game';
-import { GAME_ASSETS } from '@/config/gameAssets';
-import { GameAssetIcon } from '@/components/ui/game/GameAssetIcon';
+import { GAME_ASSETS } from '@/game/assets/gameAssets';
+import { restaurantLevelFromReputation } from '@/core/gameCore';
+import { GameModal } from '@/components/ui/game/GameModal';
+import { GameButton } from '@/components/ui/game/GameButton';
 
 export const MenuModal: React.FC = () => {
   const {
@@ -15,6 +16,7 @@ export const MenuModal: React.FC = () => {
     dishes,
     coins,
     inventory,
+    reputationPoints,
     unlockDish,
   } = useGameStore();
 
@@ -22,221 +24,136 @@ export const MenuModal: React.FC = () => {
 
   if (activeModal !== 'menu') return null;
 
-  const dishList = Object.values(dishes).filter((d) => d.category === activeCategory);
+  const level = restaurantLevelFromReputation(reputationPoints);
+  const dishList = Object.values(dishes).filter((dish) => dish.category === activeCategory);
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-50 bg-stone-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 select-none font-baloo">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9, y: 15 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.9, y: 15 }}
-          className="bg-stone-900 rounded-3xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl border-4 border-amber-600/60 relative flex flex-col max-h-[90vh] text-stone-100"
-        >
-          {/* Close button (Phase 3 PNG: ui_close_dong.png) */}
+    <GameModal
+      title="Thực đơn"
+      subtitle="Mở khóa món và xem chi phí nguyên liệu"
+      onClose={() => setActiveModal('none')}
+      maxWidth="max-w-3xl"
+      icon={<span className="relative h-9 w-9"><Image src={GAME_ASSETS.navigation.menu} alt="" fill sizes="36px" className="object-contain" /></span>}
+    >
+      <div className="mb-3 flex items-center gap-2">
+        {[
+          { id: 'main', label: 'Món ăn' },
+          { id: 'drink', label: 'Đồ uống' },
+        ].map((tab) => (
           <button
+            key={tab.id}
             type="button"
-            onClick={() => setActiveModal('none')}
-            title="Đóng thực đơn"
-            className="absolute top-4 right-4 w-8 h-8 rounded-xl overflow-hidden cursor-pointer transition-transform active:scale-90 z-20"
+            onClick={() => setActiveCategory(tab.id as DishCategory)}
+            className={`min-h-[40px] rounded-xl border px-4 text-[11px] font-black transition active:scale-95 ${
+              activeCategory === tab.id
+                ? 'border-amber-300/50 bg-amber-600/70 text-white'
+                : 'border-stone-700 bg-stone-900 text-stone-400 hover:bg-stone-800'
+            }`}
           >
-            <Image
-              src="/assets/phase3-ui/ui_close_dong.png"
-              alt="Đóng"
-              width={32}
-              height={32}
-              className="w-full h-full object-contain pointer-events-none drop-shadow"
-            />
+            {tab.label}
           </button>
+        ))}
+      </div>
 
-          {/* Modal Header (Phase 3 PNG: tab_menu_thuc_don.png) */}
-          <div className="flex items-center gap-2.5 mb-4 pr-10">
-            <div className="w-11 h-11 rounded-2xl bg-amber-500/20 border border-amber-400/40 p-1 flex items-center justify-center shrink-0">
-              <Image
-                src="/assets/phase3-ui/tab_menu_thuc_don.png"
-                alt="Thực đơn"
-                width={40}
-                height={40}
-                className="w-full h-full object-contain pointer-events-none"
-              />
-            </div>
-            <div>
-              <h2 className="text-base sm:text-lg font-black text-amber-200 tracking-wide uppercase">
-                THỰC ĐƠN & MỞ KHÓA MÓN
-              </h2>
-              <p className="text-[11px] text-amber-300/80 font-bold">
-                Khám phá công thức món Hàn & mở rộng menu quán
-              </p>
-            </div>
-          </div>
+      <div className="space-y-2.5">
+        {dishList.map((dish) => {
+          const asset = (GAME_ASSETS.dishes as Record<string, string>)[dish.id];
+          const ingredientCost = Object.entries(dish.requiredIngredients).reduce(
+            (sum, [ingredientId, qty]) => sum + (inventory[ingredientId]?.baseCost || 0) * (qty || 0),
+            0
+          );
+          const margin = dish.price - ingredientCost;
+          const meetsLevel = level >= dish.unlockLevel;
+          const canUnlock = !dish.isUnlocked && meetsLevel && coins >= dish.unlockCost;
 
-          {/* Category Tabs */}
-          <div className="flex items-center gap-2 mb-4 border-b border-stone-800 pb-2">
-            {[
-              { id: 'main', label: 'Món Nóng Bếp Hàn' },
-              { id: 'drink', label: 'Đồ Uống Giải Khát' },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveCategory(tab.id as DishCategory)}
-                className={`py-1.5 px-4 rounded-xl font-black text-xs sm:text-sm transition-all cursor-pointer ${
-                  activeCategory === tab.id
-                    ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md border border-amber-300'
-                    : 'bg-stone-800 hover:bg-stone-750 text-stone-400 border border-stone-700'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Dish List */}
-          <div className="overflow-y-auto space-y-3 pr-1 flex-1">
-            {dishList.map((dish) => {
-              const canUnlock = coins >= dish.unlockCost && !dish.isUnlocked;
-              const dishAsset =
-                (GAME_ASSETS.dishes as Record<string, string>)[dish.id] ||
-                GAME_ASSETS.dishes.ramyeon;
-
-              return (
-                <div
-                  key={dish.id}
-                  className={`border-2 rounded-2xl p-3 sm:p-4 transition-all ${
-                    dish.isUnlocked
-                      ? 'bg-stone-950/70 border-amber-500/40 shadow-md'
-                      : 'bg-stone-950/40 border-dashed border-stone-800 opacity-80'
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    {/* Dish Icon & Title */}
-                    <div className="flex items-start gap-3">
-                      <div className="w-14 h-14 p-1.5 bg-stone-800 rounded-2xl border border-amber-500/30 shadow-inner flex items-center justify-center shrink-0">
-                        <Image
-                          src={dishAsset}
-                          alt={dish.name}
-                          width={44}
-                          height={44}
-                          className="w-full h-full object-contain pointer-events-none drop-shadow"
-                        />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-black text-amber-100 text-sm sm:text-base">
-                            {dish.name}
-                          </h4>
-                          <span className="text-[11px] font-bold text-amber-300 bg-amber-950/80 border border-amber-500/40 px-2 py-0.5 rounded-md">
-                            {dish.koreanName}
-                          </span>
-                        </div>
-                        <p className="text-xs text-stone-300 mt-0.5">{dish.description}</p>
-
-                        <div className="flex items-center gap-3 mt-2 text-xs font-semibold">
-                          <span className="text-amber-400 flex items-center gap-1 font-black">
-                            <GameAssetIcon name="coin" size={14} />
-                            Giá bán: {dish.price} Xu
-                          </span>
-                          <span className="text-stone-600">|</span>
-                          <span className="text-stone-400 flex items-center gap-1">
-                            <GameAssetIcon name="clock" size={14} />
-                            Nấu trong: {dish.prepTime}s
-                          </span>
-                        </div>
-                      </div>
+          return (
+            <article
+              key={dish.id}
+              className={`rounded-2xl border p-3 ${
+                dish.isUnlocked
+                  ? 'border-amber-500/20 bg-stone-900/65'
+                  : 'border-stone-700 bg-black/20'
+              }`}
+            >
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center self-start rounded-xl border border-amber-500/15 bg-black/20 p-1 sm:self-auto">
+                  {asset ? (
+                    <div className="relative h-12 w-12">
+                      <Image src={asset} alt={dish.name} fill sizes="48px" className="object-contain" />
                     </div>
+                  ) : (
+                    <span className="text-center text-[8px] font-black text-red-300">Thiếu asset</span>
+                  )}
+                </div>
 
-                    {/* Unlock Action or Status */}
-                    <div className="shrink-0">
-                      {dish.isUnlocked ? (
-                        <div className="h-8 aspect-[375/199] relative flex items-center justify-center">
-                          <Image
-                            src="/assets/phase3-ui/status_perfect_hoan_hao.png"
-                            alt="Đang Phục Vụ"
-                            width={375}
-                            height={199}
-                            className="h-full w-auto object-contain pointer-events-none drop-shadow-sm"
-                          />
-                        </div>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => unlockDish(dish.id)}
-                          disabled={!canUnlock}
-                          title={`Mở khóa món ${dish.name} (${dish.unlockCost} Xu)`}
-                          className={`h-8 sm:h-9 px-2 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                            canUnlock
-                              ? 'bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400 active:scale-95'
-                              : 'bg-stone-800/80 border border-stone-700 opacity-60 cursor-not-allowed'
-                          }`}
-                        >
-                          <div className="h-6 w-auto aspect-[593/295] relative">
-                            <Image
-                              src={canUnlock ? '/assets/phase3-ui/btn_open_mo.png' : '/assets/phase3-ui/btn_lock_khoa.png'}
-                              alt={canUnlock ? 'Mở Khóa' : 'Khóa'}
-                              width={593}
-                              height={295}
-                              className="h-full w-auto object-contain pointer-events-none"
-                            />
-                          </div>
-                          <span className="text-xs font-black text-amber-300">
-                            {dish.unlockCost} Xu
-                          </span>
-                        </button>
-                      )}
-                    </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <h3 className="text-xs font-black text-amber-100 sm:text-sm">{dish.name}</h3>
+                    {dish.koreanName && (
+                      <span className="rounded-full border border-stone-700 bg-stone-950/60 px-2 py-0.5 text-[9px] font-bold text-stone-400">
+                        {dish.koreanName}
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-0.5 text-[10px] leading-relaxed text-stone-400">{dish.description}</p>
+
+                  <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-black">
+                    <span className="text-amber-300">Bán {dish.price} Xu</span>
+                    <span className="text-stone-500">Chi phí {ingredientCost} Xu</span>
+                    <span className={margin >= 0 ? 'text-emerald-300' : 'text-red-300'}>
+                      Lãi {margin >= 0 ? '+' : ''}{margin} Xu
+                    </span>
+                    <span className="text-stone-400">{dish.prepTime}s</span>
                   </div>
 
-                  {/* Required Ingredients */}
-                  <div className="mt-3 pt-2.5 border-t border-stone-800 flex items-center gap-2 flex-wrap">
-                    <span className="text-[10px] font-bold text-amber-300 uppercase tracking-wider">
-                      Nguyên liệu cần:
-                    </span>
-                    {Object.entries(dish.requiredIngredients).map(([ingId, qty]) => {
-                      const ing = inventory[ingId];
-                      const ingAsset =
-                        (GAME_ASSETS.ingredients as Record<string, string>)[ingId] ||
-                        (GAME_ASSETS.toppings as Record<string, string>)[ingId];
-
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {Object.entries(dish.requiredIngredients).map(([id, qty]) => {
+                      const item = inventory[id];
+                      const ingredientAsset =
+                        (GAME_ASSETS.ingredients as Record<string, string>)[id] ||
+                        (GAME_ASSETS.toppings as Record<string, string>)[id];
                       return (
                         <span
-                          key={ingId}
-                          className="inline-flex items-center gap-1 text-[11px] font-bold bg-stone-900 border border-stone-700 px-2 py-0.5 rounded-lg text-stone-200"
+                          key={id}
+                          className="inline-flex items-center gap-1 rounded-lg border border-stone-700 bg-black/20 px-2 py-1 text-[9px] font-bold text-stone-300"
                         >
-                          {ingAsset && (
-                            <Image
-                              src={ingAsset}
-                              alt={ing?.vietnameseName || ingId}
-                              width={14}
-                              height={14}
-                              className="w-3.5 h-3.5 object-contain"
-                            />
+                          {ingredientAsset && (
+                            <span className="relative h-4 w-4">
+                              <Image src={ingredientAsset} alt="" fill sizes="16px" className="object-contain" />
+                            </span>
                           )}
-                          <span>{ing?.vietnameseName}</span>
-                          <span className="text-amber-400 font-black">x{qty}</span>
+                          {item?.vietnameseName || id} ×{qty}
                         </span>
                       );
                     })}
                   </div>
+                </div>
 
-                  {/* Cooking Steps Guide */}
-                  {dish.isUnlocked && dish.recipeSteps && (
-                    <div className="mt-2.5 bg-amber-950/40 border border-amber-600/30 rounded-xl p-2.5 text-xs text-stone-200">
-                      <span className="font-black text-amber-300 block mb-1">
-                        Quy trình chế biến chuẩn:
-                      </span>
-                      <ol className="list-decimal list-inside space-y-0.5 text-[11px] text-amber-100/80">
-                        {dish.recipeSteps.map((step, idx) => (
-                          <li key={idx}>{step}</li>
-                        ))}
-                      </ol>
-                    </div>
+                <div className="shrink-0 sm:self-center">
+                  {dish.isUnlocked ? (
+                    <span className="inline-flex min-h-[40px] w-full items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-950/45 px-3 text-[10px] font-black text-emerald-300 sm:w-auto">
+                      Đang bán
+                    </span>
+                  ) : (
+                    <GameButton fullWidth compact disabled={!canUnlock} onClick={() => unlockDish(dish.id)} className="sm:w-auto">
+                      {meetsLevel ? `${dish.unlockCost} Xu` : `Cấp ${dish.unlockLevel}`}
+                    </GameButton>
                   )}
                 </div>
-              );
-            })}
-          </div>
-        </motion.div>
+              </div>
+
+              {dish.isUnlocked && dish.recipeSteps?.length > 0 && (
+                <details className="mt-2 rounded-xl border border-stone-800 bg-black/20 px-3 py-2">
+                  <summary className="cursor-pointer text-[10px] font-black text-amber-300">Xem quy trình nấu</summary>
+                  <ol className="mt-2 list-decimal space-y-1 pl-4 text-[10px] leading-relaxed text-stone-400">
+                    {dish.recipeSteps.map((step, index) => <li key={index}>{step}</li>)}
+                  </ol>
+                </details>
+              )}
+            </article>
+          );
+        })}
       </div>
-    </AnimatePresence>
+    </GameModal>
   );
 };

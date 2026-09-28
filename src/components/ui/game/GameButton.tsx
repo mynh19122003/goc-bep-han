@@ -1,56 +1,61 @@
 'use client';
 
 import React from 'react';
-import { soundManager } from '@/utils/audio';
+import Image from 'next/image';
+
+type GameButtonTone = 'primary' | 'success' | 'danger' | 'neutral' | 'ghost';
 
 interface GameButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'wood' | 'red' | 'amber' | 'emerald' | 'cream';
-  size?: 'sm' | 'md' | 'lg';
-  children: React.ReactNode;
+  iconSrc?: string;
+  tone?: GameButtonTone;
+  compact?: boolean;
+  fullWidth?: boolean;
 }
 
+const toneMap: Record<GameButtonTone, string> = {
+  primary:
+    'bg-gradient-to-b from-amber-500 to-orange-700 border-amber-300/70 text-white hover:brightness-110',
+  success:
+    'bg-gradient-to-b from-emerald-500 to-emerald-700 border-emerald-300/70 text-white hover:brightness-110',
+  danger:
+    'bg-gradient-to-b from-red-600 to-red-800 border-red-300/60 text-white hover:brightness-110',
+  neutral:
+    'bg-stone-800 border-stone-600 text-stone-100 hover:bg-stone-700',
+  ghost:
+    'bg-stone-950/45 border-stone-600/70 text-stone-200 hover:bg-stone-900/70',
+};
+
 export const GameButton: React.FC<GameButtonProps> = ({
-  variant = 'amber',
-  size = 'md',
-  children,
-  onClick,
-  disabled,
+  iconSrc,
+  tone = 'primary',
+  compact = false,
+  fullWidth = false,
   className = '',
+  children,
+  disabled,
   ...props
 }) => {
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!disabled) {
-      soundManager.playClick();
-      if (onClick) onClick(e);
-    }
-  };
-
-  const variantStyles = {
-    wood: 'bg-gradient-to-b from-[#8C5B3F] to-[#5C3826] text-amber-100 border-[#451A03] hover:from-[#9B6647] shadow-[0_4px_0_#381704]',
-    red: 'bg-gradient-to-b from-red-500 to-red-700 text-white border-red-800 hover:from-red-400 shadow-[0_4px_0_#7f1d1d]',
-    amber: 'bg-gradient-to-b from-amber-400 to-orange-500 text-stone-900 border-amber-600 hover:from-amber-300 shadow-[0_4px_0_#9a3412]',
-    emerald: 'bg-gradient-to-b from-emerald-500 to-green-700 text-white border-green-800 hover:from-emerald-400 shadow-[0_4px_0_#14532d]',
-    cream: 'bg-gradient-to-b from-[#FFFDF9] to-[#F4ECE4] text-stone-800 border-[#D4C2B0] hover:bg-white shadow-[0_3px_0_#bfa792]',
-  };
-
-  const sizeStyles = {
-    sm: 'px-2.5 py-1 text-xs rounded-xl border-2 font-bold',
-    md: 'px-4 py-2 text-sm rounded-2xl border-2 font-extrabold',
-    lg: 'px-5 py-3 text-base rounded-2xl border-3 font-black',
-  };
-
   return (
     <button
-      onClick={handleClick}
+      type="button"
       disabled={disabled}
-      className={`relative inline-flex items-center justify-center gap-1.5 transition-all select-none cursor-pointer font-baloo active:translate-y-1 active:shadow-none ${
-        disabled
-          ? 'bg-stone-300 border-stone-400 text-stone-500 cursor-not-allowed shadow-none'
-          : variantStyles[variant]
-      } ${sizeStyles[size]} ${className}`}
+      className={[
+        'inline-flex items-center justify-center gap-2 rounded-xl border font-black outline-none',
+        'shadow-[0_3px_0_rgba(0,0,0,0.28)] transition-all active:translate-y-[1px] active:shadow-none focus-visible:ring-2 focus-visible:ring-amber-300/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[#17110f]',
+        'disabled:opacity-40 disabled:cursor-not-allowed disabled:active:translate-y-0 disabled:shadow-none',
+        compact ? 'min-h-[40px] px-3 py-2 text-[11px]' : 'min-h-[44px] px-4 py-2.5 text-xs sm:text-sm',
+        fullWidth ? 'w-full' : '',
+        toneMap[tone],
+        className,
+      ].join(' ')}
       {...props}
     >
-      {children}
+      {iconSrc && (
+        <span className="relative w-5 h-5 shrink-0">
+          <Image src={iconSrc} alt="" fill sizes="20px" className="object-contain" />
+        </span>
+      )}
+      <span className="min-w-0 leading-tight">{children}</span>
     </button>
   );
 };

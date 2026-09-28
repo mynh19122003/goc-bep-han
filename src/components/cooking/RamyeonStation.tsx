@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { useGameStore } from '@/stores/useGameStore';
 import { GAME_ASSETS } from '@/config/gameAssets';
 import { GameAssetIcon } from '@/components/ui/game/GameAssetIcon';
-import { PHASE3_UI_ASSETS } from '@/game/assets/phase3UiAssets';
 
 export const RamyeonStation: React.FC = () => {
   const {
@@ -13,6 +12,7 @@ export const RamyeonStation: React.FC = () => {
     dishes,
     startRamyeon,
     pourRamyeonWater,
+    confirmRamyeonWater,
     addRamyeonContents,
     tapEggCrack,
     finishRamyeon,
@@ -50,6 +50,8 @@ export const RamyeonStation: React.FC = () => {
             ? `Gõ Trứng (${ramyeonSession.eggCrackTaps}/2)`
             : ramyeonSession.step === 'boiling'
             ? `Đang Sôi (${Math.ceil(ramyeonSession.boilProgress)}%)`
+            : ramyeonSession.step === 'burned'
+            ? 'Mì Đã Quá Lửa'
             : 'Mì Chín Tới'}
         </span>
       </div>
@@ -140,41 +142,47 @@ export const RamyeonStation: React.FC = () => {
             <button
               type="button"
               onClick={() => startRamyeon(selectedDish)}
-              className="w-full flex items-center justify-center cursor-pointer active:scale-95 transition-all drop-shadow-md py-1"
-              title="Bắt đầu nấu Ramyeon"
+              className="w-full py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-black text-xs rounded-2xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-1.5 border border-amber-300/40 cursor-pointer"
             >
-              <Image
-                src={PHASE3_UI_ASSETS.btn_cook_nau.src}
-                alt="Nấu Ramyeon"
-                width={PHASE3_UI_ASSETS.btn_cook_nau.width}
-                height={PHASE3_UI_ASSETS.btn_cook_nau.height}
-                className="h-10 w-auto object-contain pointer-events-none"
-              />
+              <GameAssetIcon name="gas_stove" size={18} />
+              <span>Đặt Nồi Lên Bếp Gas</span>
             </button>
           </div>
         ) : ramyeonSession.step === 'pouring_water' ? (
-          <div className="flex gap-2">
+          <div className="grid grid-cols-[auto_1fr_auto_auto] gap-2">
             <button
               type="button"
-              onClick={() => pourRamyeonWater(25)}
-              className="flex-1 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-xs rounded-2xl shadow-xl active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer border border-blue-400/40"
+              onClick={() => pourRamyeonWater(-5)}
+              className="w-11 py-3 bg-stone-800 hover:bg-stone-700 text-white font-black text-xs rounded-2xl border border-stone-600 active:scale-95"
+            >
+              -5
+            </button>
+            <button
+              type="button"
+              onClick={() => pourRamyeonWater(5)}
+              className="py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-xs rounded-2xl shadow-xl active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer border border-blue-400/40"
             >
               <GameAssetIcon name="ladle" size={18} />
-              <span>Đổ Nước Dashi Vào Nồi (+25%)</span>
+              <span>Thêm nước +5%</span>
+            </button>
+            <button
+              type="button"
+              onClick={confirmRamyeonWater}
+              className={`px-3 py-3 rounded-2xl font-black text-xs border active:scale-95 ${
+                ramyeonSession.waterLevel >= 70 && ramyeonSession.waterLevel <= 80
+                  ? 'bg-emerald-600 border-emerald-300 text-white'
+                  : 'bg-stone-800 border-stone-700 text-stone-500'
+              }`}
+            >
+              Chốt
             </button>
             <button
               type="button"
               onClick={discardRamyeon}
-              className="p-2 rounded-2xl border border-stone-700 bg-stone-800/80 hover:bg-stone-700 active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0"
+              className="p-2.5 rounded-2xl border border-stone-700 bg-stone-800 text-stone-400 hover:text-red-400 cursor-pointer"
               title="Hủy mẻ này"
             >
-              <Image
-                src={PHASE3_UI_ASSETS.ui_cancel_huy.src}
-                alt="Hủy"
-                width={PHASE3_UI_ASSETS.ui_cancel_huy.width}
-                height={PHASE3_UI_ASSETS.ui_cancel_huy.height}
-                className="h-6 w-auto object-contain pointer-events-none"
-              />
+              <GameAssetIcon name="close" size={16} />
             </button>
           </div>
         ) : ramyeonSession.step === 'adding_contents' ? (
@@ -198,16 +206,10 @@ export const RamyeonStation: React.FC = () => {
             <button
               type="button"
               onClick={discardRamyeon}
-              className="p-2 rounded-2xl border border-stone-700 bg-stone-800/80 hover:bg-stone-700 active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0"
+              className="p-2.5 rounded-2xl border border-stone-700 bg-stone-800 text-stone-400 hover:text-red-400 cursor-pointer"
               title="Hủy mẻ này"
             >
-              <Image
-                src={PHASE3_UI_ASSETS.ui_cancel_huy.src}
-                alt="Hủy"
-                width={PHASE3_UI_ASSETS.ui_cancel_huy.width}
-                height={PHASE3_UI_ASSETS.ui_cancel_huy.height}
-                className="h-6 w-auto object-contain pointer-events-none"
-              />
+              <GameAssetIcon name="close" size={16} />
             </button>
           </div>
         ) : ramyeonSession.step === 'egg_crack_rhythm' ? (
@@ -231,16 +233,10 @@ export const RamyeonStation: React.FC = () => {
             <button
               type="button"
               onClick={discardRamyeon}
-              className="p-2 rounded-2xl border border-stone-700 bg-stone-800/80 hover:bg-stone-700 active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0"
+              className="p-2.5 rounded-2xl border border-stone-700 bg-stone-800 text-stone-400 hover:text-red-400 cursor-pointer"
               title="Hủy mẻ này"
             >
-              <Image
-                src={PHASE3_UI_ASSETS.ui_cancel_huy.src}
-                alt="Hủy"
-                width={PHASE3_UI_ASSETS.ui_cancel_huy.width}
-                height={PHASE3_UI_ASSETS.ui_cancel_huy.height}
-                className="h-6 w-auto object-contain pointer-events-none"
-              />
+              <GameAssetIcon name="close" size={16} />
             </button>
           </div>
         ) : ramyeonSession.step === 'boiling' ? (
@@ -248,35 +244,37 @@ export const RamyeonStation: React.FC = () => {
             <GameAssetIcon name="fire" size={16} />
             <span>Nồi mì đang sôi sục... Chờ sợi mì nở chín tới!</span>
           </div>
+        ) : ramyeonSession.step === 'burned' ? (
+          <div className="flex gap-2">
+            <div className="flex-1 py-3 rounded-2xl border border-red-500/50 bg-red-950/60 text-red-200 text-xs font-black text-center">
+              Mì đã quá lửa. Hủy mẻ và nấu lại.
+            </div>
+            <button
+              type="button"
+              onClick={discardRamyeon}
+              className="p-2.5 rounded-2xl border border-red-700 bg-stone-900 text-red-300 hover:bg-red-950 cursor-pointer"
+              title="Hủy mẻ này"
+            >
+              <GameAssetIcon name="close" size={16} />
+            </button>
+          </div>
         ) : (
           <div className="flex gap-2">
             <button
               type="button"
               onClick={finishRamyeon}
-              className="flex-1 flex items-center justify-center cursor-pointer active:scale-95 transition-all drop-shadow-md py-1"
-              title="Múc ra bát sẵn sàng giao"
+              className="flex-1 py-2.5 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-black text-xs rounded-2xl shadow-xl active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer border border-emerald-300/40"
             >
-              <Image
-                src={PHASE3_UI_ASSETS.btn_complete_hoan_tat.src}
-                alt="Hoàn Tất"
-                width={PHASE3_UI_ASSETS.btn_complete_hoan_tat.width}
-                height={PHASE3_UI_ASSETS.btn_complete_hoan_tat.height}
-                className="h-10 w-auto object-contain pointer-events-none"
-              />
+              <GameAssetIcon name="complete" size={18} />
+              <span>Múc Ra Bát Sẵn Sàng Giao</span>
             </button>
             <button
               type="button"
               onClick={discardRamyeon}
-              className="p-2 rounded-2xl border border-stone-700 bg-stone-800/80 hover:bg-stone-700 active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0"
+              className="p-2.5 rounded-2xl border border-stone-700 bg-stone-800 text-stone-400 hover:text-red-400 cursor-pointer"
               title="Hủy mẻ này"
             >
-              <Image
-                src={PHASE3_UI_ASSETS.ui_cancel_huy.src}
-                alt="Hủy"
-                width={PHASE3_UI_ASSETS.ui_cancel_huy.width}
-                height={PHASE3_UI_ASSETS.ui_cancel_huy.height}
-                className="h-6 w-auto object-contain pointer-events-none"
-              />
+              <GameAssetIcon name="close" size={16} />
             </button>
           </div>
         )}

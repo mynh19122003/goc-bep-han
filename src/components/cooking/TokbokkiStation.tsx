@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { useGameStore } from '@/stores/useGameStore';
 import { GAME_ASSETS } from '@/config/gameAssets';
 import { GameAssetIcon } from '@/components/ui/game/GameAssetIcon';
-import { PHASE3_UI_ASSETS } from '@/game/assets/phase3UiAssets';
 
 export const TokbokkiStation: React.FC = () => {
   const {
@@ -14,6 +13,7 @@ export const TokbokkiStation: React.FC = () => {
     startTokbokki,
     addTokbokkiSauceSpoon,
     setTokbokkiStirring,
+    flipTokbokkiPan,
     finishTokbokki,
     discardTokbokki,
   } = useGameStore();
@@ -167,16 +167,10 @@ export const TokbokkiStation: React.FC = () => {
             <button
               type="button"
               onClick={() => startTokbokki(selectedDish)}
-              className="w-full flex items-center justify-center cursor-pointer active:scale-95 transition-all drop-shadow-md py-1"
-              title="Bắt đầu nấu Tokbokki"
+              className="w-full py-2.5 bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 text-white font-black text-xs rounded-2xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-1.5 border border-amber-400/30 cursor-pointer"
             >
-              <Image
-                src={PHASE3_UI_ASSETS.btn_cook_nau.src}
-                alt="Nấu Tokbokki"
-                width={PHASE3_UI_ASSETS.btn_cook_nau.width}
-                height={PHASE3_UI_ASSETS.btn_cook_nau.height}
-                className="h-10 w-auto object-contain pointer-events-none"
-              />
+              <GameAssetIcon name="fire" size={18} />
+              <span>Cho Bánh Gạo Vào Chảo</span>
             </button>
           </div>
         ) : tokbokkiSession.status === 'sauce_ratio' ? (
@@ -246,10 +240,18 @@ export const TokbokkiStation: React.FC = () => {
             {/* Hold to Stir Button */}
             <button
               type="button"
-              onMouseDown={() => setTokbokkiStirring(true)}
-              onMouseUp={() => setTokbokkiStirring(false)}
-              onTouchStart={() => setTokbokkiStirring(true)}
-              onTouchEnd={() => setTokbokkiStirring(false)}
+              onPointerDown={(event) => {
+                event.currentTarget.setPointerCapture(event.pointerId);
+                setTokbokkiStirring(true);
+              }}
+              onPointerUp={(event) => {
+                if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+                  event.currentTarget.releasePointerCapture(event.pointerId);
+                }
+                setTokbokkiStirring(false);
+              }}
+              onPointerCancel={() => setTokbokkiStirring(false)}
+              onPointerLeave={() => setTokbokkiStirring(false)}
               className="w-full py-3 bg-gradient-to-r from-orange-500 to-red-600 active:scale-95 text-white font-black text-xs rounded-2xl shadow-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer touch-none border border-amber-300/40"
             >
               <GameAssetIcon name="fire" size={18} />
@@ -257,13 +259,29 @@ export const TokbokkiStation: React.FC = () => {
             </button>
           </div>
         ) : tokbokkiSession.status === 'cooking_stir' ? (
-          <div className="flex gap-2">
+          <div className="grid grid-cols-[1fr_auto] gap-2">
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={flipTokbokkiPan}
+                className="py-3 font-black text-xs rounded-2xl shadow-xl active:scale-95 bg-orange-700 hover:bg-orange-600 text-white border border-amber-300/30 cursor-pointer"
+              >
+                LẬT CHẢO ({tokbokkiSession.flipCount}/2)
+              </button>
             <button
               type="button"
-              onMouseDown={() => setTokbokkiStirring(true)}
-              onMouseUp={() => setTokbokkiStirring(false)}
-              onTouchStart={() => setTokbokkiStirring(true)}
-              onTouchEnd={() => setTokbokkiStirring(false)}
+              onPointerDown={(event) => {
+                event.currentTarget.setPointerCapture(event.pointerId);
+                setTokbokkiStirring(true);
+              }}
+              onPointerUp={(event) => {
+                if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+                  event.currentTarget.releasePointerCapture(event.pointerId);
+                }
+                setTokbokkiStirring(false);
+              }}
+              onPointerCancel={() => setTokbokkiStirring(false)}
+              onPointerLeave={() => setTokbokkiStirring(false)}
               className={`flex-1 py-3 font-black text-xs rounded-2xl shadow-xl transition-all active:scale-95 flex items-center justify-center gap-1.5 touch-none cursor-pointer border border-amber-300/30 ${
                 tokbokkiSession.isStirring
                   ? 'bg-red-600 text-white animate-pulse'
@@ -272,19 +290,14 @@ export const TokbokkiStation: React.FC = () => {
             >
               <span>{tokbokkiSession.isStirring ? 'ĐANG KHUẤY MẠNH' : 'CHẠM GIỮ ĐỂ KHUẤY'}</span>
             </button>
+            </div>
             <button
               type="button"
               onClick={discardTokbokki}
-              className="p-2 rounded-2xl border border-stone-700 bg-stone-800/80 hover:bg-stone-700 active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0"
+              className="p-2.5 rounded-2xl border border-stone-700 bg-stone-800 text-stone-400 hover:text-red-400 cursor-pointer"
               title="Hủy mẻ này"
             >
-              <Image
-                src={PHASE3_UI_ASSETS.ui_cancel_huy.src}
-                alt="Hủy"
-                width={PHASE3_UI_ASSETS.ui_cancel_huy.width}
-                height={PHASE3_UI_ASSETS.ui_cancel_huy.height}
-                className="h-6 w-auto object-contain pointer-events-none"
-              />
+              <GameAssetIcon name="close" size={16} />
             </button>
           </div>
         ) : (
@@ -292,30 +305,22 @@ export const TokbokkiStation: React.FC = () => {
             <button
               type="button"
               onClick={finishTokbokki}
-              className="flex-1 flex items-center justify-center cursor-pointer active:scale-95 transition-all drop-shadow-md py-1"
-              title="Hoàn tất và gắp ra đĩa"
+              className={`flex-1 py-2.5 rounded-2xl font-black text-xs shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer border border-emerald-400/40 ${
+                tokbokkiSession.status === 'perfect'
+                  ? 'bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white'
+                  : 'bg-stone-800 text-stone-200'
+              }`}
             >
-              <Image
-                src={PHASE3_UI_ASSETS.btn_complete_hoan_tat.src}
-                alt="Hoàn Tất"
-                width={PHASE3_UI_ASSETS.btn_complete_hoan_tat.width}
-                height={PHASE3_UI_ASSETS.btn_complete_hoan_tat.height}
-                className="h-10 w-auto object-contain pointer-events-none"
-              />
+              <GameAssetIcon name="complete" size={18} />
+              <span>Gắp Ra Đĩa Để Phục Vụ</span>
             </button>
             <button
               type="button"
               onClick={discardTokbokki}
-              className="p-2 rounded-2xl border border-stone-700 bg-stone-800/80 hover:bg-stone-700 active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0"
+              className="p-2.5 rounded-2xl border border-stone-700 bg-stone-800 text-stone-400 hover:text-red-400 cursor-pointer"
               title="Hủy mẻ này"
             >
-              <Image
-                src={PHASE3_UI_ASSETS.ui_cancel_huy.src}
-                alt="Hủy"
-                width={PHASE3_UI_ASSETS.ui_cancel_huy.width}
-                height={PHASE3_UI_ASSETS.ui_cancel_huy.height}
-                className="h-6 w-auto object-contain pointer-events-none"
-              />
+              <GameAssetIcon name="close" size={16} />
             </button>
           </div>
         )}

@@ -2,9 +2,9 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/stores/useGameStore';
-import { GameAssetIcon } from '@/components/ui/game/GameAssetIcon';
+import { GAME_ASSETS } from '@/game/assets/gameAssets';
+import { GameModal } from '@/components/ui/game/GameModal';
 
 export const ReviewFeedModal: React.FC = () => {
   const { activeModal, setActiveModal, reviews, rating } = useGameStore();
@@ -12,143 +12,60 @@ export const ReviewFeedModal: React.FC = () => {
   if (activeModal !== 'reviews') return null;
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-50 bg-stone-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 select-none font-baloo">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9, y: 15 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.9, y: 15 }}
-          className="bg-stone-900 rounded-3xl max-w-md w-full p-4 sm:p-5 shadow-2xl border-4 border-amber-600/60 relative flex flex-col max-h-[85vh] text-stone-100"
-        >
-          {/* Close button (Phase 3 PNG: ui_close_dong.png) */}
-          <button
-            type="button"
-            onClick={() => setActiveModal('none')}
-            title="Đóng đánh giá"
-            className="absolute top-3.5 right-3.5 w-8 h-8 rounded-xl overflow-hidden cursor-pointer transition-transform active:scale-90 z-20"
-          >
-            <Image
-              src="/assets/phase3-ui/ui_close_dong.png"
-              alt="Đóng"
-              width={32}
-              height={32}
-              className="w-full h-full object-contain pointer-events-none drop-shadow"
-            />
-          </button>
-
-          {/* Header */}
-          <div className="flex items-center gap-2.5 mb-3 pr-10">
-            <div className="w-11 h-11 rounded-2xl bg-amber-500/20 border border-amber-400/40 p-1 flex items-center justify-center shrink-0">
-              <Image
-                src="/assets/phase3-ui/tab_review_danh_gia.png"
-                alt="Đánh giá"
-                width={40}
-                height={40}
-                className="w-full h-full object-contain pointer-events-none"
-              />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-black text-amber-200 text-base uppercase">
-                  ĐÁNH GIÁ TỪ THỰC KHÁCH
-                </h3>
-                <span className="text-xs font-black text-amber-300 bg-amber-950/90 border border-amber-500/50 px-2 py-0.5 rounded-xl flex items-center gap-1 shadow-inner">
-                  <GameAssetIcon name="star" size={14} />
-                  {rating.toFixed(1)} / 5.0
-                </span>
-              </div>
-              <p className="text-[11px] text-amber-300/80 font-bold">
-                Ý kiến từ khách ăn tại quán & đơn giao tận nơi
-              </p>
-            </div>
-          </div>
-
-          {/* Review Feed List */}
-          <div className="overflow-y-auto space-y-2.5 flex-1 pr-1">
-            {reviews.map((rev) => {
-              const isSpriteAvatar = rev.avatar?.startsWith('/');
-
-              return (
-                <div
-                  key={rev.id}
-                  className="bg-stone-950/70 rounded-2xl p-3 border-2 border-stone-800 shadow-md"
-                >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className="flex items-center gap-2.5">
-                      {/* Avatar presentation */}
-                      <div className="w-10 h-10 rounded-2xl bg-stone-800 border border-amber-500/30 overflow-hidden flex items-center justify-center shrink-0">
-                        {isSpriteAvatar ? (
-                          <div className="relative w-8 h-8">
-                            <Image
-                              src={rev.avatar}
-                              alt={rev.author}
-                              fill
-                              className="object-contain"
-                            />
-                          </div>
-                        ) : (
-                          <span className="text-xs font-bold text-amber-300">{rev.author.charAt(0)}</span>
-                        )}
-                      </div>
-
-                      <div>
-                        <h4 className="font-extrabold text-amber-100 text-xs">{rev.author}</h4>
-                        <span className="text-[10px] text-stone-400 font-medium">{rev.timeAgo}</span>
-                      </div>
+    <GameModal
+      title="Đánh giá thực khách"
+      subtitle={`Điểm hiện tại ${rating.toFixed(1)} / 5.0`}
+      onClose={() => setActiveModal('none')}
+      maxWidth="max-w-md"
+      icon={<span className="relative h-9 w-9"><Image src={GAME_ASSETS.hud.rating} alt="" fill sizes="36px" className="object-contain" /></span>}
+    >
+      <div className="space-y-2.5">
+        {reviews.length === 0 ? (
+          <div className="py-10 text-center text-[11px] font-bold text-stone-500">Chưa có đánh giá mới.</div>
+        ) : (
+          reviews.map((review) => {
+            const imageAvatar = review.avatar?.startsWith('/');
+            return (
+              <article key={review.id} className="rounded-2xl border border-stone-700 bg-stone-900/65 p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-amber-500/15 bg-black/20">
+                      {imageAvatar ? (
+                        <div className="relative h-9 w-9">
+                          <Image src={review.avatar} alt={review.author} fill sizes="36px" className="object-contain" />
+                        </div>
+                      ) : (
+                        <span className="text-xs font-black text-amber-300">{review.author.charAt(0)}</span>
+                      )}
                     </div>
-
-                    {/* Stars */}
-                    <div className="flex items-center gap-0.5">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <GameAssetIcon
-                          key={i}
-                          name="star"
-                          size={14}
-                          className={i < rev.rating ? 'opacity-100' : 'opacity-20 grayscale'}
-                        />
-                      ))}
+                    <div className="min-w-0">
+                      <h3 className="truncate text-xs font-black text-amber-100">{review.author}</h3>
+                      <p className="text-[9px] text-stone-500">{review.timeAgo}</p>
                     </div>
                   </div>
 
-                  <p className="text-xs text-stone-300 font-medium mt-1 leading-snug">
-                    &quot;{rev.comment}&quot;
-                  </p>
-
-                  <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-stone-800 text-[10px] text-stone-400">
-                    <span className="font-bold text-amber-300 flex items-center gap-1">
-                      <GameAssetIcon
-                        name={rev.orderType === 'delivery' ? 'delivery' : 'bowl'}
-                        size={14}
-                      />
-                      {rev.dishName}
-                    </span>
-
-                    <span
-                      className={`font-black px-2 py-0.5 rounded-lg border ${
-                        rev.tag === 'tasty' || rev.tag === 'fast'
-                          ? 'text-emerald-300 bg-emerald-950/60 border-emerald-500/40'
-                          : rev.tag === 'spicy'
-                          ? 'text-amber-300 bg-amber-950/60 border-amber-500/40'
-                          : 'text-red-300 bg-red-950/60 border-red-500/40'
-                      }`}
-                    >
-                      {rev.tag === 'tasty'
-                        ? 'Ngon miệng'
-                        : rev.tag === 'fast'
-                        ? 'Giao nhanh'
-                        : rev.tag === 'spicy'
-                        ? 'Cay đậm vị'
-                        : rev.tag === 'late'
-                        ? 'Chờ lâu'
-                        : 'Góp ý'}
-                    </span>
+                  <div className="flex items-center gap-0.5">
+                    {Array.from({ length: 5 }).map((_, index) => (
+                      <span key={index} className={`relative h-3.5 w-3.5 ${index < review.rating ? 'opacity-100' : 'opacity-15 grayscale'}`}>
+                        <Image src={GAME_ASSETS.hud.rating} alt="" fill sizes="14px" className="object-contain" />
+                      </span>
+                    ))}
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </motion.div>
+
+                <p className="mt-2 text-[11px] leading-relaxed text-stone-300">“{review.comment}”</p>
+
+                <div className="mt-2 flex items-center justify-between gap-2 border-t border-stone-800 pt-2">
+                  <span className="truncate text-[9px] font-bold text-amber-300">{review.dishName}</span>
+                  <span className="rounded-lg border border-stone-700 bg-black/20 px-2 py-1 text-[8px] font-black text-stone-400">
+                    {review.orderType === 'delivery' ? 'Giao hàng' : 'Tại quán'}
+                  </span>
+                </div>
+              </article>
+            );
+          })
+        )}
       </div>
-    </AnimatePresence>
+    </GameModal>
   );
 };

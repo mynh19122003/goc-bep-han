@@ -1,11 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useGameStore } from '@/stores/useGameStore';
 import { GAME_ASSETS } from '@/game/assets/gameAssets';
-import { GameIconButton } from '@/components/ui/game/GameIconButton';
+import { CloseButton } from '@/components/ui/game/CloseButton';
 import { soundManager } from '@/utils/audio';
 
 interface DishPickerProps {
@@ -14,19 +14,20 @@ interface DishPickerProps {
   onSelectDish: (dishId: string) => void;
 }
 
-export const DishPicker: React.FC<DishPickerProps> = ({
-  isOpen,
-  onClose,
-  onSelectDish,
-}) => {
-  const { dishes, coins } = useGameStore();
+export const DishPicker: React.FC<DishPickerProps> = ({ isOpen, onClose, onSelectDish }) => {
+  const { dishes } = useGameStore();
+  const [category, setCategory] = useState<'all' | 'main' | 'drink'>('all');
+
+  const dishList = useMemo(() => {
+    const all = Object.values(dishes);
+    if (category === 'all') return all;
+    return all.filter((dish) => dish.category === category);
+  }, [dishes, category]);
 
   if (!isOpen) return null;
 
-  const dishList = Object.values(dishes);
-
-  const handlePickDish = (dishId: string, isUnlocked: boolean) => {
-    if (!isUnlocked) {
+  const choose = (dishId: string, unlocked: boolean) => {
+    if (!unlocked) {
       soundManager.playError();
       return;
     }
@@ -37,118 +38,99 @@ export const DishPicker: React.FC<DishPickerProps> = ({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 bg-stone-950/80 backdrop-blur-sm select-none font-baloo">
-        {/* Backdrop click */}
-        <div className="absolute inset-0 cursor-pointer" onClick={onClose} />
+      <div className="fixed inset-0 z-[100] flex items-end bg-black/70 backdrop-blur-sm sm:items-center sm:justify-center sm:p-4">
+        <button type="button" className="absolute inset-0" aria-label="Đóng chọn món" onClick={onClose} />
 
-        {/* Modal Container */}
-        <motion.div
-          initial={{ scale: 0.92, opacity: 0, y: 15 }}
-          animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.92, opacity: 0, y: 15 }}
-          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="relative z-10 w-full max-w-[760px] bg-stone-900 border-2 border-amber-600/70 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] text-stone-100"
+        <motion.section
+          initial={{ y: 30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 30, opacity: 0 }}
+          transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+          className="relative z-10 flex h-[82dvh] w-full flex-col overflow-hidden rounded-t-3xl border-t border-amber-500/35 bg-[#1a1310]/98 text-stone-100 shadow-2xl sm:h-auto sm:max-h-[82vh] sm:max-w-[820px] sm:rounded-3xl sm:border"
         >
-          {/* Header */}
-          <div className="shrink-0 p-3 sm:p-4 border-b border-amber-600/40 bg-stone-950/90 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-xl bg-amber-600/20 border border-amber-400/40 p-1 flex items-center justify-center shrink-0">
-                <Image
-                  src="/assets/phase3-ui/tab_menu_thuc_don.png"
-                  alt="Thực đơn"
-                  width={36}
-                  height={36}
-                  className="w-full h-full object-contain pointer-events-none"
-                />
-              </div>
-              <div>
-                <h3 className="text-sm sm:text-base font-black text-amber-200 uppercase tracking-wide leading-tight">
-                  CHỌN MÓN NẤU TỰ DO
-                </h3>
-                <span className="text-[11px] text-amber-300/80 font-bold block leading-none">
-                  Sáng tạo món ăn & bày biện topping theo sở thích
-                </span>
+          <div className="mx-auto mt-2 h-1.5 w-12 rounded-full bg-stone-600/70 sm:hidden" />
+
+          <header className="flex items-center justify-between gap-2 border-b border-amber-500/20 px-3 py-3 sm:px-4">
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="relative h-9 w-9 shrink-0">
+                <Image src={GAME_ASSETS.navigation.menu} alt="" fill sizes="36px" className="object-contain" />
+              </span>
+              <div className="min-w-0">
+                <h3 className="truncate text-sm font-black uppercase text-amber-100">Nấu tự do</h3>
+                <p className="truncate text-[10px] font-bold text-stone-400">Chọn một món đã mở khóa</p>
               </div>
             </div>
+            <CloseButton onClick={onClose} />
+          </header>
 
-            <button
-              type="button"
-              onClick={onClose}
-              title="Đóng chọn món"
-              className="w-8 h-8 rounded-xl overflow-hidden cursor-pointer transition-transform active:scale-90"
-            >
-              <Image
-                src="/assets/phase3-ui/ui_close_dong.png"
-                alt="Đóng"
-                width={32}
-                height={32}
-                className="w-full h-full object-contain pointer-events-none drop-shadow"
-              />
-            </button>
+          <div className="flex shrink-0 gap-1.5 border-b border-stone-800 bg-black/20 px-3 py-2 sm:px-4">
+            {[
+              { id: 'all', label: 'Tất cả' },
+              { id: 'main', label: 'Món ăn' },
+              { id: 'drink', label: 'Đồ uống' },
+            ].map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setCategory(item.id as 'all' | 'main' | 'drink')}
+                className={`min-h-[36px] flex-1 rounded-xl border px-2 text-[9px] font-black transition active:scale-95 sm:flex-none sm:px-3 sm:text-[10px] ${
+                  category === item.id
+                    ? 'border-amber-300/45 bg-amber-600/65 text-white'
+                    : 'border-stone-700 bg-stone-900/70 text-stone-400'
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+            <span className="ml-auto hidden items-center text-[9px] font-bold text-stone-500 sm:flex">
+              {dishList.length} món
+            </span>
           </div>
 
-          {/* Dish Grid: 2 per row on mobile, 3-4 per row on desktop */}
-          <div className="flex-1 overflow-y-auto p-3 sm:p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 sm:gap-3">
+          <div className="game-scrollbar grid flex-1 grid-cols-2 content-start gap-2 overflow-y-auto p-3 sm:grid-cols-3 sm:gap-3 sm:p-4 lg:grid-cols-4">
             {dishList.map((dish) => {
-              const dishAsset =
-                (GAME_ASSETS.dishes as Record<string, string>)[dish.id] ||
-                GAME_ASSETS.dishes.ramyeon;
-              const isUnlocked = dish.isUnlocked;
-
+              const asset = (GAME_ASSETS.dishes as Record<string, string>)[dish.id];
               return (
                 <button
                   key={dish.id}
                   type="button"
-                  onClick={() => handlePickDish(dish.id, isUnlocked)}
-                  className={`relative rounded-2xl p-2.5 sm:p-3 flex flex-col items-center justify-between border-2 transition-all cursor-pointer text-center ${
-                    isUnlocked
-                      ? 'bg-stone-850 hover:bg-stone-800 border-amber-500/40 hover:border-amber-400 shadow-md hover:shadow-amber-500/20 active:scale-95'
-                      : 'bg-stone-950/60 border-stone-800 opacity-60 cursor-not-allowed'
+                  disabled={!dish.isUnlocked}
+                  onClick={() => choose(dish.id, dish.isUnlocked)}
+                  className={`relative flex min-h-[136px] flex-col items-center justify-between rounded-2xl border p-2 text-center transition sm:min-h-[150px] sm:p-2.5 ${
+                    dish.isUnlocked
+                      ? 'border-amber-500/25 bg-stone-900/70 hover:border-amber-300/55 hover:bg-stone-800/80 active:scale-95'
+                      : 'cursor-not-allowed border-stone-800 bg-black/25 opacity-55'
                   }`}
                 >
-                  {/* Lock Overlay if not unlocked */}
-                  {!isUnlocked && (
-                    <div className="absolute inset-0 bg-stone-950/75 rounded-2xl flex flex-col items-center justify-center p-2 z-10 backdrop-blur-[1px]">
-                      <div className="h-6 w-auto aspect-[563/255] relative mb-1">
-                        <Image
-                          src="/assets/phase3-ui/btn_lock_khoa.png"
-                          alt="Khóa"
-                          width={563}
-                          height={255}
-                          className="h-full w-auto object-contain pointer-events-none"
-                        />
-                      </div>
-                      <span className="text-[10px] font-black text-amber-400">
-                        Cấp {dish.unlockLevel}
+                  {!dish.isUnlocked && (
+                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-2xl bg-black/55">
+                      <span className="rounded-full border border-stone-600 bg-stone-900 px-2 py-1 text-[9px] font-black text-stone-300">
+                        Cần cấp {dish.unlockLevel}
                       </span>
                     </div>
                   )}
 
-                  {/* Food Image */}
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 relative my-1 flex items-center justify-center shrink-0">
-                    <Image
-                      src={dishAsset}
-                      alt={dish.name}
-                      width={80}
-                      height={80}
-                      className="w-full h-full object-contain pointer-events-none drop-shadow-md"
-                    />
+                  <div className="relative h-16 w-16 sm:h-24 sm:w-24">
+                    {asset ? (
+                      <Image src={asset} alt={dish.name} fill sizes="96px" className="object-contain drop-shadow" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center rounded-xl border border-red-900/40 text-[9px] font-black text-red-300">
+                        Thiếu asset món
+                      </div>
+                    )}
                   </div>
 
-                  {/* Dish Name */}
-                  <span className="text-xs sm:text-sm font-black text-amber-100 line-clamp-2 leading-tight min-h-[32px] flex items-center justify-center">
+                  <span className="mt-1 line-clamp-2 min-h-[30px] text-[11px] font-black leading-tight text-amber-100 sm:text-xs">
                     {dish.name}
                   </span>
-
-                  {/* Price Tag */}
-                  <div className="mt-1 flex items-center justify-center gap-1 text-[11px] font-black text-amber-300 bg-amber-950/70 px-2 py-0.5 rounded-full border border-amber-600/40 w-full">
-                    <span>{dish.price} Xu</span>
-                  </div>
+                  <span className="mt-1 rounded-full border border-amber-500/20 bg-amber-950/40 px-2 py-0.5 text-[9px] font-black text-amber-300">
+                    {dish.price} Xu
+                  </span>
                 </button>
               );
             })}
           </div>
-        </motion.div>
+        </motion.section>
       </div>
     </AnimatePresence>
   );

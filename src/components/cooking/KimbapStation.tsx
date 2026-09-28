@@ -1,18 +1,18 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useGameStore } from '@/stores/useGameStore';
 import { IngredientId } from '@/types/game';
 import { GAME_ASSETS } from '@/config/gameAssets';
 import { GameAssetIcon } from '@/components/ui/game/GameAssetIcon';
-import { PHASE3_UI_ASSETS } from '@/game/assets/phase3UiAssets';
 
 export const KimbapStation: React.FC = () => {
   const {
     kimbapSession,
     dishes,
+    inventory,
     startKimbap,
     tapKimbapIngredient,
     advanceKimbapRoll,
@@ -23,12 +23,16 @@ export const KimbapStation: React.FC = () => {
 
   const [selectedDish, setSelectedDish] = useState<'kimbap_classic' | 'kimbap_cheese'>('kimbap_classic');
 
-  const ingredientMeta: { [key in IngredientId]?: { name: string; asset: string } } = {
-    rice: { name: 'Cơm Dẻo', asset: GAME_ASSETS.ingredients.rice },
-    carrot: { name: 'Cà Rốt', asset: GAME_ASSETS.ingredients.ca_rot },
-    cucumber: { name: 'Dưa Leo', asset: GAME_ASSETS.ingredients.dua_leo },
-    egg: { name: 'Trứng Gà', asset: GAME_ASSETS.ingredients.trung },
-    fish_cake: { name: 'Chả Cá', asset: GAME_ASSETS.ingredients.cha_ca },
+  const pointerStart = useRef<{ x: number; y: number } | null>(null);
+
+  const getIngredientMeta = (id: IngredientId) => {
+    const asset =
+      (GAME_ASSETS.ingredients as Record<string, string>)[id] ||
+      (GAME_ASSETS.toppings as Record<string, string>)[id];
+    return {
+      name: inventory[id]?.vietnameseName || id,
+      asset,
+    };
   };
 
   const nextRequired =
@@ -58,7 +62,7 @@ export const KimbapStation: React.FC = () => {
           {kimbapSession.step === 'idle'
             ? 'Mành Rảnh'
             : kimbapSession.step === 'ingredients'
-            ? `Nhân (${kimbapSession.placedIngredients.length}/5)`
+            ? `Nhân (${kimbapSession.placedIngredients.length}/${kimbapSession.requiredIngredientsQueue.length})`
             : kimbapSession.step === 'rolling'
             ? `Cuộn (${kimbapSession.rollProgress}%)`
             : kimbapSession.step === 'slicing'
@@ -68,7 +72,30 @@ export const KimbapStation: React.FC = () => {
       </div>
 
       {/* Visual Bamboo Mat Area using REAL ASSET */}
-      <div className="flex-1 my-2 flex flex-col items-center justify-center relative min-h-[140px] bg-amber-950/30 rounded-2xl border-2 border-amber-600/40 shadow-inner overflow-hidden p-2">
+      <div
+        className="flex-1 my-2 flex flex-col items-center justify-center relative min-h-[140px] bg-amber-950/30 rounded-2xl border-2 border-amber-600/40 shadow-inner overflow-hidden p-2 touch-none"
+        onPointerDown={(event) => {
+          pointerStart.current = { x: event.clientX, y: event.clientY };
+        }}
+        onPointerUp={(event) => {
+          if (!pointerStart.current) return;
+          const deltaX = event.clientX - pointerStart.current.x;
+          const deltaY = pointerStart.current.y - event.clientY;
+          pointerStart.current = null;
+
+          if (kimbapSession.step === 'rolling' && deltaY >= 24) {
+            advanceKimbapRoll(34);
+          } else if (
+            kimbapSession.step === 'slicing' &&
+            Math.abs(deltaX) >= 24
+          ) {
+            sliceKimbap();
+          }
+        }}
+        onPointerCancel={() => {
+          pointerStart.current = null;
+        }}
+      >
         <div className="relative w-36 h-36 flex items-center justify-center">
           <Image
             src={GAME_ASSETS.props.cutting_board}
@@ -87,7 +114,7 @@ export const KimbapStation: React.FC = () => {
           {kimbapSession.step === 'ingredients' && (
             <div className="absolute inset-4 bg-stone-950/90 border border-stone-700 rounded-xl p-2 flex flex-wrap items-center justify-center gap-1">
               {kimbapSession.placedIngredients.map((id, idx) => {
-                const meta = ingredientMeta[id];
+                const meta = getIngredientMeta(id);
                 return (
                   <div key={idx} className="w-6 h-6 relative animate-bounce-slight">
                     {meta?.asset && (
@@ -187,26 +214,20 @@ export const KimbapStation: React.FC = () => {
             <button
               type="button"
               onClick={() => startKimbap(selectedDish)}
-              className="w-full flex items-center justify-center cursor-pointer active:scale-95 transition-all drop-shadow-md py-1"
-              title="Trải rong biển & bắt đầu làm Kimbap"
+              className="w-full py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-xs rounded-2xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-1.5 border border-emerald-400/40 cursor-pointer"
             >
-              <Image
-                src={PHASE3_UI_ASSETS.btn_cook_nau.src}
-                alt="Bắt Đầu Làm Kimbap"
-                width={PHASE3_UI_ASSETS.btn_cook_nau.width}
-                height={PHASE3_UI_ASSETS.btn_cook_nau.height}
-                className="h-10 w-auto object-contain pointer-events-none"
-              />
+              <GameAssetIcon name="board" size={18} />
+              <span>Trải Rong Biển Lên Mành</span>
             </button>
           </div>
         ) : kimbapSession.step === 'ingredients' ? (
           <div>
             <span className="text-[10px] text-stone-300 font-bold block mb-1">
-              Chạm thêm tiếp theo: <strong className="text-emerald-400 font-black">{ingredientMeta[nextRequired!]?.name}</strong>
+              Chạm thêm tiếp theo: <strong className="text-emerald-400 font-black">{nextRequired ? getIngredientMeta(nextRequired).name : ''}</strong>
             </span>
             <div className="grid grid-cols-5 gap-1">
-              {(['rice', 'carrot', 'cucumber', 'egg', 'fish_cake'] as IngredientId[]).map((id) => {
-                const meta = ingredientMeta[id];
+              {Array.from(new Set(kimbapSession.requiredIngredientsQueue)).map((id) => {
+                const meta = getIngredientMeta(id);
                 return (
                   <button
                     key={id}
@@ -242,21 +263,15 @@ export const KimbapStation: React.FC = () => {
               onClick={() => advanceKimbapRoll(35)}
               className="flex-1 py-3 bg-gradient-to-r from-amber-600 to-emerald-600 hover:from-amber-700 hover:to-emerald-700 text-white font-black text-xs rounded-2xl shadow-xl active:scale-95 flex items-center justify-center gap-1 cursor-pointer border border-amber-300/40"
             >
-              <span>Vuốt Lên Để Cuộn Chặt (+35%)</span>
+              <span>Vuốt Lên Hoặc Bấm Để Cuộn (+34%)</span>
             </button>
             <button
               type="button"
               onClick={discardKimbap}
-              className="p-2 rounded-2xl border border-stone-700 bg-stone-800/80 hover:bg-stone-700 active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0"
+              className="p-2.5 rounded-2xl border border-stone-700 bg-stone-800 text-stone-400 hover:text-red-400 cursor-pointer"
               title="Hủy mẻ này"
             >
-              <Image
-                src={PHASE3_UI_ASSETS.ui_cancel_huy.src}
-                alt="Hủy"
-                width={PHASE3_UI_ASSETS.ui_cancel_huy.width}
-                height={PHASE3_UI_ASSETS.ui_cancel_huy.height}
-                className="h-6 w-auto object-contain pointer-events-none"
-              />
+              <GameAssetIcon name="close" size={16} />
             </button>
           </div>
         ) : kimbapSession.step === 'slicing' ? (
@@ -267,21 +282,15 @@ export const KimbapStation: React.FC = () => {
               className="flex-1 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-xs rounded-2xl shadow-xl active:scale-95 flex items-center justify-center gap-1 cursor-pointer border border-emerald-300/40"
             >
               <GameAssetIcon name="knife" size={18} />
-              <span>Cắt Khoanh Tiếp Theo ({kimbapSession.slicesMade}/8)</span>
+              <span>Vuốt Ngang Hoặc Bấm Để Cắt ({kimbapSession.slicesMade}/8)</span>
             </button>
             <button
               type="button"
               onClick={discardKimbap}
-              className="p-2 rounded-2xl border border-stone-700 bg-stone-800/80 hover:bg-stone-700 active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0"
+              className="p-2.5 rounded-2xl border border-stone-700 bg-stone-800 text-stone-400 hover:text-red-400 cursor-pointer"
               title="Hủy mẻ này"
             >
-              <Image
-                src={PHASE3_UI_ASSETS.ui_cancel_huy.src}
-                alt="Hủy"
-                width={PHASE3_UI_ASSETS.ui_cancel_huy.width}
-                height={PHASE3_UI_ASSETS.ui_cancel_huy.height}
-                className="h-6 w-auto object-contain pointer-events-none"
-              />
+              <GameAssetIcon name="close" size={16} />
             </button>
           </div>
         ) : (
@@ -289,30 +298,18 @@ export const KimbapStation: React.FC = () => {
             <button
               type="button"
               onClick={finishKimbap}
-              className="flex-1 flex items-center justify-center cursor-pointer active:scale-95 transition-all drop-shadow-md py-1"
-              title="Hoàn tất và cho ra đĩa"
+              className="flex-1 py-2.5 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-black text-xs rounded-2xl shadow-xl active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer border border-emerald-300/40"
             >
-              <Image
-                src={PHASE3_UI_ASSETS.btn_complete_hoan_tat.src}
-                alt="Hoàn Tất"
-                width={PHASE3_UI_ASSETS.btn_complete_hoan_tat.width}
-                height={PHASE3_UI_ASSETS.btn_complete_hoan_tat.height}
-                className="h-10 w-auto object-contain pointer-events-none"
-              />
+              <GameAssetIcon name="complete" size={18} />
+              <span>Cho Ra Đĩa Sẵn Sàng Giao</span>
             </button>
             <button
               type="button"
               onClick={discardKimbap}
-              className="p-2 rounded-2xl border border-stone-700 bg-stone-800/80 hover:bg-stone-700 active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0"
+              className="p-2.5 rounded-2xl border border-stone-700 bg-stone-800 text-stone-400 hover:text-red-400 cursor-pointer"
               title="Hủy mẻ này"
             >
-              <Image
-                src={PHASE3_UI_ASSETS.ui_cancel_huy.src}
-                alt="Hủy"
-                width={PHASE3_UI_ASSETS.ui_cancel_huy.width}
-                height={PHASE3_UI_ASSETS.ui_cancel_huy.height}
-                className="h-6 w-auto object-contain pointer-events-none"
-              />
+              <GameAssetIcon name="close" size={16} />
             </button>
           </div>
         )}

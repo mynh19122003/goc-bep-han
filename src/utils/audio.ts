@@ -2,7 +2,7 @@
 
 class SoundEffectsManager {
   private ctx: AudioContext | null = null;
-  private isMuted: boolean = false;
+  private sfxMuted: boolean = false;
   private bgmPlaying: boolean = false;
   private bgmInterval: NodeJS.Timeout | null = null;
 
@@ -23,19 +23,16 @@ class SoundEffectsManager {
   }
 
   public setMuted(muted: boolean) {
-    this.isMuted = muted;
-    if (muted && this.bgmPlaying) {
-      this.stopBgm();
-    }
+    this.sfxMuted = muted;
   }
 
   public getIsMuted(): boolean {
-    return this.isMuted;
+    return this.sfxMuted;
   }
 
   // Play a soft chime when earning coins
   public playCoin() {
-    if (this.isMuted) return;
+    if (this.sfxMuted) return;
     this.initContext();
     if (!this.ctx) return;
 
@@ -59,7 +56,7 @@ class SoundEffectsManager {
 
   // Sizzle sound when cooking tokbokki / pan frying
   public playSizzle() {
-    if (this.isMuted) return;
+    if (this.sfxMuted) return;
     this.initContext();
     if (!this.ctx) return;
 
@@ -92,7 +89,7 @@ class SoundEffectsManager {
 
   // Boiling bubble sound for ramyeon soup
   public playBoil() {
-    if (this.isMuted) return;
+    if (this.sfxMuted) return;
     this.initContext();
     if (!this.ctx) return;
 
@@ -116,7 +113,7 @@ class SoundEffectsManager {
 
   // Knife chop / slice sound for Kimbap
   public playChop() {
-    if (this.isMuted) return;
+    if (this.sfxMuted) return;
     this.initContext();
     if (!this.ctx) return;
 
@@ -140,7 +137,7 @@ class SoundEffectsManager {
 
   // Gentle bell when customer arrives
   public playCustomerBell() {
-    if (this.isMuted) return;
+    if (this.sfxMuted) return;
     this.initContext();
     if (!this.ctx) return;
 
@@ -167,7 +164,7 @@ class SoundEffectsManager {
 
   // Success fanfare when dish is served perfectly
   public playSuccess() {
-    if (this.isMuted) return;
+    if (this.sfxMuted) return;
     this.initContext();
     if (!this.ctx) return;
 
@@ -194,7 +191,7 @@ class SoundEffectsManager {
 
   // Soft thud or sad tone when customer leaves angry or food burned
   public playError() {
-    if (this.isMuted) return;
+    if (this.sfxMuted) return;
     this.initContext();
     if (!this.ctx) return;
 
@@ -218,7 +215,7 @@ class SoundEffectsManager {
 
   // Gentle UI Click
   public playClick() {
-    if (this.isMuted) return;
+    if (this.sfxMuted) return;
     this.initContext();
     if (!this.ctx) return;
 
@@ -249,6 +246,7 @@ class SoundEffectsManager {
     this.initContext();
     if (!this.ctx) return false;
 
+    if (this.bgmPlaying) return true;
     this.bgmPlaying = true;
     const chords = [
       [261.63, 329.63, 392.00], // C maj
@@ -259,7 +257,7 @@ class SoundEffectsManager {
     let chordIdx = 0;
 
     const playAmbientChord = () => {
-      if (!this.bgmPlaying || this.isMuted || !this.ctx) return;
+      if (!this.bgmPlaying || !this.ctx) return;
       const now = this.ctx.currentTime;
       const currentChord = chords[chordIdx % chords.length];
       chordIdx++;

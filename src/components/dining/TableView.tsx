@@ -1,11 +1,10 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useGameStore } from '@/stores/useGameStore';
 import { GameAssetIcon } from '@/components/ui/game/GameAssetIcon';
-import { PHASE3_UI_ASSETS } from '@/game/assets/phase3UiAssets';
+import { preparedDishMatchesOrder } from '@/core/gameCore';
 
 export const TableView: React.FC = () => {
   const { tables, preparedDishes, isDayActive, startDay, serveTable, cleanTable } = useGameStore();
@@ -32,7 +31,16 @@ export const TableView: React.FC = () => {
           const isDirty = table.status === 'dirty';
 
           const canServe =
-            hasCustomer && preparedDishes.some((p) => p.dishId === table.customer?.orderDishId);
+            hasCustomer && preparedDishes.some((p) =>
+              preparedDishMatchesOrder({
+                prepared: p,
+                orderId: table.customer?.id,
+                dishId: table.customer?.orderDishId || '',
+                requiredToppings: table.customer?.requiredToppings,
+                excludedToppings: table.customer?.excludedToppings,
+                spiceLevel: table.customer?.spiceLevel,
+              })
+            );
 
           const patiencePercent = hasCustomer
             ? Math.max(0, Math.min(100, (table.customer!.currentPatience / table.customer!.maxPatience) * 100))
@@ -120,26 +128,19 @@ export const TableView: React.FC = () => {
 
               {/* Action Button if Customer Seated */}
               {hasCustomer && (
-                canServe ? (
-                  <button
-                    type="button"
-                    onClick={() => serveTable(table.id)}
-                    className="w-full flex items-center justify-center cursor-pointer active:scale-95 transition-all drop-shadow-md py-0.5"
-                    title="Giao món cho bàn này"
-                  >
-                    <Image
-                      src={PHASE3_UI_ASSETS.btn_serve_giao_mon.src}
-                      alt="Giao Món"
-                      width={PHASE3_UI_ASSETS.btn_serve_giao_mon.width}
-                      height={PHASE3_UI_ASSETS.btn_serve_giao_mon.height}
-                      className="h-7 w-auto object-contain pointer-events-none"
-                    />
-                  </button>
-                ) : (
-                  <div className="w-full py-1 rounded-xl text-[10px] font-black flex items-center justify-center bg-stone-200 text-stone-500 select-none">
-                    <span>Chưa có món</span>
-                  </div>
-                )
+                <button
+                  type="button"
+                  onClick={() => serveTable(table.id)}
+                  disabled={!canServe}
+                  className={`w-full py-1 rounded-xl text-[11px] font-black flex items-center justify-center gap-1 transition-all ${
+                    canServe
+                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer active:scale-95 animate-bounce-slight shadow-xs'
+                      : 'bg-stone-200 text-stone-400 cursor-not-allowed'
+                  }`}
+                >
+                  <GameAssetIcon name="complete" size={14} />
+                  <span>{canServe ? 'Giao Bàn Này' : 'Chưa có món'}</span>
+                </button>
               )}
             </motion.div>
           );
@@ -151,16 +152,10 @@ export const TableView: React.FC = () => {
         <button
           type="button"
           onClick={startDay}
-          className="w-full mt-2 flex items-center justify-center shrink-0 cursor-pointer active:scale-95 transition-all drop-shadow-md"
-          title="Mở cửa đón khách"
+          className="w-full mt-2 py-2 bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 text-white font-black text-xs rounded-2xl shadow-md active:scale-95 transition-all flex items-center justify-center gap-1.5"
         >
-          <Image
-            src={PHASE3_UI_ASSETS.btn_start_bat_dau.src}
-            alt="Mở Cửa Đón Khách"
-            width={PHASE3_UI_ASSETS.btn_start_bat_dau.width}
-            height={PHASE3_UI_ASSETS.btn_start_bat_dau.height}
-            className="h-10 w-auto object-contain pointer-events-none"
-          />
+          <GameAssetIcon name="lantern" size={16} />
+          <span>Mở Cửa Đón Khách Đến Ăn</span>
         </button>
       )}
     </div>

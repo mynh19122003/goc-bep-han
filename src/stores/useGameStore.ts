@@ -33,6 +33,18 @@ import {
 import { CUSTOMER_VISUAL_POOL, SHIPPER_LIST } from '@/config/gameAssets';
 import { soundManager } from '@/utils/audio';
 import { generateOrderCustomization } from '@/config/recipes';
+import {
+  averageFreshnessForRequirements,
+  buildConsumptionRequirements,
+  cloneDishes,
+  cloneInventory,
+  createGameId,
+  deductIngredients,
+  mergeDishesWithDefaults,
+  mergeInventoryWithDefaults,
+  preparedDishMatchesOrder,
+  restaurantLevelFromReputation,
+} from '@/core/gameCore';
 
 interface GameState {
   // Progression & Economy
@@ -41,7 +53,9 @@ interface GameState {
   dayTimeSeconds: number; // 0 to 100s per day
   isDayActive: boolean;
   isPaused: boolean;
+  pauseBeforeModal: boolean;
   rating: number; // 1.0 to 5.0
+  dayStartRating: number;
   reputationPoints: number;
 
   // Day Statistics
@@ -86,6 +100,7 @@ interface GameState {
   endDay: () => void;
   advanceToNextDay: () => void;
   gameTick: (deltaSeconds: number) => void;
+  cookingTick: (deltaSeconds: number) => void;
 
   // Dine-In Table Actions
   serveTable: (tableId: number) => boolean;
@@ -121,6 +136,7 @@ interface GameState {
   startTokbokki: (dishId: string) => boolean;
   addTokbokkiSauceSpoon: (type: 'gochujang' | 'soySauce' | 'sugar') => void;
   setTokbokkiStirring: (isStirring: boolean) => void;
+  flipTokbokkiPan: () => void;
   finishTokbokki: () => boolean;
   discardTokbokki: () => void;
 
@@ -135,6 +151,7 @@ interface GameState {
   // Tactile Cooking: Ramyeon
   startRamyeon: (dishId: string) => boolean;
   pourRamyeonWater: (delta: number) => void;
+  confirmRamyeonWater: () => boolean;
   addRamyeonContents: () => void;
   tapEggCrack: () => void;
   finishRamyeon: () => boolean;
@@ -156,6 +173,43 @@ interface GameState {
 
 const DAY_DURATION_SECONDS = 100;
 
+const createInitialTokbokkiSession = (): TokbokkiCookSession => ({
+  status: 'idle',
+  dishId: null,
+  gochujangSpoons: 0,
+  soySauceSpoons: 0,
+  sugarSpoons: 0,
+  spicyMeter: 0,
+  saltyMeter: 0,
+  sweetMeter: 0,
+  heatNeedle: 20,
+  heatDirection: 1,
+  isStirring: false,
+  greenZoneTime: 0,
+  totalCookTime: 0,
+  requiredCookTime: 7,
+  flipCount: 0,
+});
+
+const createInitialKimbapSession = (): KimbapCookSession => ({
+  dishId: null,
+  step: 'idle',
+  placedIngredients: [],
+  requiredIngredientsQueue: ['rice', 'carrot', 'cucumber', 'egg', 'fish_cake'],
+  rollProgress: 0,
+  slicesMade: 0,
+});
+
+const createInitialRamyeonSession = (): RamyeonCookSession => ({
+  dishId: null,
+  step: 'idle',
+  waterLevel: 0,
+  noodlesAdded: false,
+  soupAdded: false,
+  eggCrackTaps: 0,
+  boilProgress: 0,
+});
+
 export const useGameStore = create<GameState>()(
   persist(
     (set, get) => ({
@@ -164,7 +218,9 @@ export const useGameStore = create<GameState>()(
       dayTimeSeconds: 0,
       isDayActive: false,
       isPaused: false,
+      pauseBeforeModal: false,
       rating: 4.8,
+      dayStartRating: 4.8,
       reputationPoints: 25,
 
       dailyRevenue: 0,
@@ -176,13 +232,13 @@ export const useGameStore = create<GameState>()(
 
       activeScene: 'kitchen',
       activeTab: 'kitchen',
-      activeStation: 'tokbokki',
+      activeStation: null,
       activeModal: 'none',
       bgmEnabled: false,
       sfxEnabled: true,
 
-      inventory: { ...INITIAL_INGREDIENTS },
-      dishes: { ...INITIAL_DISHES },
+      inventory: cloneInventory(INITIAL_INGREDIENTS),
+      dishes: cloneDishes(INITIAL_DISHES),
       upgrades: [...INITIAL_UPGRADES],
       currentNews: MARKET_NEWS_LIST[0],
       bannedMarketItemsToday: [],
@@ -193,49 +249,20 @@ export const useGameStore = create<GameState>()(
       reviews: [...INITIAL_REVIEWS],
       preparedDishes: [],
 
-      tokbokkiSession: {
-        status: 'idle',
-        dishId: null,
-        gochujangSpoons: 2,
-        soySauceSpoons: 1,
-        sugarSpoons: 1,
-        spicyMeter: 60,
-        saltyMeter: 35,
-        sweetMeter: 40,
-        heatNeedle: 20,
-        heatDirection: 1,
-        isStirring: false,
-        greenZoneTime: 0,
-        totalCookTime: 0,
-        requiredCookTime: 6,
-      },
-
-      kimbapSession: {
-        dishId: null,
-        step: 'idle',
-        placedIngredients: [],
-        requiredIngredientsQueue: ['rice', 'carrot', 'cucumber', 'egg', 'fish_cake'],
-        rollProgress: 0,
-        slicesMade: 0,
-      },
-
-      ramyeonSession: {
-        dishId: null,
-        step: 'idle',
-        waterLevel: 0,
-        noodlesAdded: false,
-        soupAdded: false,
-        eggCrackTaps: 0,
-        boilProgress: 0,
-      },
+      tokbokkiSession: createInitialTokbokkiSession(),
+      kimbapSession: createInitialKimbapSession(),
+      ramyeonSession: createInitialRamyeonSession(),
 
       // --- GAME FLOW ---
       startDay: () => {
+        const state = get();
+        if (state.isDayActive) return;
         soundManager.playCustomerBell();
         set({
           isDayActive: true,
           isPaused: false,
           dayTimeSeconds: 0,
+          dayStartRating: state.rating,
           dailyRevenue: 0,
           dailyCustomersServed: 0,
           dailyDeliveriesCompleted: 0,
@@ -247,6 +274,7 @@ export const useGameStore = create<GameState>()(
         // Spawn first dine-in customer
         setTimeout(() => {
           const state = get();
+          if (!state.isDayActive || state.isPaused) return;
           const emptyTable = state.tables.find((t) => t.status === 'empty');
           if (emptyTable) {
             const unlockedDishes = Object.values(state.dishes).filter((d) => d.isUnlocked);
@@ -255,7 +283,7 @@ export const useGameStore = create<GameState>()(
             const customization = generateOrderCustomization(randomDish.id);
 
             const newCust: Customer = {
-              id: `cust_${Date.now()}`,
+              id: createGameId('cust'),
               name: randomVisual.name,
               avatar: randomVisual.sprite,
               avatarColor: randomVisual.category === 'student' ? 'bg-amber-100' : 'bg-orange-100',
@@ -267,7 +295,14 @@ export const useGameStore = create<GameState>()(
               orderDishEmoji: randomDish.emoji,
               maxPatience: 45,
               currentPatience: 45,
-              tipMultiplier: 1.0,
+              tipMultiplier:
+                randomVisual.personality === 'friendly'
+                  ? 1.15
+                  : randomVisual.personality === 'critic'
+                  ? 1.25
+                  : randomVisual.personality === 'student'
+                  ? 0.9
+                  : 1.05,
               personality: randomVisual.personality,
               mood: 'happy',
               quote: randomVisual.defaultQuote,
@@ -296,23 +331,25 @@ export const useGameStore = create<GameState>()(
           customersServed: state.dailyCustomersServed,
           deliveriesCompleted: state.dailyDeliveriesCompleted,
           customersLost: state.dailyCustomersLost,
-          ratingChange: Number(
-            ((state.dailyCustomersServed + state.dailyDeliveriesCompleted) * 0.04 - state.dailyCustomersLost * 0.12).toFixed(2)
-          ),
+          ratingChange: Number((state.rating - state.dayStartRating).toFixed(2)),
           tipsEarned: state.dailyTips,
         };
 
         // Freshness decay on inventory
-        const updatedInventory = { ...state.inventory };
+        const updatedInventory = cloneInventory(state.inventory);
         Object.keys(updatedInventory).forEach((key) => {
           const item = updatedInventory[key];
           const decay = Math.floor(100 / item.shelfLifeDays);
-          item.freshness = Math.max(0, item.freshness - decay);
+          updatedInventory[key] = {
+            ...item,
+            freshness: Math.max(0, item.freshness - decay),
+          };
         });
 
         soundManager.playSuccess();
         set({
           isDayActive: false,
+          isPaused: true,
           dailyReport: report,
           activeModal: 'day_end',
           inventory: updatedInventory,
@@ -324,27 +361,48 @@ export const useGameStore = create<GameState>()(
         const nextNews = MARKET_NEWS_LIST[(state.day) % MARKET_NEWS_LIST.length];
 
         // Apply price fluctuation based on news
-        const updatedInventory = { ...state.inventory };
+        const updatedInventory = cloneInventory(state.inventory);
+        const notice = nextNews.affectedNotice.toLocaleLowerCase('vi-VN');
         Object.keys(updatedInventory).forEach((key) => {
           const item = updatedInventory[key];
-          let changePercent = Math.floor(Math.random() * 30) - 15; // -15% to +15% default
-          if (nextNews.affectedNotice.includes(item.vietnameseName)) {
-            changePercent = nextNews.headline.includes('giảm') || nextNews.affectedNotice.includes('giảm') ? -25 : +35;
+          let changePercent = Math.floor(Math.random() * 30) - 15;
+
+          const aliases = [
+            item.vietnameseName,
+            item.vietnameseName.replace(/\s+(Sợi|Tươi|Giòn|Thơm|Vàng)$/i, ''),
+            item.name,
+          ].map((value) => value.toLocaleLowerCase('vi-VN'));
+
+          if (aliases.some((alias) => alias && notice.includes(alias))) {
+            changePercent =
+              nextNews.headline.toLocaleLowerCase('vi-VN').includes('giảm') ||
+              notice.includes('giảm')
+                ? -25
+                : +35;
           }
-          item.priceChangePercent = changePercent;
-          item.cost = Math.max(2, Math.round(item.baseCost * (1 + changePercent / 100)));
+
+          updatedInventory[key] = {
+            ...item,
+            priceChangePercent: changePercent,
+            cost: Math.max(2, Math.round(item.baseCost * (1 + changePercent / 100))),
+          };
         });
 
         set({
           day: state.day + 1,
           dayTimeSeconds: 0,
+          isPaused: false,
           currentNews: nextNews,
           bannedMarketItemsToday: [],
           tables: JSON.parse(JSON.stringify(INITIAL_TABLES)),
           deliveryQueue: [],
+          preparedDishes: [],
           dailyReport: null,
           activeModal: 'none',
           inventory: updatedInventory,
+          tokbokkiSession: createInitialTokbokkiSession(),
+          kimbapSession: createInitialKimbapSession(),
+          ramyeonSession: createInitialRamyeonSession(),
         });
       },
 
@@ -376,7 +434,7 @@ export const useGameStore = create<GameState>()(
               lostCountDelta += 1;
               // Add disappointed review
               const badReview: CustomerReview = {
-                id: `rev_${Date.now()}`,
+                id: createGameId('rev'),
                 author: table.customer.name,
                 avatar: table.customer.avatar,
                 rating: 1,
@@ -473,7 +531,7 @@ export const useGameStore = create<GameState>()(
               ratingDelta -= 0.12;
               lostCountDelta += 1;
               const badDeliveryReview: CustomerReview = {
-                id: `rev_${Date.now()}`,
+                id: createGameId('rev'),
                 author: order.customerName,
                 avatar: '🛵',
                 rating: 2,
@@ -496,7 +554,7 @@ export const useGameStore = create<GameState>()(
           if (unlockedDishes.length > 0) {
             const randomDish = unlockedDishes[Math.floor(Math.random() * unlockedDishes.length)];
             const randomShipper = SHIPPER_LIST[Math.floor(Math.random() * SHIPPER_LIST.length)];
-            const orderNum = Math.floor(100 + Math.random() * 900);
+            const orderNum = createGameId('DH').replace('DH_', '').slice(0, 8).toUpperCase();
             const addresses = ['P. Hongdae, Tòa B5', 'Đại Học Quốc Gia Seoul', 'Chung cư Mapo, Tầng 12', 'Văn phòng Yeouido'];
             const customization = generateOrderCustomization(randomDish.id);
 
@@ -524,54 +582,77 @@ export const useGameStore = create<GameState>()(
           }
         }
 
-        // --- 3. Tick Tokbokki Stir Session (if active) ---
-        let tokSession = { ...state.tokbokkiSession };
-        if (tokSession.status === 'cooking_stir') {
-          tokSession.totalCookTime += deltaSeconds;
-
-          // Heat needle dynamics: rises when hold-to-stir, falls when released
-          if (tokSession.isStirring) {
-            tokSession.heatNeedle = Math.min(100, tokSession.heatNeedle + deltaSeconds * 28);
-          } else {
-            tokSession.heatNeedle = Math.max(0, tokSession.heatNeedle - deltaSeconds * 22);
-          }
-
-          // Green zone is 50 to 80
-          if (tokSession.heatNeedle >= 50 && tokSession.heatNeedle <= 80) {
-            tokSession.greenZoneTime += deltaSeconds;
-          }
-
-          if (tokSession.totalCookTime >= tokSession.requiredCookTime) {
-            // Determine quality
-            const ratio = tokSession.greenZoneTime / tokSession.requiredCookTime;
-            if (tokSession.heatNeedle > 95 || ratio < 0.25) {
-              tokSession.status = 'burned';
-              soundManager.playError();
-            } else {
-              tokSession.status = 'perfect';
-              soundManager.playSuccess();
-            }
-          }
-        }
-
-        // --- 4. Tick Ramyeon Boil Session (if boiling) ---
-        let ramSession = { ...state.ramyeonSession };
-        if (ramSession.step === 'boiling') {
-          ramSession.boilProgress = Math.min(100, ramSession.boilProgress + deltaSeconds * 18);
-          if (ramSession.boilProgress >= 100) {
-            ramSession.step = 'ready';
-            soundManager.playSuccess();
-          }
-        }
-
         set({
           dayTimeSeconds: newDayTime,
           tables: updatedTables,
           deliveryQueue: updatedDeliveryQueue,
-          tokbokkiSession: tokSession,
-          ramyeonSession: ramSession,
           rating: Math.max(1, Math.min(5, Number((state.rating + ratingDelta).toFixed(2)))),
           dailyCustomersLost: state.dailyCustomersLost + lostCountDelta,
+        });
+      },
+
+      cookingTick: (deltaSeconds: number) => {
+        const state = get();
+        if (state.isPaused) return;
+
+        const stoveLevel = state.upgrades.find((u) => u.id === 'stove_speed')?.level || 0;
+        const stoveSpeed = 1 + stoveLevel * 0.25;
+
+        let tokSession = { ...state.tokbokkiSession };
+        if (tokSession.status === 'cooking_stir') {
+          tokSession.totalCookTime += deltaSeconds * stoveSpeed;
+
+          if (tokSession.isStirring) {
+            tokSession.heatNeedle = Math.min(100, tokSession.heatNeedle + deltaSeconds * 28 * stoveSpeed);
+          } else {
+            tokSession.heatNeedle = Math.max(0, tokSession.heatNeedle - deltaSeconds * 22);
+          }
+
+          if (tokSession.heatNeedle >= 50 && tokSession.heatNeedle <= 80) {
+            tokSession.greenZoneTime += deltaSeconds * stoveSpeed;
+          }
+
+          if (tokSession.totalCookTime >= tokSession.requiredCookTime) {
+            const heatRatio = tokSession.greenZoneTime / tokSession.requiredCookTime;
+            const sauceTotal =
+              tokSession.gochujangSpoons + tokSession.soySauceSpoons + tokSession.sugarSpoons;
+            const sauceOk =
+              sauceTotal > 0 &&
+              Math.abs(tokSession.gochujangSpoons / sauceTotal - 0.5) <= 0.18 &&
+              Math.abs(tokSession.soySauceSpoons / sauceTotal - 0.25) <= 0.15 &&
+              Math.abs(tokSession.sugarSpoons / sauceTotal - 0.25) <= 0.15;
+            const enoughFlips = tokSession.flipCount >= 2;
+
+            if (tokSession.heatNeedle > 95 || heatRatio < 0.25 || !sauceOk) {
+              tokSession.status = 'burned';
+              soundManager.playError();
+            } else if (enoughFlips || heatRatio >= 0.55) {
+              tokSession.status = 'perfect';
+              soundManager.playSuccess();
+            } else {
+              tokSession.status = 'burned';
+              soundManager.playError();
+            }
+            tokSession.isStirring = false;
+          }
+        }
+
+        let ramSession = { ...state.ramyeonSession };
+        if (ramSession.step === 'boiling' || ramSession.step === 'ready') {
+          const wasReady = ramSession.step === 'ready';
+          ramSession.boilProgress += deltaSeconds * 18 * stoveSpeed;
+          if (ramSession.boilProgress >= 125) {
+            ramSession.step = 'burned';
+            soundManager.playError();
+          } else if (ramSession.boilProgress >= 100) {
+            ramSession.step = 'ready';
+            if (!wasReady) soundManager.playSuccess();
+          }
+        }
+
+        set({
+          tokbokkiSession: tokSession,
+          ramyeonSession: ramSession,
         });
       },
 
@@ -581,7 +662,16 @@ export const useGameStore = create<GameState>()(
         const table = state.tables.find((t) => t.id === tableId);
         if (!table || !table.customer || table.status !== 'seated') return false;
 
-        const preparedIdx = state.preparedDishes.findIndex((p) => p.dishId === table.customer?.orderDishId);
+        const preparedIdx = state.preparedDishes.findIndex((p) =>
+          preparedDishMatchesOrder({
+            prepared: p,
+            orderId: table.customer?.id,
+            dishId: table.customer?.orderDishId || '',
+            requiredToppings: table.customer?.requiredToppings,
+            excludedToppings: table.customer?.excludedToppings,
+            spiceLevel: table.customer?.spiceLevel,
+          })
+        );
         if (preparedIdx === -1) {
           soundManager.playError();
           return false;
@@ -591,8 +681,19 @@ export const useGameStore = create<GameState>()(
         const dish = state.dishes[table.customer.orderDishId];
 
         const patienceRatio = table.customer.currentPatience / table.customer.maxPatience;
-        const tip = Math.round(dish.price * (patienceRatio > 0.5 ? 0.25 : 0.1));
-        const total = dish.price + tip;
+        const qualityMultiplier =
+          prepared.quality === 'perfect' ? 1 : prepared.quality === 'good' ? 0.9 : 0.55;
+        const baseRevenue = Math.round(dish.price * qualityMultiplier);
+        const tipRate =
+          prepared.quality === 'perfect' && patienceRatio > 0.5
+            ? 0.25
+            : prepared.quality === 'good'
+            ? 0.1
+            : 0;
+        const tip = Math.round(dish.price * tipRate * table.customer.tipMultiplier);
+        const total = baseRevenue + tip;
+        const reputationGain =
+          prepared.quality === 'perfect' ? 12 : prepared.quality === 'good' ? 7 : 1;
 
         const updatedDishes = [...state.preparedDishes];
         updatedDishes.splice(preparedIdx, 1);
@@ -602,14 +703,17 @@ export const useGameStore = create<GameState>()(
 
         // Customer leaves positive review
         const newReview: CustomerReview = {
-          id: `rev_${Date.now()}`,
+          id: createGameId('rev'),
           author: table.customer.name,
           avatar: table.customer.avatar,
-          rating: prepared.quality === 'perfect' ? 5 : 4,
+          rating:
+            prepared.quality === 'perfect' ? 5 : prepared.quality === 'good' ? 4 : 2,
           comment:
             prepared.quality === 'perfect'
               ? `Món ${dish.name} ở đây đỉnh chóp luôn! Nóng hổi và đậm đà tuyệt đối.`
-              : `Món ${dish.name} vị khá ổn, quán phục vụ chu đáo.`,
+              : prepared.quality === 'good'
+              ? `Món ${dish.name} vị khá ổn, quán phục vụ chu đáo.`
+              : `Món ${dish.name} chưa đạt yêu cầu, lần sau quán cố gắng hơn nhé.`,
           dishName: dish.name,
           orderType: 'dine_in',
           timeAgo: 'Vừa xong',
@@ -624,7 +728,28 @@ export const useGameStore = create<GameState>()(
 
         set({
           coins: state.coins + total,
-          rating: Math.min(5, Number((state.rating + 0.03).toFixed(2))),
+          rating: Math.max(
+            1,
+            Math.min(
+              5,
+              Number(
+                (
+                  state.rating +
+                  (() => {
+                    const comfortLevel =
+                      state.upgrades.find((upgrade) => upgrade.id === 'table_comfort')?.level || 0;
+                    const comfortBonus = comfortLevel * 0.005;
+                    return prepared.quality === 'perfect'
+                      ? 0.04 + comfortBonus
+                      : prepared.quality === 'good'
+                      ? 0.01 + comfortBonus
+                      : -0.08 + Math.min(0.03, comfortLevel * 0.01);
+                  })()
+                ).toFixed(2)
+              )
+            )
+          ),
+          reputationPoints: state.reputationPoints + reputationGain,
           dailyRevenue: state.dailyRevenue + total,
           dailyTips: state.dailyTips + tip,
           dailyCustomersServed: state.dailyCustomersServed + 1,
@@ -639,9 +764,14 @@ export const useGameStore = create<GameState>()(
       cleanTable: (tableId: number) => {
         soundManager.playClick();
         soundManager.playCoin();
+        const state = get();
         set({
-          coins: get().coins + 5, // bonus tip for clean table
-          tables: get().tables.map((t) => (t.id === tableId ? { ...t, status: 'empty' as const } : t)),
+          coins: state.coins + 5,
+          dailyRevenue: state.dailyRevenue + 5,
+          dailyTips: state.dailyTips + 5,
+          tables: state.tables.map((t) =>
+            t.id === tableId ? { ...t, status: 'empty' as const } : t
+          ),
         });
       },
 
@@ -651,14 +781,32 @@ export const useGameStore = create<GameState>()(
         const order = state.deliveryQueue.find((o) => o.id === orderId);
         if (!order || order.shipperStatus !== 'arrived') return false;
 
-        const preparedIdx = state.preparedDishes.findIndex((p) => p.dishId === order.dishId);
+        const preparedIdx = state.preparedDishes.findIndex((p) =>
+          preparedDishMatchesOrder({
+            prepared: p,
+            orderId: order.id,
+            dishId: order.dishId,
+            requiredToppings: order.requiredToppings,
+            excludedToppings: order.excludedToppings,
+            spiceLevel: order.spiceLevel,
+          })
+        );
         if (preparedIdx === -1) {
           soundManager.playError();
           return false;
         }
 
         const prepared = state.preparedDishes[preparedIdx];
-        const totalEarned = order.price + order.tip;
+        const ebikeLevel = state.upgrades.find((u) => u.id === 'delivery_ebike')?.level || 0;
+        const qualityMultiplier =
+          prepared.quality === 'perfect' ? 1 : prepared.quality === 'good' ? 0.9 : 0.55;
+        const boostedTip =
+          prepared.quality === 'burned'
+            ? 0
+            : Math.round(order.tip * (1 + ebikeLevel * 0.3));
+        const totalEarned = Math.round(order.price * qualityMultiplier) + boostedTip;
+        const reputationGain =
+          prepared.quality === 'perfect' ? 10 : prepared.quality === 'good' ? 6 : 0;
 
         const updatedDishes = [...state.preparedDishes];
         updatedDishes.splice(preparedIdx, 1);
@@ -667,11 +815,17 @@ export const useGameStore = create<GameState>()(
         soundManager.playSuccess();
 
         const deliveryReview: CustomerReview = {
-          id: `rev_${Date.now()}`,
+          id: createGameId('rev'),
           author: order.customerName,
           avatar: '🛵',
-          rating: 5,
-          comment: `Đơn ${order.id} giao cực nhanh! Món ${order.dishName} tới nơi còn bốc khói nghi ngút. 5 sao cho quán!`,
+          rating:
+            prepared.quality === 'perfect' ? 5 : prepared.quality === 'good' ? 4 : 2,
+          comment:
+            prepared.quality === 'perfect'
+              ? `Đơn ${order.id} giao nhanh, món ${order.dishName} còn nóng hổi và rất ngon!`
+              : prepared.quality === 'good'
+              ? `Đơn ${order.id} giao ổn, món ${order.dishName} khá vừa miệng.`
+              : `Đơn ${order.id} giao tới nhưng món ${order.dishName} chưa đạt chất lượng mong đợi.`,
           dishName: order.dishName,
           orderType: 'delivery',
           timeAgo: 'Vừa xong',
@@ -680,9 +834,25 @@ export const useGameStore = create<GameState>()(
 
         set({
           coins: state.coins + totalEarned,
-          rating: Math.min(5, Number((state.rating + 0.04).toFixed(2))),
+          rating: Math.max(
+            1,
+            Math.min(
+              5,
+              Number(
+                (
+                  state.rating +
+                  (prepared.quality === 'perfect'
+                    ? 0.04
+                    : prepared.quality === 'good'
+                    ? 0.01
+                    : -0.08)
+                ).toFixed(2)
+              )
+            )
+          ),
+          reputationPoints: state.reputationPoints + reputationGain,
           dailyRevenue: state.dailyRevenue + totalEarned,
-          dailyTips: state.dailyTips + order.tip,
+          dailyTips: state.dailyTips + boostedTip,
           dailyDeliveriesCompleted: state.dailyDeliveriesCompleted + 1,
           preparedDishes: updatedDishes,
           deliveryQueue: state.deliveryQueue.filter((o) => o.id !== orderId),
@@ -707,118 +877,95 @@ export const useGameStore = create<GameState>()(
         const dish = state.dishes[params.dishId];
         if (!dish) return false;
 
-        // Deduct inventory
-        const updatedInventory = { ...state.inventory };
-        params.usedIngredients.forEach((ingId) => {
-          if (updatedInventory[ingId]) {
-            updatedInventory[ingId] = {
-              ...updatedInventory[ingId],
-              stock: Math.max(0, updatedInventory[ingId].stock - 1),
-            };
+        if (params.orderType === 'dine_in') {
+          const targetTable = state.tables.find((table) => table.id === params.tableId);
+          if (!targetTable?.customer || targetTable.customer.id !== params.orderId) {
+            soundManager.playError();
+            return false;
           }
-        });
-
-        // Tip and revenue calculation
-        const scoreMultiplier = params.score / 100;
-        const baseEarned = Math.round(dish.price * Math.max(0.4, scoreMultiplier));
-        const tipEarned = Math.round(dish.price * (params.score >= 90 ? 0.3 : params.score >= 75 ? 0.15 : 0));
-        const totalCoins = baseEarned + tipEarned;
-
-        if (params.orderType === 'dine_in' && params.tableId) {
-          const table = state.tables.find((t) => t.id === params.tableId);
-          if (!table || !table.customer) return false;
-
-          const customer = table.customer;
-          const reviewRating = params.score >= 90 ? 5 : params.score >= 75 ? 4 : params.score >= 50 ? 3 : 1;
-          const reviewComment =
-            params.score >= 90
-              ? `Tô ${dish.name} chuẩn chỉnh đúng ý mình từng hạt topping! 10/10 điểm!`
-              : params.score >= 75
-              ? `Món ${dish.name} ăn rất vừa miệng, topping thơm lừng ấm bụng.`
-              : params.score >= 50
-              ? `Món ${dish.name} ăn tạm ổn, quán nêm hơi khác khẩu vị một chút.`
-              : `Món ${dish.name} sai yêu cầu topping rồi, hơi thất vọng!`;
-
-          const newReview: CustomerReview = {
-            id: `rev_${Date.now()}`,
-            author: customer.name,
-            avatar: customer.avatar,
-            rating: reviewRating,
-            comment: reviewComment,
-            dishName: dish.name,
-            orderType: 'dine_in',
-            timeAgo: 'Vừa xong',
-            tag: params.score >= 75 ? 'tasty' : 'broken',
-          };
-
-          const updatedTables = state.tables.map((t) =>
-            t.id === params.tableId
-              ? { ...t, status: 'eating' as const, eatingTimeRemaining: 8, customer }
-              : t
-          );
-
-          set({
-            coins: state.coins + totalCoins,
-            rating: Math.max(1, Math.min(5, Number((state.rating + (params.score >= 75 ? 0.04 : -0.05)).toFixed(2)))),
-            dailyRevenue: state.dailyRevenue + totalCoins,
-            dailyTips: state.dailyTips + tipEarned,
-            dailyCustomersServed: state.dailyCustomersServed + 1,
-            tables: updatedTables,
-            inventory: updatedInventory,
-            reviews: [newReview, ...state.reviews.slice(0, 15)],
-          });
-          return true;
         }
 
-        if (params.orderType === 'delivery' && params.orderId) {
-          const orderIdx = state.deliveryQueue.findIndex((o) => o.id === params.orderId);
-          if (orderIdx === -1) return false;
-          const order = state.deliveryQueue[orderIdx];
-
-          const updatedQueue = [...state.deliveryQueue];
-          updatedQueue.splice(orderIdx, 1);
-
-          const deliveryReview: CustomerReview = {
-            id: `rev_${Date.now()}`,
-            author: order.customerName,
-            avatar: '🛵',
-            rating: params.score >= 80 ? 5 : 3,
-            comment: `Đơn ${order.id} giao món ${order.dishName} nóng sốt đẫm topping!`,
-            dishName: order.dishName,
-            orderType: 'delivery',
-            timeAgo: 'Vừa xong',
-            tag: 'fast',
-          };
-
-          set({
-            coins: state.coins + totalCoins,
-            rating: Math.min(5, Number((state.rating + 0.04).toFixed(2))),
-            dailyRevenue: state.dailyRevenue + totalCoins,
-            dailyTips: state.dailyTips + tipEarned,
-            dailyDeliveriesCompleted: state.dailyDeliveriesCompleted + 1,
-            deliveryQueue: updatedQueue,
-            inventory: updatedInventory,
-            reviews: [deliveryReview, ...state.reviews.slice(0, 15)],
-          });
-          return true;
+        if (
+          params.orderType === 'delivery' &&
+          !state.deliveryQueue.some((order) => order.id === params.orderId)
+        ) {
+          soundManager.playError();
+          return false;
         }
 
-        // Free cook: add to buffer tray
-        const newPrepared: PreparedDish = {
-          id: `prep_${Date.now()}`,
+        if (
+          params.orderId &&
+          state.preparedDishes.some((prepared) => prepared.targetOrderId === params.orderId)
+        ) {
+          soundManager.playError();
+          return false;
+        }
+
+        if (state.preparedDishes.length >= 8) {
+          soundManager.playError();
+          return false;
+        }
+
+        const requirements = buildConsumptionRequirements(dish, params.toppings);
+        const averageFreshness = averageFreshnessForRequirements(
+          state.inventory,
+          requirements
+        );
+        const updatedInventory = deductIngredients(state.inventory, requirements);
+        if (!updatedInventory) {
+          soundManager.playError();
+          return false;
+        }
+
+        let finalQuality: 'perfect' | 'good' | 'burned' =
+          params.quality === 'perfect'
+            ? 'perfect'
+            : params.quality === 'good'
+            ? 'good'
+            : 'burned';
+
+        if (averageFreshness < 35) {
+          finalQuality = 'burned';
+        } else if (averageFreshness < 60 && finalQuality === 'perfect') {
+          finalQuality = 'good';
+        }
+
+        const freshnessPenalty =
+          averageFreshness >= 80 ? 0 : averageFreshness >= 60 ? 5 : averageFreshness >= 35 ? 15 : 35;
+        const finalScore = Math.max(0, params.score - freshnessPenalty);
+
+        const prepared: PreparedDish = {
+          id: createGameId('prep'),
           dishId: params.dishId,
           name: dish.name,
           emoji: dish.emoji,
-          quality: params.quality === 'perfect' ? 'perfect' : params.quality === 'good' ? 'good' : 'burned',
+          quality: finalQuality,
           preparedAt: Date.now(),
-          toppings: params.toppings,
+          preparedOnDay: state.day,
+          toppings: [...params.toppings],
           spiceLevel: params.spiceLevel,
+          targetOrderId: params.orderId,
+          targetOrderType: params.orderType,
+          targetTableId: params.tableId,
+          score: finalScore,
         };
 
+        // Cooking creates a prepared dish. Revenue is awarded only when the
+        // correct dine-in customer or arrived shipper actually receives it.
+        if (params.orderType === 'dine_in' || params.orderType === 'delivery') {
+          set({
+            inventory: updatedInventory,
+            preparedDishes: [prepared, ...state.preparedDishes],
+          });
+          soundManager.playSuccess();
+          return true;
+        }
+
         set({
-          preparedDishes: [newPrepared, ...state.preparedDishes.slice(0, 3)],
           inventory: updatedInventory,
+          preparedDishes: [prepared, ...state.preparedDishes],
         });
+        soundManager.playSuccess();
         return true;
       },
 
@@ -834,31 +981,31 @@ export const useGameStore = create<GameState>()(
         const dish = state.dishes[dishId];
         if (!dish) return false;
 
-        const inventory = { ...state.inventory };
-        for (const [ingId, qty] of Object.entries(dish.requiredIngredients)) {
-          if (!inventory[ingId] || inventory[ingId].stock < (qty || 1)) {
-            soundManager.playError();
-            return false;
-          }
+        if (state.preparedDishes.length >= 8) {
+          soundManager.playError();
+          return false;
         }
 
-        for (const [ingId, qty] of Object.entries(dish.requiredIngredients)) {
-          inventory[ingId].stock -= qty || 1;
+        const updatedInventory = deductIngredients(state.inventory, dish.requiredIngredients);
+        if (!updatedInventory) {
+          soundManager.playError();
+          return false;
         }
 
-        soundManager.playCoin();
+        soundManager.playSuccess();
         set({
-          inventory,
+          inventory: updatedInventory,
           preparedDishes: [
-            ...state.preparedDishes,
             {
-              id: `dish_${Date.now()}`,
+              id: createGameId('prep'),
               dishId: dish.id,
               name: dish.name,
               emoji: dish.emoji,
               quality: 'perfect',
               preparedAt: Date.now(),
+              preparedOnDay: state.day,
             },
+            ...state.preparedDishes,
           ],
         });
         return true;
@@ -880,11 +1027,23 @@ export const useGameStore = create<GameState>()(
           return false;
         }
 
-        const updatedInventory = { ...state.inventory };
+        const updatedInventory = cloneInventory(state.inventory);
         items.forEach(({ id, quantity }) => {
           if (updatedInventory[id] && quantity > 0) {
-            updatedInventory[id].stock += quantity;
-            updatedInventory[id].freshness = 100;
+            const current = updatedInventory[id];
+            const newStock = current.stock + quantity;
+            const mixedFreshness =
+              newStock > 0
+                ? Math.round(
+                    (current.stock * current.freshness + quantity * 100) / newStock
+                  )
+                : 100;
+
+            updatedInventory[id] = {
+              ...current,
+              stock: newStock,
+              freshness: mixedFreshness,
+            };
           }
         });
 
@@ -924,40 +1083,50 @@ export const useGameStore = create<GameState>()(
         if (!state.bargainSession) return { success: false, discount: 0, banned: false };
 
         const pos = state.bargainSession.sliderPosition;
+        const charmLevel = state.upgrades.find((u) => u.id === 'bargain_charm')?.level || 0;
+        const bestZoneStart = Math.max(60, 80 - charmLevel * 10);
+
         let discount = 0;
         let isBanned = false;
 
-        if (pos >= 80) {
-          discount = 0.2; // 20% off
-          soundManager.playSuccess();
+        if (pos >= bestZoneStart) {
+          discount = 0.2;
         } else if (pos >= 50) {
-          discount = 0.1; // 10% off
-          soundManager.playSuccess();
+          discount = 0.1;
         } else if (pos >= 25) {
-          discount = 0.05; // 5% off
-          soundManager.playCoin();
+          discount = 0.05;
         } else {
-          isBanned = true; // Bị mắng!
-          soundManager.playError();
+          isBanned = true;
         }
 
         if (isBanned) {
+          soundManager.playError();
           set({
-            bannedMarketItemsToday: [...state.bannedMarketItemsToday, state.bargainSession.ingredientId],
+            bannedMarketItemsToday: Array.from(
+              new Set([...state.bannedMarketItemsToday, state.bargainSession.ingredientId])
+            ),
             bargainSession: { ...state.bargainSession, status: 'banned', discountAwarded: 0 },
           });
           return { success: false, discount: 0, banned: true };
-        } else {
-          // Complete purchase with discount
-          get().buyIngredients(
-            [{ id: state.bargainSession.ingredientId, quantity: state.bargainSession.quantity }],
-            discount
-          );
-          set({
-            bargainSession: { ...state.bargainSession, status: 'success', discountAwarded: discount },
-          });
-          return { success: true, discount, banned: false };
         }
+
+        const purchased = get().buyIngredients(
+          [{ id: state.bargainSession.ingredientId, quantity: state.bargainSession.quantity }],
+          discount
+        );
+
+        if (!purchased) {
+          set({
+            bargainSession: { ...state.bargainSession, status: 'active', discountAwarded: 0 },
+          });
+          return { success: false, discount: 0, banned: false };
+        }
+
+        soundManager.playSuccess();
+        set({
+          bargainSession: { ...get().bargainSession!, status: 'success', discountAwarded: discount },
+        });
+        return { success: true, discount, banned: false };
       },
 
       cancelBargain: () => {
@@ -971,15 +1140,10 @@ export const useGameStore = create<GameState>()(
         if (!dish || state.tokbokkiSession.status !== 'idle') return false;
 
         // Check ingredients
-        const inventory = { ...state.inventory };
-        for (const [ingId, qty] of Object.entries(dish.requiredIngredients)) {
-          if (!inventory[ingId] || inventory[ingId].stock < (qty || 1)) {
-            soundManager.playError();
-            return false;
-          }
-        }
-        for (const [ingId, qty] of Object.entries(dish.requiredIngredients)) {
-          inventory[ingId].stock -= qty || 1;
+        const inventory = deductIngredients(state.inventory, dish.requiredIngredients);
+        if (!inventory) {
+          soundManager.playError();
+          return false;
         }
 
         soundManager.playSizzle();
@@ -988,18 +1152,19 @@ export const useGameStore = create<GameState>()(
           tokbokkiSession: {
             status: 'sauce_ratio',
             dishId,
-            gochujangSpoons: 2,
-            soySauceSpoons: 1,
-            sugarSpoons: 1,
-            spicyMeter: 60,
-            saltyMeter: 35,
-            sweetMeter: 40,
+            gochujangSpoons: 0,
+            soySauceSpoons: 0,
+            sugarSpoons: 0,
+            spicyMeter: 0,
+            saltyMeter: 0,
+            sweetMeter: 0,
             heatNeedle: 30,
             heatDirection: 1,
             isStirring: false,
             greenZoneTime: 0,
             totalCookTime: 0,
             requiredCookTime: 7,
+            flipCount: 0,
           },
         });
         return true;
@@ -1057,6 +1222,21 @@ export const useGameStore = create<GameState>()(
         }
       },
 
+      flipTokbokkiPan: () => {
+        const state = get();
+        const session = state.tokbokkiSession;
+        if (session.status !== 'cooking_stir') return;
+
+        soundManager.playSizzle();
+        set({
+          tokbokkiSession: {
+            ...session,
+            flipCount: Math.min(5, session.flipCount + 1),
+            heatNeedle: Math.max(0, session.heatNeedle - 8),
+          },
+        });
+      },
+
       finishTokbokki: () => {
         const state = get();
         const session = state.tokbokkiSession;
@@ -1069,12 +1249,13 @@ export const useGameStore = create<GameState>()(
           preparedDishes: [
             ...state.preparedDishes,
             {
-              id: `dish_${Date.now()}`,
+              id: createGameId('prep'),
               dishId: dish.id,
               name: dish.name,
               emoji: dish.emoji,
               quality: session.status === 'perfect' ? 'perfect' : 'burned',
               preparedAt: Date.now(),
+              preparedOnDay: state.day,
             },
           ],
           tokbokkiSession: {
@@ -1103,15 +1284,10 @@ export const useGameStore = create<GameState>()(
         const dish = state.dishes[dishId];
         if (!dish || state.kimbapSession.step !== 'idle') return false;
 
-        const inventory = { ...state.inventory };
-        for (const [ingId, qty] of Object.entries(dish.requiredIngredients)) {
-          if (!inventory[ingId] || inventory[ingId].stock < (qty || 1)) {
-            soundManager.playError();
-            return false;
-          }
-        }
-        for (const [ingId, qty] of Object.entries(dish.requiredIngredients)) {
-          inventory[ingId].stock -= qty || 1;
+        const inventory = deductIngredients(state.inventory, dish.requiredIngredients);
+        if (!inventory) {
+          soundManager.playError();
+          return false;
         }
 
         soundManager.playClick();
@@ -1121,7 +1297,9 @@ export const useGameStore = create<GameState>()(
             dishId,
             step: 'ingredients',
             placedIngredients: [],
-            requiredIngredientsQueue: ['rice', 'carrot', 'cucumber', 'egg', 'fish_cake'],
+            requiredIngredientsQueue: (Object.keys(dish.requiredIngredients) as IngredientId[]).filter(
+              (id) => !['seaweed'].includes(id)
+            ),
             rollProgress: 0,
             slicesMade: 0,
           },
@@ -1198,12 +1376,13 @@ export const useGameStore = create<GameState>()(
           preparedDishes: [
             ...state.preparedDishes,
             {
-              id: `dish_${Date.now()}`,
+              id: createGameId('prep'),
               dishId: dish.id,
               name: dish.name,
               emoji: dish.emoji,
               quality: 'perfect',
               preparedAt: Date.now(),
+              preparedOnDay: state.day,
             },
           ],
           kimbapSession: {
@@ -1232,15 +1411,10 @@ export const useGameStore = create<GameState>()(
         const dish = state.dishes[dishId];
         if (!dish || state.ramyeonSession.step !== 'idle') return false;
 
-        const inventory = { ...state.inventory };
-        for (const [ingId, qty] of Object.entries(dish.requiredIngredients)) {
-          if (!inventory[ingId] || inventory[ingId].stock < (qty || 1)) {
-            soundManager.playError();
-            return false;
-          }
-        }
-        for (const [ingId, qty] of Object.entries(dish.requiredIngredients)) {
-          inventory[ingId].stock -= qty || 1;
+        const inventory = deductIngredients(state.inventory, dish.requiredIngredients);
+        if (!inventory) {
+          soundManager.playError();
+          return false;
         }
 
         soundManager.playClick();
@@ -1265,14 +1439,33 @@ export const useGameStore = create<GameState>()(
         if (session.step !== 'pouring_water') return;
 
         soundManager.playBoil();
-        const nextLevel = Math.min(100, session.waterLevel + delta);
+        const nextLevel = Math.max(0, Math.min(100, session.waterLevel + delta));
         set({
           ramyeonSession: {
             ...session,
             waterLevel: nextLevel,
-            step: nextLevel >= 75 ? 'adding_contents' : 'pouring_water',
           },
         });
+      },
+
+      confirmRamyeonWater: () => {
+        const state = get();
+        const session = state.ramyeonSession;
+        if (session.step !== 'pouring_water') return false;
+
+        if (session.waterLevel < 70 || session.waterLevel > 80) {
+          soundManager.playError();
+          return false;
+        }
+
+        soundManager.playSuccess();
+        set({
+          ramyeonSession: {
+            ...session,
+            step: 'adding_contents',
+          },
+        });
+        return true;
       },
 
       addRamyeonContents: () => {
@@ -1319,12 +1512,13 @@ export const useGameStore = create<GameState>()(
           preparedDishes: [
             ...state.preparedDishes,
             {
-              id: `dish_${Date.now()}`,
+              id: createGameId('prep'),
               dishId: dish.id,
               name: dish.name,
               emoji: dish.emoji,
               quality: 'perfect',
               preparedAt: Date.now(),
+              preparedOnDay: state.day,
             },
           ],
           ramyeonSession: {
@@ -1378,7 +1572,8 @@ export const useGameStore = create<GameState>()(
       unlockDish: (dishId: string) => {
         const state = get();
         const d = state.dishes[dishId];
-        if (!d || d.isUnlocked || state.coins < d.unlockCost) {
+        const restaurantLevel = restaurantLevelFromReputation(state.reputationPoints);
+        if (!d || d.isUnlocked || state.coins < d.unlockCost || restaurantLevel < d.unlockLevel) {
           soundManager.playError();
           return false;
         }
@@ -1413,7 +1608,23 @@ export const useGameStore = create<GameState>()(
 
       setActiveModal: (modal: ModalType) => {
         soundManager.playClick();
-        set({ activeModal: modal });
+        const state = get();
+
+        if (modal === 'none') {
+          set({
+            activeModal: 'none',
+            isPaused: state.pauseBeforeModal,
+            pauseBeforeModal: false,
+          });
+          return;
+        }
+
+        set({
+          activeModal: modal,
+          pauseBeforeModal:
+            state.activeModal === 'none' ? state.isPaused : state.pauseBeforeModal,
+          isPaused: state.isDayActive ? true : state.isPaused,
+        });
       },
 
       toggleBgm: () => {
@@ -1436,7 +1647,9 @@ export const useGameStore = create<GameState>()(
           dayTimeSeconds: 0,
           isDayActive: false,
           isPaused: false,
+          pauseBeforeModal: false,
           rating: 4.8,
+          dayStartRating: 4.8,
           reputationPoints: 25,
           dailyRevenue: 0,
           dailyCustomersServed: 0,
@@ -1444,8 +1657,8 @@ export const useGameStore = create<GameState>()(
           dailyCustomersLost: 0,
           dailyTips: 0,
           dailyReport: null,
-          inventory: { ...INITIAL_INGREDIENTS },
-          dishes: { ...INITIAL_DISHES },
+          inventory: cloneInventory(INITIAL_INGREDIENTS),
+          dishes: cloneDishes(INITIAL_DISHES),
           upgrades: [...INITIAL_UPGRADES],
           currentNews: MARKET_NEWS_LIST[0],
           bannedMarketItemsToday: [],
@@ -1454,19 +1667,36 @@ export const useGameStore = create<GameState>()(
           deliveryQueue: [],
           reviews: [...INITIAL_REVIEWS],
           preparedDishes: [],
+          tokbokkiSession: createInitialTokbokkiSession(),
+          kimbapSession: createInitialKimbapSession(),
+          ramyeonSession: createInitialRamyeonSession(),
+          activeScene: 'dining',
           activeTab: 'kitchen',
-          activeStation: 'tokbokki',
+          activeStation: null,
           activeModal: 'none',
         });
       },
     }),
     {
       name: 'goc-bep-han-tycoon-v2',
+      version: 3,
       storage: createJSONStorage(() => localStorage),
+      migrate: (persistedState: any) => {
+        const persisted = persistedState || {};
+        return {
+          ...persisted,
+          inventory: mergeInventoryWithDefaults(INITIAL_INGREDIENTS, persisted.inventory),
+          dishes: mergeDishesWithDefaults(INITIAL_DISHES, persisted.dishes),
+          reputationPoints: persisted.reputationPoints ?? 25,
+          currentNews: persisted.currentNews ?? MARKET_NEWS_LIST[0],
+        };
+      },
       partialize: (state) => ({
         coins: state.coins,
         day: state.day,
         rating: state.rating,
+        reputationPoints: state.reputationPoints,
+        currentNews: state.currentNews,
         inventory: state.inventory,
         dishes: state.dishes,
         upgrades: state.upgrades,

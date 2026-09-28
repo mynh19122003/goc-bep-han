@@ -417,6 +417,36 @@ export const RECIPE_CONFIGS: Record<string, DishRecipeConfig> = {
     ],
   },
 
+  banana_milk: {
+    dishId: 'banana_milk',
+    name: 'Sữa Chuối Ướp Lạnh',
+    koreanName: '바나나맛 우유',
+    stationType: 'bowl',
+    containerAsset: GAME_ASSETS.cooking.bowl,
+    baseIngredients: ['banana_milk_carton'],
+    allowedToppings: [],
+    supportsSpiceLevel: false,
+    defaultSpiceLevel: 0,
+    maxSpiceLevel: 0,
+    idealCookSeconds: 1,
+    steps: [
+      {
+        id: 'prep',
+        stepNumber: 1,
+        title: 'Lấy Sữa Chuối Ướp Lạnh',
+        instruction: 'Lấy hộp sữa chuối từ ngăn mát',
+        type: 'prepare',
+      },
+      {
+        id: 'finish',
+        stepNumber: 2,
+        title: 'Phục Vụ',
+        instruction: 'Cắm ống hút và giao ngay cho khách',
+        type: 'finish',
+      },
+    ],
+  },
+
   canh_kimchi: {
     dishId: 'canh_kimchi',
     name: 'Canh Kim Chi Hầm Bò',
@@ -515,19 +545,40 @@ export const RECIPE_CONFIGS: Record<string, DishRecipeConfig> = {
 };
 
 /**
- * Helper to fetch recipe config, with safe fallback to spicy_ramyeon or ramyeon
+ * Fetch recipe config. Unknown dishes receive a neutral, non-spicy recipe so
+ * missing configuration can never silently become spicy ramyeon.
  */
 export function getRecipeConfig(dishId: string): DishRecipeConfig {
   if (RECIPE_CONFIGS[dishId]) {
     return RECIPE_CONFIGS[dishId];
   }
 
-  // Fallback pattern matching
-  if (dishId.includes('ramyeon')) return RECIPE_CONFIGS.spicy_ramyeon;
+  if (dishId.includes('ramyeon')) return RECIPE_CONFIGS.ramyeon;
   if (dishId.includes('tokbokki')) return RECIPE_CONFIGS.tokbokki;
   if (dishId.includes('kimbap')) return RECIPE_CONFIGS.kimbap_classic;
 
-  return RECIPE_CONFIGS.spicy_ramyeon;
+  return {
+    dishId,
+    name: dishId,
+    koreanName: '',
+    stationType: 'bowl',
+    containerAsset: GAME_ASSETS.cooking.bowl,
+    baseIngredients: [],
+    allowedToppings: [],
+    supportsSpiceLevel: false,
+    defaultSpiceLevel: 0,
+    maxSpiceLevel: 0,
+    idealCookSeconds: 1,
+    steps: [
+      {
+        id: 'finish',
+        stepNumber: 1,
+        title: 'Hoàn Thành',
+        instruction: 'Món này chưa có công thức tương tác riêng.',
+        type: 'finish',
+      },
+    ],
+  };
 }
 
 export function generateOrderCustomization(dishId: string): {

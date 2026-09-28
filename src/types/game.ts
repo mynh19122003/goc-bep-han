@@ -160,6 +160,7 @@ export interface TokbokkiCookSession {
   greenZoneTime: number; // seconds kept in green zone
   totalCookTime: number;
   requiredCookTime: number;
+  flipCount: number; // successful pan flips / toss gestures
 }
 
 export interface KimbapCookSession {
@@ -191,6 +192,10 @@ export interface PreparedDish {
   toppings?: IngredientId[];
   spiceLevel?: number;
   targetOrderId?: string;
+  targetOrderType?: 'dine_in' | 'delivery' | 'free_cook';
+  targetTableId?: number;
+  score?: number;
+  preparedOnDay?: number;
 }
 
 export interface UpgradeItem {
