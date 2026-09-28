@@ -12,6 +12,7 @@ interface GameModalProps {
   icon?: React.ReactNode;
   maxWidth?: string;
   className?: string;
+  showClose?: boolean;
 }
 
 export const GameModal: React.FC<GameModalProps> = ({
@@ -22,6 +23,7 @@ export const GameModal: React.FC<GameModalProps> = ({
   icon,
   maxWidth = 'max-w-2xl',
   className = '',
+  showClose = true,
 }) => (
   <div className="fixed inset-0 z-50 flex items-end bg-black/70 backdrop-blur-sm sm:items-center sm:justify-center sm:p-4">
     <button type="button" className="absolute inset-0" aria-label="Đóng" onClick={onClose} />
@@ -41,7 +43,7 @@ export const GameModal: React.FC<GameModalProps> = ({
             {subtitle && <p className="truncate text-[10px] font-bold text-stone-400">{subtitle}</p>}
           </div>
         </div>
-        <CloseButton onClick={onClose} />
+        {showClose && <CloseButton onClick={onClose} />}
       </header>
       <div className="game-scrollbar min-h-0 flex-1 overflow-y-auto p-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:p-4">
         {children}
