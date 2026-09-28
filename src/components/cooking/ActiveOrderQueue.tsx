@@ -113,11 +113,10 @@ export const ActiveOrderQueue: React.FC<ActiveOrderQueueProps> = ({
           )}
         </div>
       ) : (
-        <div className="flex gap-2.5 overflow-x-auto pb-2 px-1 scrollbar-thin scrollbar-thumb-amber-400 select-none">
+        <div className="game-scrollbar flex gap-2.5 overflow-x-auto overscroll-x-contain snap-x snap-mandatory pb-2 px-1 select-none">
           {allOrders.map((order, idx) => {
             const dishAsset =
-              (GAME_ASSETS.dishes as Record<string, string>)[order.dishId] ||
-              GAME_ASSETS.dishes.ramyeon;
+              (GAME_ASSETS.dishes as Record<string, string>)[order.dishId] || null;
 
             const isUrgent = order.timeRemaining !== undefined && order.timeRemaining <= 15;
 
@@ -165,7 +164,6 @@ export const ActiveOrderQueue: React.FC<ActiveOrderQueueProps> = ({
                           : 'bg-amber-100 text-amber-800 border-amber-300'
                       }`}
                     >
-                      <GameAssetIcon name="clock" size={12} />
                       <span>{order.timeRemaining}s</span>
                     </div>
                   )}
@@ -196,7 +194,7 @@ export const ActiveOrderQueue: React.FC<ActiveOrderQueueProps> = ({
                           return (
                             <span
                               key={topId}
-                              className="text-[9px] font-black bg-amber-200/80 text-amber-900 px-1.5 py-0.2 rounded-md"
+                              className="text-[9px] font-black bg-amber-200/80 text-amber-900 px-1.5 py-0.5 rounded-md"
                             >
                               +{item ? item.vietnameseName : topId}
                             </span>
@@ -217,7 +215,7 @@ export const ActiveOrderQueue: React.FC<ActiveOrderQueueProps> = ({
                           return (
                             <span
                               key={excId}
-                              className="text-[9px] font-black bg-red-100 text-red-700 px-1.5 py-0.2 rounded-md line-through"
+                              className="text-[9px] font-black bg-red-100 text-red-700 px-1.5 py-0.5 rounded-md line-through"
                             >
                               -{item ? item.vietnameseName : excId}
                             </span>
