@@ -33,10 +33,13 @@ export default function GamePage() {
   // Handle panel selection from bottom dock
   const handleSelectDockPanel = (panel: GamePanelType) => {
     if (panel === 'menu') {
+      setActivePanel(null);
       setActiveModal('menu');
     } else if (panel === 'inventory') {
+      setActivePanel(null);
       setActiveModal('market');
     } else if (panel === 'upgrade') {
+      setActivePanel(null);
       setActiveModal('upgrades');
     } else {
       setActivePanel(panel);
