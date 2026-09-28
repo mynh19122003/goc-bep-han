@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useGameLoop } from '@/hooks/useGameLoop';
 import { useGameStore } from '@/stores/useGameStore';
 import { HeaderHUD } from '@/components/hud/HeaderHUD';
@@ -19,6 +19,8 @@ import { UpgradeModal } from '@/components/modals/UpgradeModal';
 import { DayEndModal } from '@/components/modals/DayEndModal';
 import { SettingsModal } from '@/components/modals/SettingsModal';
 import { CookbookModal } from '@/components/modals/CookbookModal';
+import { GameIntroModal } from '@/components/modals/GameIntroModal';
+import { GAME_VERSION } from '@/config/version';
 
 export default function GamePage() {
   // Start continuous 1s game loop for customer patience, timers & day cycle
@@ -29,6 +31,19 @@ export default function GamePage() {
   // Single active panel state (Contextual Drawer pattern: ONE GAME SCREEN)
   const [activePanel, setActivePanel] = useState<'kitchen' | 'delivery' | null>(null);
   const [targetedCookingOrder, setTargetedCookingOrder] = useState<CookingTargetOrder | null>(null);
+  const [showIntro, setShowIntro] = useState(false);
+
+  useEffect(() => {
+    const seenVersion = window.localStorage.getItem('goc-bep-han:intro-version');
+    if (seenVersion !== GAME_VERSION) {
+      setShowIntro(true);
+    }
+  }, []);
+
+  const closeIntro = () => {
+    window.localStorage.setItem('goc-bep-han:intro-version', GAME_VERSION);
+    setShowIntro(false);
+  };
 
   // Handle panel selection from bottom dock
   const handleSelectDockPanel = (panel: GamePanelType) => {
@@ -60,6 +75,7 @@ export default function GamePage() {
       <HeaderHUD
         onOpenDelivery={() => setActivePanel('delivery')}
         onOpenSettings={() => setActiveModal('settings')}
+        onOpenGuide={() => setShowIntro(true)}
       />
 
       {/* ========================================================================= */}
@@ -109,6 +125,7 @@ export default function GamePage() {
       <DayEndModal />
       <SettingsModal />
       <CookbookModal />
+      <GameIntroModal isOpen={showIntro} onClose={closeIntro} />
     </div>
   );
 }
