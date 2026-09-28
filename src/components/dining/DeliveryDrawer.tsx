@@ -20,13 +20,13 @@ export const DeliveryDrawer: React.FC<DeliveryDrawerProps> = ({ isOpen, onClose 
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 select-none font-baloo">
+      <div className="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 select-none font-baloo">
         <motion.div
           initial={{ y: '100%' }}
           animate={{ y: 0 }}
           exit={{ y: '100%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 250 }}
-          className="bg-white rounded-t-[32px] sm:rounded-[32px] w-full max-w-md p-4 sm:p-5 shadow-2xl border-t-4 sm:border-4 border-teal-300 max-h-[85vh] flex flex-col"
+          className="bg-white rounded-t-[32px] sm:rounded-[32px] w-full sm:max-w-lg p-4 sm:p-5 shadow-2xl border-t-4 sm:border-4 border-teal-300 h-[82dvh] sm:h-auto sm:max-h-[85vh] flex flex-col"
         >
           {/* Header */}
           <div className="flex items-center justify-between border-b border-stone-200 pb-3 mb-3">
@@ -37,7 +37,7 @@ export const DeliveryDrawer: React.FC<DeliveryDrawerProps> = ({ isOpen, onClose 
               <div>
                 <h3 className="font-black text-stone-800 text-sm sm:text-base flex items-center gap-1.5 uppercase">
                   <span>Đơn Giao Tận Nơi</span>
-                  <span className="bg-teal-500 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full">
+                  <span className="bg-teal-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
                     {deliveryQueue.length} Đơn
                   </span>
                 </h3>
@@ -57,7 +57,7 @@ export const DeliveryDrawer: React.FC<DeliveryDrawerProps> = ({ isOpen, onClose 
           </div>
 
           {/* Delivery Orders List */}
-          <div className="overflow-y-auto space-y-2.5 flex-1 pr-1">
+          <div className="game-scrollbar overflow-y-auto space-y-2.5 flex-1 pr-1 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
             {deliveryQueue.length === 0 ? (
               <div className="text-center py-8 text-stone-400">
                 <div className="w-12 h-12 mx-auto mb-2 flex items-center justify-center">
