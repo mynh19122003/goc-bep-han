@@ -6,9 +6,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/stores/useGameStore';
 import { GAME_ASSETS } from '@/game/assets/gameAssets';
 import { CookingEngine, CookingTargetOrder } from '@/components/cooking/CookingEngine';
-import { TokbokkiStation } from '@/components/cooking/TokbokkiStation';
-import { RamyeonStation } from '@/components/cooking/RamyeonStation';
-import { KimbapStation } from '@/components/cooking/KimbapStation';
 import { DishPicker } from '@/components/modals/DishPicker';
 import { GameAssetIcon } from '@/components/ui/game/GameAssetIcon';
 import { GameIconButton } from '@/components/ui/game/GameIconButton';
@@ -32,8 +29,6 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
     preparedDishes,
     completeCustomOrder,
     prepareInstantItem,
-    activeStation,
-    setActiveStation,
     discardPreparedDish,
   } = useGameStore();
 
@@ -43,11 +38,9 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
   // Update currentOrder when initialOrder changes from outside
   useEffect(() => {
     if (!isOpen) return;
-    setActiveStation(null);
 
     if (initialOrder) {
       setCurrentOrder(initialOrder);
-      setActiveStation(null);
     } else if (!currentOrder) {
       // Default to first waiting table customer or first delivery
       const firstSeated = tables.find((t) => t.status === 'seated' && t.customer);
@@ -131,7 +124,6 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
     if (dish.stationType === 'instant') {
       prepareInstantItem(dishId);
       setCurrentOrder(null);
-      setActiveStation(null);
       return;
     }
 
@@ -146,7 +138,6 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
       spiceLevel: undefined,
       price: dish.price,
     });
-    setActiveStation(null);
   };
 
   const handleFinishCustomCook = (result: {
@@ -264,8 +255,7 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
               </div>
             ) : (
               waitingOrders.map((order, idx) => {
-                const isSelected =
-                  currentOrder?.orderId === order.orderId && activeStation === null;
+                const isSelected = currentOrder?.orderId === order.orderId;
                 const dishAsset =
                   (GAME_ASSETS.dishes as Record<string, string>)[order.dishId] ||
                   GAME_ASSETS.dishes.ramyeon;
@@ -276,8 +266,7 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
                     type="button"
                     onClick={() => {
                       setCurrentOrder(order);
-                      setActiveStation(null);
-                    }}
+                                    }}
                     className={`shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-black border transition-all cursor-pointer ${
                       isSelected
                         ? 'bg-amber-600 text-white border-amber-300 shadow-md scale-105'
@@ -307,13 +296,7 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
 
           {/* 3. Main Cooking Area (CookingEngine or Specific Stations) */}
           <div className="flex-1 overflow-y-auto p-2 sm:p-4">
-            {activeStation === 'tokbokki' ? (
-              <TokbokkiStation />
-            ) : activeStation === 'ramyeon' ? (
-              <RamyeonStation />
-            ) : activeStation === 'kimbap' ? (
-              <KimbapStation />
-            ) : currentOrder ? (
+            {currentOrder ? (
               <CookingEngine
                 key={`${currentOrder.orderType}-${currentOrder.orderId || currentOrder.dishId}-${currentOrder.tableId || 'free'}`}
                 order={currentOrder}
