@@ -46,6 +46,9 @@ export const GameIntroModal: React.FC<GameIntroModalProps> = ({ isOpen, onClose 
       {isOpen && (
         <div className="fixed inset-0 z-[160] flex items-end justify-center bg-black/75 backdrop-blur-md sm:items-center sm:p-4">
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Giới thiệu và hướng dẫn Góc Bếp Hàn"
             initial={{ y: 36, opacity: 0, scale: 0.98 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 36, opacity: 0, scale: 0.98 }}
