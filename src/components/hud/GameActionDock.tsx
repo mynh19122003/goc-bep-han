@@ -34,7 +34,7 @@ export const GameActionDock: React.FC<GameActionDockProps> = ({
 
   return (
     <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-2 pb-[max(.45rem,env(safe-area-inset-bottom))]">
-      <div className="pointer-events-auto grid w-full max-w-[560px] grid-cols-5 gap-1 rounded-2xl border border-amber-500/25 bg-[#18120f]/96 p-1.5 shadow-2xl backdrop-blur-md">
+      <div className="pointer-events-auto grid w-full max-w-[560px] grid-cols-5 gap-0.5 rounded-2xl border border-amber-500/25 bg-[#18120f]/96 p-1 shadow-2xl backdrop-blur-md sm:gap-1 sm:p-1.5">
         {dockItems.map((item) => {
           const selected = activePanel === item.key;
           const badge =
@@ -51,10 +51,10 @@ export const GameActionDock: React.FC<GameActionDockProps> = ({
                   : 'text-stone-300 hover:bg-white/5'
               }`}
             >
-              <span className="relative h-7 w-7 sm:h-8 sm:w-8">
+              <span className="relative h-6 w-6 sm:h-8 sm:w-8">
                 <Image src={item.asset} alt="" fill sizes="32px" className="object-contain" />
               </span>
-              <span className="max-w-full truncate text-[9px] font-black sm:text-[10px]">{item.label}</span>
+              <span className="max-w-full truncate text-[8px] font-black sm:text-[10px]">{item.label}</span>
               {badge > 0 && (
                 <span className="absolute right-1 top-0 min-w-[18px] rounded-full border border-red-300/50 bg-red-600 px-1 text-[9px] font-black leading-[16px] text-white">
                   {badge}
