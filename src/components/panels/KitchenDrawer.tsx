@@ -177,39 +177,42 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex justify-end bg-stone-950/70 backdrop-blur-xs select-none font-baloo">
+      <div className="fixed inset-0 z-50 flex items-end sm:items-stretch sm:justify-end bg-stone-950/75 backdrop-blur-xs select-none font-baloo">
         {/* Backdrop click to close */}
         <div className="absolute inset-0 cursor-pointer" onClick={onClose} />
 
-        {/* Drawer Container (Right side on Desktop, Bottom Sheet on Mobile) */}
+        {/* Drawer Container: Bottom Sheet on Mobile, Right Panel on Desktop */}
         <motion.div
-          initial={{ x: '100%' }}
-          animate={{ x: 0 }}
-          exit={{ x: '100%' }}
+          initial={{ y: '100%', opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 28, stiffness: 280 }}
-          className="relative z-10 w-full sm:max-w-2xl lg:max-w-3xl h-full bg-stone-900/95 backdrop-blur-xl border-l-2 border-amber-600/50 shadow-2xl flex flex-col justify-between overflow-hidden text-stone-100"
+          className="relative z-10 w-full sm:max-w-2xl lg:max-w-3xl h-[90vh] sm:h-full bg-stone-900/98 backdrop-blur-xl rounded-t-[28px] sm:rounded-t-none border-t-2 sm:border-t-0 sm:border-l-2 border-amber-600/50 shadow-2xl flex flex-col justify-between overflow-hidden text-stone-100"
         >
+          {/* Mobile pull indicator */}
+          <div className="w-12 h-1.5 bg-stone-600/70 rounded-full mx-auto mt-2 sm:hidden shrink-0" />
+
           {/* 1. Drawer Header */}
-          <div className="shrink-0 p-3 sm:p-4 border-b border-amber-600/30 bg-stone-950/80 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-amber-600/20 border border-amber-400/40 flex items-center justify-center shrink-0">
+          <div className="shrink-0 p-2.5 sm:p-4 border-b border-amber-600/30 bg-stone-950/80 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-amber-600/20 border border-amber-400/40 flex items-center justify-center shrink-0">
                 <Image
                   src={GAME_ASSETS.navigation.kitchen}
                   alt="Bếp nấu"
-                  width={30}
-                  height={30}
+                  width={28}
+                  height={28}
                   className="object-contain"
                 />
               </div>
-              <div>
-                <h2 className="text-sm sm:text-base font-black text-amber-200 uppercase tracking-wide flex items-center gap-2 leading-tight">
-                  <span>GIAN BẾP NẤU HÀN QUỐC</span>
-                  <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-500/40">
+              <div className="min-w-0">
+                <h2 className="text-xs sm:text-base font-black text-amber-200 uppercase tracking-wide flex items-center gap-1.5 leading-tight truncate">
+                  <span>GIAN BẾP HÀN</span>
+                  <span className="text-[9px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 shrink-0">
                     Khay: {preparedDishes.length}/4
                   </span>
                 </h2>
-                <span className="text-[11px] text-amber-300/80 font-bold block leading-none">
-                  Chế biến theo yêu cầu • Mì Cay, Tokbokki, Kimbap
+                <span className="text-[10px] sm:text-[11px] text-amber-300/80 font-bold block leading-none truncate">
+                  Mì Cay • Tokbokki • Kimbap
                 </span>
               </div>
             </div>
@@ -219,19 +222,35 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
               <button
                 type="button"
                 onClick={() => setIsDishPickerOpen(true)}
-                className="px-3 py-1.5 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 text-white rounded-xl text-xs font-black shadow border border-amber-400/50 flex items-center gap-1 active:scale-95 transition-all cursor-pointer"
+                title="Mở menu nấu tự do"
+                className="h-8 sm:h-9 px-2.5 rounded-xl bg-amber-600/30 hover:bg-amber-600/50 border border-amber-400/60 flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer shadow-sm"
               >
-                <GameAssetIcon name="menu" size={14} />
-                <span>+ Nấu Tự Do</span>
+                <div className="h-5 w-auto aspect-[476/210] relative">
+                  <Image
+                    src="/assets/phase3-ui/btn_free_cook_nau_tu_do.png"
+                    alt="Nấu Tự Do"
+                    width={476}
+                    height={210}
+                    className="h-full w-auto object-contain pointer-events-none"
+                  />
+                </div>
+                <span className="text-xs font-black text-amber-200 hidden xs:inline">Nấu Tự Do</span>
               </button>
 
-              <GameIconButton
-                asset={GAME_ASSETS.actions.close}
-                size="sm"
-                variant="glass"
+              <button
+                type="button"
                 onClick={onClose}
                 title="Đóng gian bếp"
-              />
+                className="w-8 h-8 rounded-xl overflow-hidden cursor-pointer transition-transform active:scale-90"
+              >
+                <Image
+                  src="/assets/phase3-ui/ui_close_dong.png"
+                  alt="Đóng"
+                  width={32}
+                  height={32}
+                  className="w-full h-full object-contain pointer-events-none drop-shadow"
+                />
+              </button>
             </div>
           </div>
 
@@ -332,9 +351,17 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsDishPickerOpen(true)}
-                  className="px-4 py-2 bg-gradient-to-r from-red-600 via-amber-600 to-red-600 hover:brightness-110 text-white rounded-2xl font-black text-xs sm:text-sm shadow-lg border border-amber-300 active:scale-95 transition-all cursor-pointer flex items-center gap-2"
+                  className="h-10 sm:h-11 px-4 bg-gradient-to-r from-red-600 via-amber-600 to-red-600 hover:brightness-110 text-white rounded-2xl font-black text-xs sm:text-sm shadow-lg border border-amber-300 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2"
                 >
-                  <GameAssetIcon name="menu" size={16} />
+                  <div className="h-6 w-auto aspect-[476/210] relative">
+                    <Image
+                      src="/assets/phase3-ui/btn_free_cook_nau_tu_do.png"
+                      alt="Nấu tự do"
+                      width={476}
+                      height={210}
+                      className="h-full w-auto object-contain pointer-events-none"
+                    />
+                  </div>
                   <span>Mở Menu Chọn Món Tự Do</span>
                 </button>
               </div>
@@ -344,10 +371,16 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
           {/* 4. Drawer Footer: Prepared Dishes Tray */}
           {preparedDishes.length > 0 && (
             <div className="shrink-0 p-2 sm:p-3 bg-stone-950 border-t border-amber-600/30 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-1.5 overflow-x-auto">
-                <span className="text-[10px] font-bold text-amber-300/80 shrink-0 uppercase">
-                  Món Đã Nấu Xong:
-                </span>
+              <div className="flex items-center gap-2 overflow-x-auto">
+                <div className="h-6 w-auto aspect-[619/254] relative shrink-0">
+                  <Image
+                    src="/assets/phase3-ui/btn_tray_khay.png"
+                    alt="Khay"
+                    width={619}
+                    height={254}
+                    className="h-full w-auto object-contain pointer-events-none"
+                  />
+                </div>
                 {preparedDishes.map((dish) => {
                   const dishAsset =
                     (GAME_ASSETS.dishes as Record<string, string>)[dish.dishId] ||
@@ -370,10 +403,16 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
                       <button
                         type="button"
                         onClick={() => discardPreparedDish(dish.id)}
-                        className="text-stone-400 hover:text-red-400 text-xs ml-1 cursor-pointer"
+                        className="w-4 h-4 relative ml-1 cursor-pointer transition-transform active:scale-90"
                         title="Hủy món này"
                       >
-                        ✕
+                        <Image
+                          src="/assets/phase3-ui/ui_cancel_huy.png"
+                          alt="Hủy"
+                          width={16}
+                          height={16}
+                          className="w-full h-full object-contain pointer-events-none"
+                        />
                       </button>
                     </div>
                   );
