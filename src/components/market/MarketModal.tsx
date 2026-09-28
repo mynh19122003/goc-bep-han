@@ -109,7 +109,7 @@ export const MarketModal: React.FC = () => {
               const assetSrc =
                 (GAME_ASSETS.ingredients as Record<string, string>)[item.id] ||
                 (GAME_ASSETS.toppings as Record<string, string>)[item.id] ||
-                GAME_ASSETS.ingredients.trung;
+                null;
 
               return (
                 <div
