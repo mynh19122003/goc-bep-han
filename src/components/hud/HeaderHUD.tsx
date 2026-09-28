@@ -10,11 +10,13 @@ import { GameButton } from '@/components/ui/game/GameButton';
 interface HeaderHUDProps {
   onOpenDelivery?: () => void;
   onOpenSettings?: () => void;
+  onOpenGuide?: () => void;
 }
 
 export const HeaderHUD: React.FC<HeaderHUDProps> = ({
   onOpenDelivery,
   onOpenSettings,
+  onOpenGuide,
 }) => {
   const {
     coins,
@@ -110,6 +112,15 @@ export const HeaderHUD: React.FC<HeaderHUDProps> = ({
               {isPaused ? 'Tiếp tục' : 'Tạm dừng'}
             </GameButton>
           )}
+
+          <button
+            type="button"
+            onClick={onOpenGuide}
+            className="hidden h-10 min-w-[44px] rounded-xl border border-teal-500/25 bg-teal-950/35 px-2 text-[10px] font-black text-teal-200 transition hover:bg-teal-900/40 active:scale-95 md:block"
+            title="Giới thiệu & hướng dẫn chơi"
+          >
+            HDSD
+          </button>
 
           <button
             type="button"
