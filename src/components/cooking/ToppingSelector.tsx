@@ -22,120 +22,81 @@ export const ToppingSelector: React.FC<ToppingSelectorProps> = ({
   inventory,
   disabled = false,
 }) => {
-  // Count how many of each topping are currently selected in this session
-  const selectionCounts = selectedToppings.reduce<Record<string, number>>((acc, id) => {
+  const counts = selectedToppings.reduce<Record<string, number>>((acc, id) => {
     acc[id] = (acc[id] || 0) + 1;
     return acc;
   }, {});
 
   return (
-    <div className="w-full select-none font-baloo">
-      {/* Header Label */}
-      <div className="flex items-center justify-between px-1 mb-2">
+    <section className="w-full">
+      <div className="mb-2 flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5">
-          <div className="w-5 h-5 relative shrink-0">
-            <Image
-              src={GAME_ASSETS.props.condiment_tray}
-              alt="Khay topping"
-              width={20}
-              height={20}
-              className="object-contain"
-            />
-          </div>
-          <span className="text-xs sm:text-sm font-black text-amber-200 uppercase tracking-wide">
-            KHAY TOPPING TƯƠI NGON
+          <span className="relative h-5 w-5">
+            <Image src={GAME_ASSETS.props.condiment_tray} alt="" fill sizes="20px" className="object-contain" />
           </span>
+          <h3 className="text-[10px] font-black uppercase tracking-wider text-amber-200 sm:text-[11px]">
+            Topping
+          </h3>
         </div>
-        <span className="text-[11px] font-bold text-amber-300/80">
-          Chạm để thêm vào món
-        </span>
+        <span className="text-[9px] font-bold text-stone-500">Chạm để thêm • Bỏ bớt bên dưới</span>
       </div>
 
-      {/* Horizontal Scroll Topping Bar: Cards min 76-90px on mobile, 80-105px on desktop, flex: 0 0 auto */}
-      <div className="flex gap-2 sm:gap-2.5 overflow-x-auto pb-2 px-1 scrollbar-thin scrollbar-thumb-amber-600/40">
-        {allowedToppings.map((toppingId) => {
-          const item = inventory[toppingId];
-          const stock = item ? item.stock : 0;
-          const currentCount = selectionCounts[toppingId] || 0;
-          const remainingStock = Math.max(0, stock - currentCount);
-          const isOutOfStock = remainingStock <= 0;
-          const isSelected = currentCount > 0;
-
-          // Asset resolution
-          const assetSrc =
-            (GAME_ASSETS.toppings as Record<string, string>)[toppingId] ||
-            (GAME_ASSETS.ingredients as Record<string, string>)[toppingId] ||
-            GAME_ASSETS.ingredients.trung;
-
-          const displayName = item ? item.vietnameseName : toppingId;
+      <div className="game-scrollbar flex snap-x snap-mandatory gap-2 overflow-x-auto overscroll-x-contain pb-2">
+        {allowedToppings.map((id) => {
+          const item = inventory[id];
+          const selected = counts[id] || 0;
+          const remaining = Math.max(0, (item?.stock || 0) - selected);
+          const unavailable = remaining <= 0;
+          const asset =
+            (GAME_ASSETS.toppings as Record<string, string>)[id] ||
+            (GAME_ASSETS.ingredients as Record<string, string>)[id];
 
           return (
-            <div
-              key={toppingId}
-              className="flex-shrink-0 flex flex-col items-center"
-              style={{ flex: '0 0 auto' }}
-            >
+            <div key={id} className="w-[82px] shrink-0 snap-start sm:w-[94px]">
               <button
                 type="button"
-                disabled={disabled || isOutOfStock}
-                onClick={() => onAddTopping(toppingId)}
-                title={`${displayName} (Còn ${remainingStock})`}
-                className={`relative w-[76px] sm:w-[92px] h-[96px] sm:h-[108px] rounded-2xl p-1.5 flex flex-col items-center justify-between border-2 transition-all duration-150 cursor-pointer shadow-md ${
-                  isSelected
-                    ? 'bg-amber-950/90 border-amber-400 shadow-amber-500/20 scale-[1.03]'
-                    : 'bg-stone-900/90 hover:bg-stone-850 border-amber-600/50 hover:border-amber-400'
-                } ${
-                  isOutOfStock
-                    ? 'opacity-40 grayscale cursor-not-allowed border-stone-700'
-                    : 'active:scale-95'
-                }`}
+                disabled={disabled || unavailable}
+                onClick={() => onAddTopping(id)}
+                className={`relative flex h-[104px] w-full flex-col items-center justify-between rounded-2xl border p-1.5 transition active:scale-95 ${
+                  selected > 0
+                    ? 'border-amber-300/55 bg-amber-950/65'
+                    : 'border-stone-700 bg-stone-900/70 hover:border-amber-500/35'
+                } ${unavailable ? 'cursor-not-allowed opacity-40 grayscale' : ''}`}
               >
-                {/* Selected count badge in corner (does not block food view) */}
-                {isSelected && (
-                  <span className="absolute -top-1.5 -right-1.5 bg-red-600 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center shadow-md border-2 border-stone-900 animate-bounce-slight z-10">
-                    +{currentCount}
+                {selected > 0 && (
+                  <span className="absolute right-1 top-1 min-w-[18px] rounded-full bg-red-600 px-1 text-[9px] font-black leading-[18px] text-white">
+                    {selected}
                   </span>
                 )}
 
-                {/* Topping Image Asset */}
-                <div className="w-10 h-10 sm:w-12 sm:h-12 relative flex items-center justify-center shrink-0 my-auto">
-                  <Image
-                    src={assetSrc}
-                    alt={displayName}
-                    width={48}
-                    height={48}
-                    className="w-full h-full object-contain pointer-events-none drop-shadow-sm"
-                    draggable={false}
-                  />
+                <div className="flex h-12 w-12 items-center justify-center">
+                  {asset ? (
+                    <div className="relative h-11 w-11">
+                      <Image src={asset} alt={item?.vietnameseName || id} fill sizes="44px" className="object-contain drop-shadow" />
+                    </div>
+                  ) : (
+                    <span className="text-center text-[8px] font-black leading-tight text-red-300">Thiếu asset</span>
+                  )}
                 </div>
 
-                {/* Topping Name with 2-line clamp to prevent ugly clipping */}
-                <span className="text-[11px] font-black text-amber-100 text-center leading-tight line-clamp-2 max-w-full px-0.5">
-                  {displayName}
+                <span className="line-clamp-2 min-h-[24px] max-w-full text-center text-[10px] font-black leading-tight text-amber-100">
+                  {item?.vietnameseName || id}
                 </span>
 
-                {/* Stock Counter Pill at bottom */}
-                <div className="w-full flex items-center justify-center mt-0.5">
-                  <span
-                    className={`text-[10px] font-black px-2 py-0.2 rounded-full border ${
-                      isOutOfStock
-                        ? 'bg-red-950 text-red-300 border-red-800'
-                        : isSelected
-                        ? 'bg-amber-400 text-stone-950 border-amber-300'
-                        : 'bg-stone-950/80 text-amber-300 border-amber-600/40'
-                    }`}
-                  >
-                    {isOutOfStock ? 'Hết' : `x${remainingStock}`}
-                  </span>
-                </div>
+                <span className={`rounded-full border px-2 py-0.5 text-[9px] font-black ${
+                  unavailable
+                    ? 'border-red-900/40 bg-red-950/40 text-red-300'
+                    : 'border-stone-700 bg-black/25 text-stone-300'
+                }`}>
+                  {unavailable ? 'Hết' : `x${remaining}`}
+                </span>
               </button>
 
-              {/* Remove button if selected */}
-              {isSelected && (
+              {selected > 0 && (
                 <button
                   type="button"
-                  onClick={() => onRemoveTopping(toppingId)}
-                  className="mt-1 text-[10px] font-bold text-red-400 hover:text-red-300 underline active:scale-90 cursor-pointer"
+                  onClick={() => onRemoveTopping(id)}
+                  className="mt-1 w-full rounded-lg py-1 text-[9px] font-black text-red-300 transition hover:bg-red-950/30 active:scale-95"
                 >
                   Bỏ bớt
                 </button>
@@ -144,6 +105,6 @@ export const ToppingSelector: React.FC<ToppingSelectorProps> = ({
           );
         })}
       </div>
-    </div>
+    </section>
   );
 };
