@@ -46,11 +46,11 @@ export const RestaurantScene: React.FC<RestaurantSceneProps> = ({
           alt="Không gian quán ăn truyền thống Hàn Quốc"
           fill
           sizes="100vw"
-          className="object-cover object-center filter brightness-[0.80] contrast-[1.05] saturate-[1.15]"
+          className="object-cover object-center filter brightness-[0.88] contrast-[1.03] saturate-[1.08]"
           priority
         />
         {/* Soft top & bottom gradient for text contrast without making the scene dark */}
-        <div className="absolute inset-0 bg-gradient-to-b from-stone-950/40 via-transparent to-stone-950/60 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-stone-950/30 via-transparent to-stone-950/45 pointer-events-none" />
       </div>
 
       {/* 2. Top Restaurant Banner & Day Controls */}
@@ -100,14 +100,14 @@ export const RestaurantScene: React.FC<RestaurantSceneProps> = ({
       </div>
 
       {/* 3. Main Restaurant Space: Delivery Spot + 4 Dining Table Zones */}
-      <div className="relative z-10 flex-1 px-2 sm:px-4 py-1 flex flex-col lg:flex-row gap-3 max-w-6xl mx-auto w-full overflow-y-auto">
+      <div className="game-scrollbar relative z-10 flex-1 px-2 sm:px-4 py-1 grid grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)] gap-3 max-w-6xl mx-auto w-full overflow-y-auto pb-20">
         {/* ========================================================================= */}
         {/* A. DELIVERY SPOT (Góc Chờ Shipper Giao Hàng Trực Tuyến)                  */}
         {/* ========================================================================= */}
-        <div className="lg:w-64 shrink-0 flex flex-col justify-start">
+        <div className="shrink-0 flex flex-col justify-start">
           <div
             onClick={onOpenDelivery}
-            className="bg-stone-900/85 hover:bg-stone-900 backdrop-blur-md border-2 border-teal-500/50 hover:border-teal-400 p-2.5 rounded-3xl shadow-xl transition-all cursor-pointer group"
+            className="bg-stone-950/55 hover:bg-stone-950/70 backdrop-blur-[3px] border border-teal-400/45 hover:border-teal-300 p-2.5 rounded-2xl shadow-lg transition-all cursor-pointer group"
           >
             {/* Header */}
             <div className="flex items-center justify-between mb-2">
@@ -203,7 +203,18 @@ export const RestaurantScene: React.FC<RestaurantSceneProps> = ({
             const isEmpty = table.status === 'empty';
 
             const canServe = Boolean(
-              hasCustomer && preparedDishes.some((p) => p.dishId === table.customer?.orderDishId)
+              hasCustomer &&
+                table.customer &&
+                preparedDishes.some((prepared) =>
+                  preparedDishMatchesOrder({
+                    prepared,
+                    orderId: table.customer!.id,
+                    dishId: table.customer!.orderDishId,
+                    requiredToppings: table.customer!.requiredToppings,
+                    excludedToppings: table.customer!.excludedToppings,
+                    spiceLevel: table.customer!.spiceLevel,
+                  })
+                )
             );
 
             const patiencePercent = hasCustomer
@@ -216,7 +227,7 @@ export const RestaurantScene: React.FC<RestaurantSceneProps> = ({
             return (
               <div
                 key={table.id}
-                className="relative rounded-3xl p-3 flex flex-col justify-between transition-all bg-stone-900/80 backdrop-blur-md border-2 border-amber-600/40 hover:border-amber-400/70 shadow-xl"
+                className="relative rounded-2xl p-2.5 sm:p-3 flex flex-col justify-between transition-all bg-stone-950/45 backdrop-blur-[3px] border border-amber-400/35 hover:bg-stone-950/60 hover:border-amber-300/70 shadow-lg"
               >
                 {/* 1. Table Header: Table Name & Waiting Seconds */}
                 <div className="flex items-center justify-between mb-1.5 z-10">
@@ -242,7 +253,7 @@ export const RestaurantScene: React.FC<RestaurantSceneProps> = ({
                 </div>
 
                 {/* 2. Table Area Content (Customer + Order Bubble or Clean Table Graphic) */}
-                <div className="min-h-[145px] flex flex-col items-center justify-center relative my-1">
+                <div className="min-h-[128px] sm:min-h-[142px] flex flex-col items-center justify-center relative my-1">
                   {/* CASE 1: Customer Seated Waiting for Food */}
                   {hasCustomer && table.customer && (
                     <div className="flex flex-col items-center w-full z-10">
@@ -402,7 +413,7 @@ export const RestaurantScene: React.FC<RestaurantSceneProps> = ({
       </div>
 
       {/* 4. Bottom Spacer to avoid overlapping with GameActionDock */}
-      <div className="h-20 shrink-0 pointer-events-none" />
+      <div className="h-12 shrink-0 pointer-events-none" />
     </div>
   );
 };
