@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/stores/useGameStore';
 import { GAME_ASSETS } from '@/config/gameAssets';
 import { GameAssetIcon } from '@/components/ui/game/GameAssetIcon';
+import { preparedDishMatchesOrder } from '@/core/gameCore';
 
 interface DeliveryDrawerProps {
   isOpen: boolean;
@@ -69,7 +70,16 @@ export const DeliveryDrawer: React.FC<DeliveryDrawerProps> = ({ isOpen, onClose 
               deliveryQueue.map((order) => {
                 const canServe =
                   order.shipperStatus === 'arrived' &&
-                  preparedDishes.some((p) => p.dishId === order.dishId);
+                  preparedDishes.some((p) =>
+                    preparedDishMatchesOrder({
+                      prepared: p,
+                      orderId: order.id,
+                      dishId: order.dishId,
+                      requiredToppings: order.requiredToppings,
+                      excludedToppings: order.excludedToppings,
+                      spiceLevel: order.spiceLevel,
+                    })
+                  );
 
                 const dishAsset =
                   (GAME_ASSETS.dishes as Record<string, string>)[order.dishId] ||
