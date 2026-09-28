@@ -411,7 +411,7 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
         }}
       >
         {/* Cookware Vessel Wrapper with clamp width and exact aspect ratio */}
-        <div className="relative w-[min(70vw,260px)] sm:w-[clamp(240px,30vw,340px)] aspect-square flex items-center justify-center">
+        <div className="relative w-[min(64vw,238px)] sm:w-[clamp(250px,30vw,330px)] aspect-square flex items-center justify-center touch-none">
           {/* Stove shadow glow */}
           <div className="absolute -bottom-1 w-3/4 h-5 bg-black/60 rounded-full blur-md" />
 
@@ -433,7 +433,13 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
           />
 
           {/* Inner Ingredient Clip Area: strictly constrained inside bowl/pot bounds */}
-          <div className="absolute inset-[16%] sm:inset-[18%] rounded-full overflow-hidden flex items-center justify-center z-20 pointer-events-auto">
+          <div className={`absolute overflow-hidden flex items-center justify-center z-20 pointer-events-auto ${
+                recipe.stationType === 'board'
+                  ? 'left-[17%] right-[17%] top-[26%] bottom-[22%] rounded-xl'
+                  : recipe.stationType === 'pan'
+                  ? 'left-[20%] right-[28%] top-[29%] bottom-[27%] rounded-full'
+                  : 'left-[22%] right-[22%] top-[23%] bottom-[24%] rounded-full'
+              }`}>
             {/* Base broth/rice/sauce texture */}
             {baseAdded ? (
               <motion.div
@@ -448,7 +454,7 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
                 }`}
               >
                 {/* Steam/broth effect without plastered text */}
-                <div className="absolute inset-0 bg-radial-gradient animate-pulse opacity-30 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-black/20 animate-pulse opacity-40 pointer-events-none" />
               </motion.div>
             ) : (
               <div className="absolute inset-0 rounded-full border-2 border-dashed border-amber-500/40 flex items-center justify-center bg-black/40 p-2 text-center">
@@ -520,7 +526,7 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
                 : 'bg-stone-900 text-stone-400 border-stone-700'
             }`}
           >
-            {baseAdded ? `Đã cho: ${baseIngredientNames}` : 'Chưa cho vào nồi'}
+            {baseAdded ? `Đã cho: ${baseIngredientNames}` : 'Chưa cho nguyên liệu nền'}
           </span>
         </div>
 
@@ -618,7 +624,7 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
             size={18}
           />
           <span>
-            {baseAdded ? '✓ Đã Cho Nền' : `+ Cho ${baseIngredientNames}`}
+            {baseAdded ? 'Đã Cho Nền' : `Cho ${baseIngredientNames}`}
           </span>
         </button>
 
@@ -629,7 +635,7 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
               type="button"
               onClick={handleSpiceDecrease}
               disabled={currentSpice <= 0}
-              className="w-11 h-11 rounded-lg bg-stone-850 hover:bg-stone-800 disabled:opacity-30 border border-stone-700 flex items-center justify-center text-amber-200 font-black text-base active:scale-90 cursor-pointer"
+              className="w-11 h-11 rounded-lg bg-stone-800 hover:bg-stone-800 disabled:opacity-30 border border-stone-700 flex items-center justify-center text-amber-200 font-black text-base active:scale-90 cursor-pointer"
               title="Giảm độ cay"
             >
               <GameAssetIcon name="minus" size={16} />
