@@ -4,8 +4,8 @@ import React from 'react';
 import Image from 'next/image';
 import { useGameStore } from '@/stores/useGameStore';
 import { GAME_ASSETS } from '@/game/assets/gameAssets';
-import { GameIconButton } from '@/components/ui/game/GameIconButton';
 import { restaurantProgress } from '@/core/gameCore';
+import { GameButton } from '@/components/ui/game/GameButton';
 
 interface HeaderHUDProps {
   onOpenDelivery?: () => void;
@@ -24,7 +24,6 @@ export const HeaderHUD: React.FC<HeaderHUDProps> = ({
     isPaused,
     rating,
     reputationPoints,
-    deliveryQueue,
     sfxEnabled,
     startDay,
     pauseGame,
@@ -34,155 +33,100 @@ export const HeaderHUD: React.FC<HeaderHUDProps> = ({
   } = useGameStore();
 
   const totalDaySeconds = 100;
-  const progression = restaurantProgress(reputationPoints);
+  const progress = restaurantProgress(reputationPoints);
   const progressPercent = Math.min(100, (dayTimeSeconds / totalDaySeconds) * 100);
 
-  // Business clock: 10:00 to 22:00
   const currentHour = 10 + Math.floor((dayTimeSeconds / totalDaySeconds) * 12);
   const currentMinute = Math.floor(((dayTimeSeconds / totalDaySeconds) * 12 * 60) % 60);
   const timeFormatted = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}`;
 
   return (
-    <header className="w-full bg-stone-900/95 backdrop-blur-md border-b-2 border-amber-600/40 px-2 sm:px-4 py-2 shrink-0 z-40 shadow-lg text-stone-100 select-none font-baloo">
-      <div className="flex items-center justify-between gap-1.5 sm:gap-3 max-w-[1720px] mx-auto">
-        {/* Left: Brand & Day/Time */}
-        <div className="flex items-center gap-1.5 sm:gap-2.5">
-          <div className="flex items-center gap-1.5 bg-gradient-to-r from-red-600 to-amber-600 text-white font-black px-2.5 py-1 rounded-2xl text-xs sm:text-sm shadow-md border border-red-400/30">
-            <div className="w-6 h-6 sm:w-7 sm:h-7 relative shrink-0">
-              <Image
-                src={GAME_ASSETS.props.food_stall}
-                alt="Logo"
-                width={28}
-                height={28}
-                className="object-contain w-full h-full"
-              />
-            </div>
-            <span className="tracking-wide hidden xs:inline">GÓC BẾP HÀN</span>
+    <header className="relative z-40 shrink-0 border-b border-amber-500/25 bg-[#17110f]/95 text-stone-100 shadow-lg">
+      <div className="mx-auto flex min-h-[62px] max-w-[1500px] items-center gap-2 px-2 py-2 sm:px-4">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          <div className="flex h-10 shrink-0 items-center gap-2 rounded-2xl border border-red-400/25 bg-gradient-to-r from-red-700 to-orange-700 px-2.5 shadow">
+            <span className="relative h-7 w-7 shrink-0">
+              <Image src={GAME_ASSETS.props.food_stall} alt="Góc Bếp Hàn" fill sizes="28px" className="object-contain" />
+            </span>
+            <span className="hidden text-xs font-black tracking-wide sm:inline">GÓC BẾP HÀN</span>
           </div>
 
-          {/* Day & Business Time */}
-          <div className="flex items-center gap-1.5 bg-stone-950/80 border border-amber-500/30 text-amber-200 px-2.5 py-1 rounded-2xl font-black text-xs sm:text-sm shadow-inner">
-            <span className="text-amber-400">Ngày {day}</span>
-            <span className="text-stone-600">|</span>
-            <span className="font-mono text-stone-100">
-              {isDayActive ? timeFormatted : '10:00'}
-            </span>
+          <div className="flex min-w-0 items-center gap-1.5 rounded-2xl border border-amber-500/25 bg-black/35 px-2.5 py-1.5 text-[11px] font-black sm:text-xs">
+            <span className="text-amber-300">Ngày {day}</span>
+            <span className="text-stone-600">•</span>
+            <span className="font-mono text-stone-100">{isDayActive ? timeFormatted : '10:00'}</span>
+          </div>
+
+          <div className="hidden min-w-[130px] flex-col gap-1 rounded-2xl border border-emerald-500/20 bg-black/30 px-2.5 py-1.5 lg:flex">
+            <div className="flex items-center justify-between text-[10px] font-black">
+              <span className="text-emerald-300">Cấp quán {progress.level}</span>
+              <span className="text-stone-400">{progress.currentXp}/{progress.nextLevelXp}</span>
+            </div>
+            <div className="h-1.5 overflow-hidden rounded-full bg-stone-800">
+              <div className="h-full rounded-full bg-emerald-500 transition-all" style={{ width: `${progress.progressPercent}%` }} />
+            </div>
           </div>
         </div>
 
-        {/* Center: Currencies & Rating */}
-        <div className="flex items-center gap-1.5 sm:gap-3">
-          {/* Coin Counter */}
-          <div className="flex items-center gap-1.5 bg-amber-950/90 border border-amber-500/50 text-amber-200 font-black px-2.5 sm:px-3 py-1 rounded-2xl shadow-inner text-xs sm:text-sm">
-            <div className="w-6 h-6 sm:w-7 sm:h-7 relative shrink-0">
-              <Image
-                src={GAME_ASSETS.hud.coin}
-                alt="Tiền xu"
-                width={28}
-                height={28}
-                className="object-contain w-full h-full"
-              />
-            </div>
-            <span className="tracking-tight">{coins.toLocaleString()}</span>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <div className="flex h-10 items-center gap-1.5 rounded-2xl border border-amber-500/30 bg-amber-950/70 px-2.5 text-xs font-black text-amber-200">
+            <span className="relative h-6 w-6">
+              <Image src={GAME_ASSETS.hud.coin} alt="Xu" fill sizes="24px" className="object-contain" />
+            </span>
+            <span>{coins.toLocaleString()}</span>
           </div>
 
-          {/* Restaurant Level / Reputation */}
-          <div
-            className="hidden md:flex min-w-[122px] flex-col gap-0.5 bg-stone-950/80 border border-emerald-500/30 px-2.5 py-1 rounded-2xl shadow-inner"
-            title={`Danh tiếng ${reputationPoints} • Cấp quán ${progression.level}`}
-          >
-            <div className="flex items-center justify-between gap-2 text-[10px] font-black">
-              <span className="text-emerald-300">Cấp {progression.level}</span>
-              <span className="text-stone-400">
-                {progression.currentXp}/{progression.nextLevelXp}
-              </span>
-            </div>
-            <div className="h-1.5 rounded-full bg-stone-800 overflow-hidden">
-              <div
-                className="h-full bg-emerald-500 transition-all"
-                style={{ width: `${progression.progressPercent}%` }}
-              />
-            </div>
-          </div>
-
-          {/* Rating Heart */}
           <button
             type="button"
             onClick={() => setActiveModal('reviews')}
-            title="Đánh giá từ khách hàng"
-            className="flex items-center gap-1.5 bg-amber-950/90 hover:bg-amber-900 border border-amber-500/50 text-amber-200 font-black px-2.5 sm:px-3 py-1 rounded-2xl cursor-pointer shadow-inner transition-transform active:scale-95 text-xs sm:text-sm"
+            className="flex h-10 items-center gap-1.5 rounded-2xl border border-amber-500/30 bg-amber-950/70 px-2.5 text-xs font-black text-amber-200 transition hover:bg-amber-900 active:scale-95"
+            title="Đánh giá khách hàng"
           >
-            <div className="w-6 h-6 sm:w-7 sm:h-7 relative shrink-0">
-              <Image
-                src={GAME_ASSETS.hud.rating}
-                alt="Đánh giá"
-                width={28}
-                height={28}
-                className="object-contain w-full h-full"
-              />
-            </div>
+            <span className="relative h-6 w-6">
+              <Image src={GAME_ASSETS.hud.rating} alt="Đánh giá" fill sizes="24px" className="object-contain" />
+            </span>
             <span>{rating.toFixed(1)}</span>
           </button>
-        </div>
 
-        {/* Right: Sound, Day Action & Settings */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          {/* Sound Toggle (28-32px icon) */}
-          <GameIconButton
-            asset={GAME_ASSETS.hud.sound}
-            size="sm"
-            variant="glass"
-            active={sfxEnabled}
+          <button
+            type="button"
             onClick={toggleSfx}
-            title={sfxEnabled ? 'Âm thanh: Đang bật' : 'Âm thanh: Đang tắt'}
-            className={sfxEnabled ? 'opacity-100' : 'opacity-40 grayscale'}
-          />
+            className={`hidden h-10 min-w-[48px] rounded-xl border px-2 text-[10px] font-black transition active:scale-95 sm:block ${
+              sfxEnabled
+                ? 'border-emerald-500/35 bg-emerald-950/70 text-emerald-300'
+                : 'border-stone-700 bg-stone-900 text-stone-500'
+            }`}
+          >
+            SFX {sfxEnabled ? 'ON' : 'OFF'}
+          </button>
 
-          {/* Day Open/Pause Toggle */}
           {!isDayActive ? (
-            <button
-              type="button"
-              onClick={startDay}
-              className="bg-gradient-to-r from-emerald-600 to-green-600 hover:brightness-110 text-white font-black px-3 py-1.5 rounded-2xl text-xs sm:text-sm shadow-md active:scale-95 flex items-center gap-1.5 border border-emerald-400/40 cursor-pointer transition-all"
-            >
-              <div className="w-5 h-5 relative shrink-0">
-                <Image
-                  src={GAME_ASSETS.actions.start}
-                  alt="Mở quán"
-                  width={20}
-                  height={20}
-                  className="object-contain w-full h-full"
-                />
-              </div>
+            <GameButton compact tone="success" onClick={startDay} iconSrc={GAME_ASSETS.props.food_stall}>
               <span className="hidden sm:inline">Mở Quán</span>
-            </button>
+              <span className="sm:hidden">Mở</span>
+            </GameButton>
           ) : (
-            <button
-              type="button"
-              onClick={isPaused ? resumeGame : pauseGame}
-              className="bg-amber-600 hover:bg-amber-700 text-white font-black px-3 py-1.5 rounded-2xl text-xs sm:text-sm shadow-md active:scale-95 border border-amber-400/40 cursor-pointer transition-all flex items-center gap-1"
-            >
-              <span>{isPaused ? 'Tiếp tục' : 'Tạm dừng'}</span>
-            </button>
+            <GameButton compact tone="neutral" onClick={isPaused ? resumeGame : pauseGame}>
+              {isPaused ? 'Tiếp tục' : 'Tạm dừng'}
+            </GameButton>
           )}
 
-          {/* Settings Modal Button */}
-          <GameIconButton
-            asset={GAME_ASSETS.hud.settings}
-            size="sm"
-            variant="glass"
+          <button
+            type="button"
             onClick={() => {
               if (onOpenSettings) onOpenSettings();
               else setActiveModal('settings');
             }}
-            title="Cài đặt trò chơi"
-          />
+            className="h-10 min-w-[48px] rounded-xl border border-amber-500/25 bg-stone-900 px-2 text-[10px] font-black text-amber-200 transition hover:bg-stone-800 active:scale-95"
+          >
+            <span className="sm:hidden">Cài</span>
+            <span className="hidden sm:inline">Cài đặt</span>
+          </button>
         </div>
       </div>
 
-      {/* Day Progress Meter */}
       {isDayActive && (
-        <div className="w-full bg-stone-950 h-1.5 rounded-full mt-1.5 overflow-hidden border border-stone-800 max-w-[1720px] mx-auto">
+        <div className="h-1 w-full bg-black/30">
           <div
             className="h-full bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 transition-all duration-200"
             style={{ width: `${progressPercent}%` }}
