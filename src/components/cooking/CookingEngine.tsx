@@ -203,14 +203,20 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
           </div>
         </div>
 
-        {/* Close Button */}
+        {/* Close Button (Phase 3 PNG: ui_close_dong.png) */}
         <button
           type="button"
           onClick={onClose}
-          className="w-8 h-8 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 border border-stone-600 flex items-center justify-center shrink-0 cursor-pointer active:scale-90 transition-transform"
+          className="w-8 h-8 rounded-xl overflow-hidden flex items-center justify-center shrink-0 cursor-pointer active:scale-90 transition-transform"
           title="Đóng chế biến"
         >
-          <GameAssetIcon name="close" size={16} />
+          <Image
+            src="/assets/phase3-ui/ui_close_dong.png"
+            alt="Đóng"
+            width={32}
+            height={32}
+            className="w-full h-full object-contain pointer-events-none drop-shadow"
+          />
         </button>
       </div>
 
@@ -464,33 +470,43 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
       {/* 6. PRIMARY ACTION BUTTONS                                                 */}
       {/* ========================================================================= */}
       <div className="w-full flex items-center gap-2 pt-1 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
-        {/* Back / Cancel button */}
+        {/* Back / Cancel button (Phase 3 PNG: ui_back_quay_lai.png) */}
         <button
           type="button"
           onClick={onClose}
-          className="h-11 sm:h-12 px-4 rounded-xl bg-stone-800 hover:bg-stone-700 border border-stone-600 text-stone-300 font-bold text-xs sm:text-sm flex items-center gap-1 active:scale-95 transition-transform cursor-pointer shrink-0"
+          title="Quay lại danh sách đơn"
+          className="h-11 sm:h-12 px-3 rounded-xl bg-stone-800 hover:bg-stone-700 border border-stone-600 text-stone-300 font-bold text-xs sm:text-sm flex items-center gap-1.5 active:scale-95 transition-transform cursor-pointer shrink-0"
         >
-          <span>Quay lại</span>
+          <div className="h-6 w-auto aspect-[525/251] relative">
+            <Image
+              src="/assets/phase3-ui/ui_back_quay_lai.png"
+              alt="Quay lại"
+              width={525}
+              height={251}
+              className="h-full w-auto object-contain pointer-events-none"
+            />
+          </div>
+          <span className="hidden xs:inline">Quay lại</span>
         </button>
 
-        {/* Primary Finish Cooking Button */}
+        {/* Primary Finish Cooking Button (Phase 3 PNG: btn_cook_nau.png / btn_complete_hoan_tat.png) */}
         <button
           type="button"
           onClick={handleServeDish}
           disabled={isCookingActive}
           className="flex-1 h-11 sm:h-12 px-4 rounded-xl bg-gradient-to-r from-red-600 via-amber-600 to-red-600 hover:brightness-110 disabled:opacity-50 text-white font-black text-xs sm:text-base shadow-lg border-2 border-amber-300 flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
         >
-          <div className="w-5 h-5 relative shrink-0">
+          <div className="h-7 w-auto aspect-[513/196] relative shrink-0">
             <Image
-              src={GAME_ASSETS.actions.complete}
-              alt="Hoàn thành"
-              width={20}
-              height={20}
-              className="object-contain"
+              src="/assets/phase3-ui/btn_complete_hoan_tat.png"
+              alt="Hoàn tất"
+              width={513}
+              height={196}
+              className="h-full w-auto object-contain pointer-events-none"
             />
           </div>
           <span>
-            {isCookingActive ? 'Đang Nấu Món...' : 'Hoàn Thành & Giao Món'}
+            {isCookingActive ? 'Đang Nấu Món...' : 'Hoàn Thành & Đánh Giá'}
           </span>
         </button>
       </div>
@@ -507,19 +523,18 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
               exit={{ scale: 0.9, opacity: 0, y: 15 }}
               className="relative w-full max-w-sm bg-stone-900 border-2 border-amber-500/80 rounded-3xl p-4 sm:p-5 shadow-2xl text-center text-stone-100 flex flex-col items-center"
             >
-              {/* Quality Badge Asset */}
-              <div className="w-16 h-16 relative mb-2">
+              {/* Quality Badge Asset (Phase 3 PNG: status_perfect_hoan_hao.png or status_burned_qua_lua.png) */}
+              <div className="h-16 w-auto aspect-[375/199] relative mb-2 flex items-center justify-center">
                 <Image
                   src={
-                    validationResult.quality === 'perfect' ||
-                    validationResult.quality === 'good'
-                      ? GAME_ASSETS.props.heart_icon
-                      : GAME_ASSETS.props.rice_bowl
+                    validationResult.quality === 'perfect' || validationResult.quality === 'good'
+                      ? '/assets/phase3-ui/status_perfect_hoan_hao.png'
+                      : '/assets/phase3-ui/status_burned_qua_lua.png'
                   }
-                  alt="Kết quả"
-                  width={64}
-                  height={64}
-                  className="object-contain drop-shadow"
+                  alt={validationResult.quality === 'perfect' ? 'Hoàn hảo' : 'Chưa chuẩn'}
+                  width={375}
+                  height={199}
+                  className="h-full w-auto object-contain drop-shadow"
                 />
               </div>
 
@@ -568,12 +583,22 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
                 </div>
               </div>
 
+              {/* Confirm & Serve Button (Phase 3 PNG: btn_serve_giao_mon.png) */}
               <button
                 type="button"
                 onClick={handleConfirmResult}
-                className="w-full mt-2 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-green-600 hover:brightness-110 text-white font-black text-sm shadow-lg border border-emerald-300 active:scale-95 cursor-pointer"
+                className="w-full mt-2 h-12 rounded-2xl bg-gradient-to-r from-emerald-600 to-green-600 hover:brightness-110 text-white font-black text-sm shadow-lg border border-emerald-300 active:scale-95 cursor-pointer flex items-center justify-center gap-2"
               >
-                Giao Món Ngay
+                <div className="h-7 w-auto aspect-[480/212] relative">
+                  <Image
+                    src="/assets/phase3-ui/btn_serve_giao_mon.png"
+                    alt="Giao Món"
+                    width={480}
+                    height={212}
+                    className="h-full w-auto object-contain pointer-events-none"
+                  />
+                </div>
+                <span>Giao Món Ngay</span>
               </button>
             </motion.div>
           </div>

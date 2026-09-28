@@ -10,6 +10,7 @@ import { ActiveOrderQueue } from '@/components/cooking/ActiveOrderQueue';
 import { CookingEngine, CookingTargetOrder } from '@/components/cooking/CookingEngine';
 import { GAME_ASSETS } from '@/config/gameAssets';
 import { GameAssetIcon } from '@/components/ui/game/GameAssetIcon';
+import { PHASE3_UI_ASSETS } from '@/game/assets/phase3UiAssets';
 
 export const KitchenScene: React.FC = () => {
   const {
@@ -105,8 +106,14 @@ export const KitchenScene: React.FC = () => {
 
           {/* Tray counter */}
           <div className="flex items-center gap-1.5 text-[10px] font-black text-emerald-300 bg-emerald-950/80 border border-emerald-500/40 px-2 py-0.5 rounded-xl shadow-inner">
-            <GameAssetIcon name="bowl" size={14} />
-            <span>Khay: {preparedDishes.length}/4</span>
+            <Image
+              src={PHASE3_UI_ASSETS.btn_tray_khay.src}
+              alt="Khay"
+              width={PHASE3_UI_ASSETS.btn_tray_khay.width}
+              height={PHASE3_UI_ASSETS.btn_tray_khay.height}
+              className="h-4 w-auto object-contain pointer-events-none"
+            />
+            <span>{preparedDishes.length}/4</span>
           </div>
         </div>
 
@@ -236,10 +243,16 @@ export const KitchenScene: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => discardPreparedDish(p.id)}
-                    className="text-stone-400 hover:text-red-400 transition-colors ml-0.5 cursor-pointer"
+                    className="p-0.5 hover:opacity-80 active:scale-95 transition-all ml-0.5 cursor-pointer"
                     title="Hủy món này"
                   >
-                    <GameAssetIcon name="close" size={14} />
+                    <Image
+                      src={PHASE3_UI_ASSETS.ui_cancel_huy.src}
+                      alt="Hủy"
+                      width={PHASE3_UI_ASSETS.ui_cancel_huy.width}
+                      height={PHASE3_UI_ASSETS.ui_cancel_huy.height}
+                      className="h-4 w-auto object-contain pointer-events-none"
+                    />
                   </button>
                 </div>
               );

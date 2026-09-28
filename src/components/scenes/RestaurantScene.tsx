@@ -77,20 +77,21 @@ export const RestaurantScene: React.FC<RestaurantSceneProps> = ({
           </div>
         </div>
 
-        {/* Right: Quick Start Day Button if idle */}
+        {/* Right: Quick Start Day Button if idle (Phase 3 PNG: btn_start_bat_dau.png) */}
         {!isDayActive && (
           <button
             type="button"
             onClick={startDay}
-            className="bg-gradient-to-r from-red-600 via-amber-600 to-red-600 hover:brightness-110 text-white font-black px-4 py-2 rounded-2xl shadow-xl border border-amber-300/60 flex items-center gap-2 active:scale-95 transition-all text-xs sm:text-sm cursor-pointer animate-bounce-slight"
+            title="Mở cửa đón khách"
+            className="h-10 px-3 bg-gradient-to-r from-red-600 via-amber-600 to-red-600 hover:brightness-110 text-white font-black rounded-2xl shadow-xl border border-amber-300/60 flex items-center justify-center gap-2 active:scale-95 transition-all text-xs sm:text-sm cursor-pointer animate-bounce-slight"
           >
-            <div className="w-5 h-5 relative shrink-0">
+            <div className="h-6 w-auto aspect-[622/251] relative">
               <Image
-                src={GAME_ASSETS.actions.start}
+                src="/assets/phase3-ui/btn_start_bat_dau.png"
                 alt="Bắt đầu"
-                width={20}
-                height={20}
-                className="object-contain"
+                width={622}
+                height={251}
+                className="h-full w-auto object-contain pointer-events-none"
               />
             </div>
             <span>Mở Cửa Đón Khách</span>
@@ -111,13 +112,13 @@ export const RestaurantScene: React.FC<RestaurantSceneProps> = ({
             {/* Header */}
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
-                <div className="w-6 h-6 relative shrink-0">
+                <div className="w-10 h-7 relative shrink-0">
                   <Image
-                    src={GAME_ASSETS.navigation.delivery}
+                    src="/assets/phase3-ui/btn_delivery_giao_hang.png"
                     alt="Giao hàng"
-                    width={24}
-                    height={24}
-                    className="object-contain"
+                    width={747}
+                    height={251}
+                    className="object-contain w-full h-full"
                   />
                 </div>
                 <span className="text-xs font-black text-teal-300">Góc Giao Hàng</span>
@@ -354,9 +355,17 @@ export const RestaurantScene: React.FC<RestaurantSceneProps> = ({
                       <button
                         type="button"
                         onClick={() => serveTable(table.id)}
-                        className="w-full py-1.5 px-3 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-black rounded-xl text-xs shadow-md border border-emerald-300 flex items-center justify-center gap-1 active:scale-95 transition-all cursor-pointer"
+                        className="w-full h-9 px-3 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-black rounded-xl text-xs shadow-md border border-emerald-300 flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer"
                       >
-                        <GameAssetIcon name="bowl" size={14} />
+                        <div className="h-5 w-auto aspect-[480/212] relative">
+                          <Image
+                            src="/assets/phase3-ui/btn_serve_giao_mon.png"
+                            alt="Giao Món"
+                            width={480}
+                            height={212}
+                            className="h-full w-auto object-contain pointer-events-none"
+                          />
+                        </div>
                         <span>Giao Món Cho Khách</span>
                       </button>
                     ) : (
@@ -377,9 +386,17 @@ export const RestaurantScene: React.FC<RestaurantSceneProps> = ({
                             price: dishes[table.customer!.orderDishId]?.price || 50,
                           })
                         }
-                        className="w-full py-1.5 px-3 bg-amber-600/90 hover:bg-amber-500 text-white font-black rounded-xl text-xs shadow-md border border-amber-400/50 flex items-center justify-center gap-1 active:scale-95 transition-all cursor-pointer"
+                        className="w-full h-9 px-3 bg-amber-600/90 hover:bg-amber-500 text-white font-black rounded-xl text-xs shadow-md border border-amber-400/50 flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer"
                       >
-                        <GameAssetIcon name="cooking" size={14} />
+                        <div className="h-5 w-auto aspect-[543/270] relative">
+                          <Image
+                            src="/assets/phase3-ui/btn_cook_nau.png"
+                            alt="Nấu"
+                            width={543}
+                            height={270}
+                            className="h-full w-auto object-contain pointer-events-none"
+                          />
+                        </div>
                         <span>Nấu Món Cho Bàn Này</span>
                       </button>
                     )}

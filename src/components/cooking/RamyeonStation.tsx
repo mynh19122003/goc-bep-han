@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useGameStore } from '@/stores/useGameStore';
 import { GAME_ASSETS } from '@/config/gameAssets';
 import { GameAssetIcon } from '@/components/ui/game/GameAssetIcon';
+import { PHASE3_UI_ASSETS } from '@/game/assets/phase3UiAssets';
 
 export const RamyeonStation: React.FC = () => {
   const {
@@ -139,10 +140,16 @@ export const RamyeonStation: React.FC = () => {
             <button
               type="button"
               onClick={() => startRamyeon(selectedDish)}
-              className="w-full py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-black text-xs rounded-2xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-1.5 border border-amber-300/40 cursor-pointer"
+              className="w-full flex items-center justify-center cursor-pointer active:scale-95 transition-all drop-shadow-md py-1"
+              title="Bắt đầu nấu Ramyeon"
             >
-              <GameAssetIcon name="gas_stove" size={18} />
-              <span>Đặt Nồi Lên Bếp Gas</span>
+              <Image
+                src={PHASE3_UI_ASSETS.btn_cook_nau.src}
+                alt="Nấu Ramyeon"
+                width={PHASE3_UI_ASSETS.btn_cook_nau.width}
+                height={PHASE3_UI_ASSETS.btn_cook_nau.height}
+                className="h-10 w-auto object-contain pointer-events-none"
+              />
             </button>
           </div>
         ) : ramyeonSession.step === 'pouring_water' ? (
@@ -158,10 +165,16 @@ export const RamyeonStation: React.FC = () => {
             <button
               type="button"
               onClick={discardRamyeon}
-              className="p-2.5 rounded-2xl border border-stone-700 bg-stone-800 text-stone-400 hover:text-red-400 cursor-pointer"
+              className="p-2 rounded-2xl border border-stone-700 bg-stone-800/80 hover:bg-stone-700 active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0"
               title="Hủy mẻ này"
             >
-              <GameAssetIcon name="close" size={16} />
+              <Image
+                src={PHASE3_UI_ASSETS.ui_cancel_huy.src}
+                alt="Hủy"
+                width={PHASE3_UI_ASSETS.ui_cancel_huy.width}
+                height={PHASE3_UI_ASSETS.ui_cancel_huy.height}
+                className="h-6 w-auto object-contain pointer-events-none"
+              />
             </button>
           </div>
         ) : ramyeonSession.step === 'adding_contents' ? (
@@ -185,10 +198,16 @@ export const RamyeonStation: React.FC = () => {
             <button
               type="button"
               onClick={discardRamyeon}
-              className="p-2.5 rounded-2xl border border-stone-700 bg-stone-800 text-stone-400 hover:text-red-400 cursor-pointer"
+              className="p-2 rounded-2xl border border-stone-700 bg-stone-800/80 hover:bg-stone-700 active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0"
               title="Hủy mẻ này"
             >
-              <GameAssetIcon name="close" size={16} />
+              <Image
+                src={PHASE3_UI_ASSETS.ui_cancel_huy.src}
+                alt="Hủy"
+                width={PHASE3_UI_ASSETS.ui_cancel_huy.width}
+                height={PHASE3_UI_ASSETS.ui_cancel_huy.height}
+                className="h-6 w-auto object-contain pointer-events-none"
+              />
             </button>
           </div>
         ) : ramyeonSession.step === 'egg_crack_rhythm' ? (
@@ -212,10 +231,16 @@ export const RamyeonStation: React.FC = () => {
             <button
               type="button"
               onClick={discardRamyeon}
-              className="p-2.5 rounded-2xl border border-stone-700 bg-stone-800 text-stone-400 hover:text-red-400 cursor-pointer"
+              className="p-2 rounded-2xl border border-stone-700 bg-stone-800/80 hover:bg-stone-700 active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0"
               title="Hủy mẻ này"
             >
-              <GameAssetIcon name="close" size={16} />
+              <Image
+                src={PHASE3_UI_ASSETS.ui_cancel_huy.src}
+                alt="Hủy"
+                width={PHASE3_UI_ASSETS.ui_cancel_huy.width}
+                height={PHASE3_UI_ASSETS.ui_cancel_huy.height}
+                className="h-6 w-auto object-contain pointer-events-none"
+              />
             </button>
           </div>
         ) : ramyeonSession.step === 'boiling' ? (
@@ -228,18 +253,30 @@ export const RamyeonStation: React.FC = () => {
             <button
               type="button"
               onClick={finishRamyeon}
-              className="flex-1 py-2.5 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-black text-xs rounded-2xl shadow-xl active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer border border-emerald-300/40"
+              className="flex-1 flex items-center justify-center cursor-pointer active:scale-95 transition-all drop-shadow-md py-1"
+              title="Múc ra bát sẵn sàng giao"
             >
-              <GameAssetIcon name="complete" size={18} />
-              <span>Múc Ra Bát Sẵn Sàng Giao</span>
+              <Image
+                src={PHASE3_UI_ASSETS.btn_complete_hoan_tat.src}
+                alt="Hoàn Tất"
+                width={PHASE3_UI_ASSETS.btn_complete_hoan_tat.width}
+                height={PHASE3_UI_ASSETS.btn_complete_hoan_tat.height}
+                className="h-10 w-auto object-contain pointer-events-none"
+              />
             </button>
             <button
               type="button"
               onClick={discardRamyeon}
-              className="p-2.5 rounded-2xl border border-stone-700 bg-stone-800 text-stone-400 hover:text-red-400 cursor-pointer"
+              className="p-2 rounded-2xl border border-stone-700 bg-stone-800/80 hover:bg-stone-700 active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0"
               title="Hủy mẻ này"
             >
-              <GameAssetIcon name="close" size={16} />
+              <Image
+                src={PHASE3_UI_ASSETS.ui_cancel_huy.src}
+                alt="Hủy"
+                width={PHASE3_UI_ASSETS.ui_cancel_huy.width}
+                height={PHASE3_UI_ASSETS.ui_cancel_huy.height}
+                className="h-6 w-auto object-contain pointer-events-none"
+              />
             </button>
           </div>
         )}

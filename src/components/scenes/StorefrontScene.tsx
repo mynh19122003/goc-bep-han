@@ -40,8 +40,14 @@ export const StorefrontScene: React.FC = () => {
       <div className="relative z-10 rounded-2xl overflow-hidden p-2.5 bg-stone-900/85 backdrop-blur-md border border-red-500/40 shadow-lg mb-2 mt-1">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-red-500/20 border border-red-400/40 flex items-center justify-center shrink-0">
-              <GameAssetIcon name="delivery" size={20} />
+            <div className="w-10 h-8 rounded-xl bg-red-500/20 border border-red-400/40 p-0.5 flex items-center justify-center shrink-0">
+              <Image
+                src="/assets/phase3-ui/btn_delivery_giao_hang.png"
+                alt="Giao hàng"
+                width={747}
+                height={251}
+                className="w-full h-full object-contain pointer-events-none"
+              />
             </div>
             <div>
               <h2 className="text-xs sm:text-sm font-black text-amber-200 tracking-wide uppercase">
@@ -57,9 +63,17 @@ export const StorefrontScene: React.FC = () => {
           <button
             type="button"
             onClick={() => setActiveModal('reviews')}
-            className="flex items-center gap-1 bg-amber-400/20 hover:bg-amber-400/30 border border-amber-400/50 text-amber-300 font-black px-2.5 py-1 rounded-xl text-xs active:scale-95 transition-all cursor-pointer"
+            className="flex items-center gap-1.5 bg-amber-400/20 hover:bg-amber-400/30 border border-amber-400/50 text-amber-300 font-black px-2.5 py-1 rounded-xl text-xs active:scale-95 transition-all cursor-pointer"
           >
-            <GameAssetIcon name="star" size={16} />
+            <div className="w-4 h-4 relative shrink-0">
+              <Image
+                src="/assets/phase3-ui/tab_review_danh_gia.png"
+                alt="Đánh giá"
+                width={371}
+                height={225}
+                className="w-full h-full object-contain pointer-events-none"
+              />
+            </div>
             <span>{rating.toFixed(1)}</span>
             <span className="text-[9px] text-amber-200/70 font-semibold">({reviews.length})</span>
           </button>
@@ -151,14 +165,27 @@ export const StorefrontScene: React.FC = () => {
                     <div className="mt-1.5 flex items-center justify-between">
                       {order.shipperStatus === 'on_the_way' ? (
                         <span className="text-[10px] font-black text-amber-300 flex items-center gap-1 bg-amber-950/80 px-2 py-0.5 rounded-lg border border-amber-500/40">
-                          <GameAssetIcon name="clock" size={12} />
+                          <div className="w-3.5 h-3.5 relative">
+                            <Image
+                              src="/assets/phase3-ui/ui_timer_thoi_gian.png"
+                              alt="Timer"
+                              width={24}
+                              height={24}
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
                           Tới sau: {Math.ceil(order.shipperArriveSeconds)}s
                         </span>
                       ) : (
-                        <span className="text-[10px] font-black text-teal-300 flex items-center gap-1 bg-teal-950/90 px-2 py-0.5 rounded-lg border border-teal-400 animate-pulse">
-                          <GameAssetIcon name="delivery" size={12} />
-                          Đang chờ ({Math.ceil(order.shipperWaitSeconds)}s)
-                        </span>
+                        <div className="h-6 w-auto aspect-[343/210] relative flex items-center justify-center">
+                          <Image
+                            src="/assets/phase3-ui/status_waiting_dang_cho.png"
+                            alt="Đang chờ"
+                            width={343}
+                            height={210}
+                            className="h-full w-auto object-contain pointer-events-none drop-shadow-xs"
+                          />
+                        </div>
                       )}
 
                       <span className="text-[10px] text-amber-300 font-semibold">
@@ -173,20 +200,32 @@ export const StorefrontScene: React.FC = () => {
                   type="button"
                   onClick={() => serveDeliveryOrder(order.id)}
                   disabled={!canServe}
-                  className={`w-full mt-2.5 py-1.5 rounded-xl font-black text-xs flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer ${
+                  className={`w-full mt-2.5 h-9 rounded-xl font-black text-xs flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer ${
                     canServe
                       ? 'bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-white active:scale-95'
-                      : 'bg-stone-800 text-stone-500 border border-stone-700 cursor-not-allowed'
+                      : 'bg-stone-800 text-stone-500 border border-stone-700 cursor-not-allowed opacity-60'
                   }`}
                 >
-                  <GameAssetIcon name="complete" size={16} />
-                  <span>
-                    {canServe
-                      ? 'Giao Cho Shipper Ngay'
-                      : order.shipperStatus === 'on_the_way'
-                      ? 'Đợi Shipper Đến Cửa'
-                      : 'Cần Nấu Món Ở Bếp'}
-                  </span>
+                  {canServe ? (
+                    <>
+                      <div className="h-5 w-auto aspect-[480/212] relative">
+                        <Image
+                          src="/assets/phase3-ui/btn_serve_giao_mon.png"
+                          alt="Giao Món"
+                          width={480}
+                          height={212}
+                          className="h-full w-auto object-contain pointer-events-none"
+                        />
+                      </div>
+                      <span>Giao Cho Shipper Ngay</span>
+                    </>
+                  ) : (
+                    <span>
+                      {order.shipperStatus === 'on_the_way'
+                        ? 'Đợi Shipper Đến Cửa'
+                        : 'Cần Nấu Món Ở Bếp'}
+                    </span>
+                  )}
                 </button>
               </motion.div>
             );
@@ -199,10 +238,16 @@ export const StorefrontScene: React.FC = () => {
         <button
           type="button"
           onClick={() => setActiveModal('market')}
-          className="p-2.5 rounded-2xl bg-stone-900/85 hover:bg-stone-800/90 backdrop-blur-md border border-amber-500/40 text-amber-200 text-left transition-all active:scale-95 flex items-center gap-2 shadow-md cursor-pointer"
+          className="p-2.5 rounded-2xl bg-stone-900/85 hover:bg-stone-800/90 backdrop-blur-md border border-amber-500/40 text-amber-200 text-left transition-all active:scale-95 flex items-center gap-2.5 shadow-md cursor-pointer"
         >
-          <div className="w-7 h-7 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center shrink-0">
-            <GameAssetIcon name="cart" size={18} />
+          <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-400/40 p-1 flex items-center justify-center shrink-0">
+            <Image
+              src="/assets/phase3-ui/tab_market_cho.png"
+              alt="Chợ sớm"
+              width={40}
+              height={40}
+              className="w-full h-full object-contain pointer-events-none"
+            />
           </div>
           <div className="min-w-0">
             <span className="font-extrabold text-[11px] block leading-tight text-amber-100">
@@ -215,10 +260,16 @@ export const StorefrontScene: React.FC = () => {
         <button
           type="button"
           onClick={() => setActiveModal('cookbook')}
-          className="p-2.5 rounded-2xl bg-stone-900/85 hover:bg-stone-800/90 backdrop-blur-md border border-amber-500/40 text-amber-200 text-left transition-all active:scale-95 flex items-center gap-2 shadow-md cursor-pointer"
+          className="p-2.5 rounded-2xl bg-stone-900/85 hover:bg-stone-800/90 backdrop-blur-md border border-amber-500/40 text-amber-200 text-left transition-all active:scale-95 flex items-center gap-2.5 shadow-md cursor-pointer"
         >
-          <div className="w-7 h-7 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center shrink-0">
-            <GameAssetIcon name="recipe" size={18} />
+          <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-400/40 p-1 flex items-center justify-center shrink-0">
+            <Image
+              src="/assets/phase3-ui/tab_recipe_cong_thuc.png"
+              alt="Công thức"
+              width={40}
+              height={40}
+              className="w-full h-full object-contain pointer-events-none"
+            />
           </div>
           <div className="min-w-0">
             <span className="font-extrabold text-[11px] block leading-tight text-amber-100">

@@ -8,6 +8,7 @@ import { GAME_ASSETS } from '@/config/gameAssets';
 import { CustomerSprite } from '@/components/ui/game/CustomerSprite';
 import { OrderBubble } from '@/components/ui/game/OrderBubble';
 import { GameAssetIcon } from '@/components/ui/game/GameAssetIcon';
+import { PHASE3_UI_ASSETS } from '@/game/assets/phase3UiAssets';
 
 export const DiningScene: React.FC = () => {
   const { tables, preparedDishes, isDayActive, startDay, serveTable, cleanTable } = useGameStore();
@@ -176,19 +177,26 @@ export const DiningScene: React.FC = () => {
 
               {/* Table Action Button */}
               {hasCustomer && (
-                <button
-                  type="button"
-                  onClick={() => serveTable(table.id)}
-                  disabled={!canServe}
-                  className={`w-full py-1.5 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all shadow-md ${
-                    canServe
-                      ? 'bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white cursor-pointer active:scale-95 animate-bounce-slight'
-                      : 'bg-stone-800 text-stone-500 border border-stone-700 cursor-not-allowed'
-                  }`}
-                >
-                  <GameAssetIcon name="complete" size={16} />
-                  <span>{canServe ? 'Giao Bàn Ngay' : 'Cần Nấu Món Này'}</span>
-                </button>
+                canServe ? (
+                  <button
+                    type="button"
+                    onClick={() => serveTable(table.id)}
+                    className="w-full flex items-center justify-center cursor-pointer active:scale-95 transition-all drop-shadow-md py-0.5"
+                    title="Giao món cho bàn"
+                  >
+                    <Image
+                      src={PHASE3_UI_ASSETS.btn_serve_giao_mon.src}
+                      alt="Giao Món"
+                      width={PHASE3_UI_ASSETS.btn_serve_giao_mon.width}
+                      height={PHASE3_UI_ASSETS.btn_serve_giao_mon.height}
+                      className="h-8 w-auto object-contain pointer-events-none"
+                    />
+                  </button>
+                ) : (
+                  <div className="w-full py-1 rounded-xl text-[10px] font-black flex items-center justify-center bg-stone-800 text-stone-400 border border-stone-700 select-none">
+                    <span>Cần Nấu Món Này</span>
+                  </div>
+                )
               )}
             </motion.div>
           );
@@ -200,10 +208,16 @@ export const DiningScene: React.FC = () => {
         <button
           type="button"
           onClick={startDay}
-          className="relative z-10 w-full py-2.5 bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 text-white font-black text-xs rounded-2xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 shrink-0 border border-amber-400/40 cursor-pointer"
+          className="relative z-10 w-full flex items-center justify-center shrink-0 cursor-pointer active:scale-95 transition-all drop-shadow-xl my-1"
+          title="Bắt đầu ngày mới"
         >
-          <GameAssetIcon name="lantern" size={18} />
-          <span>Mở Cửa Đón Khách Vào Bàn</span>
+          <Image
+            src={PHASE3_UI_ASSETS.btn_start_bat_dau.src}
+            alt="Bắt Đầu Ngày Mới"
+            width={PHASE3_UI_ASSETS.btn_start_bat_dau.width}
+            height={PHASE3_UI_ASSETS.btn_start_bat_dau.height}
+            className="h-11 w-auto object-contain pointer-events-none"
+          />
         </button>
       )}
     </div>

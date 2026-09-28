@@ -7,6 +7,7 @@ import { useGameStore } from '@/stores/useGameStore';
 import { IngredientId } from '@/types/game';
 import { GAME_ASSETS } from '@/config/gameAssets';
 import { GameAssetIcon } from '@/components/ui/game/GameAssetIcon';
+import { PHASE3_UI_ASSETS } from '@/game/assets/phase3UiAssets';
 
 export const KimbapStation: React.FC = () => {
   const {
@@ -186,10 +187,16 @@ export const KimbapStation: React.FC = () => {
             <button
               type="button"
               onClick={() => startKimbap(selectedDish)}
-              className="w-full py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-xs rounded-2xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-1.5 border border-emerald-400/40 cursor-pointer"
+              className="w-full flex items-center justify-center cursor-pointer active:scale-95 transition-all drop-shadow-md py-1"
+              title="Trải rong biển & bắt đầu làm Kimbap"
             >
-              <GameAssetIcon name="board" size={18} />
-              <span>Trải Rong Biển Lên Mành</span>
+              <Image
+                src={PHASE3_UI_ASSETS.btn_cook_nau.src}
+                alt="Bắt Đầu Làm Kimbap"
+                width={PHASE3_UI_ASSETS.btn_cook_nau.width}
+                height={PHASE3_UI_ASSETS.btn_cook_nau.height}
+                className="h-10 w-auto object-contain pointer-events-none"
+              />
             </button>
           </div>
         ) : kimbapSession.step === 'ingredients' ? (
@@ -240,10 +247,16 @@ export const KimbapStation: React.FC = () => {
             <button
               type="button"
               onClick={discardKimbap}
-              className="p-2.5 rounded-2xl border border-stone-700 bg-stone-800 text-stone-400 hover:text-red-400 cursor-pointer"
+              className="p-2 rounded-2xl border border-stone-700 bg-stone-800/80 hover:bg-stone-700 active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0"
               title="Hủy mẻ này"
             >
-              <GameAssetIcon name="close" size={16} />
+              <Image
+                src={PHASE3_UI_ASSETS.ui_cancel_huy.src}
+                alt="Hủy"
+                width={PHASE3_UI_ASSETS.ui_cancel_huy.width}
+                height={PHASE3_UI_ASSETS.ui_cancel_huy.height}
+                className="h-6 w-auto object-contain pointer-events-none"
+              />
             </button>
           </div>
         ) : kimbapSession.step === 'slicing' ? (
@@ -259,10 +272,16 @@ export const KimbapStation: React.FC = () => {
             <button
               type="button"
               onClick={discardKimbap}
-              className="p-2.5 rounded-2xl border border-stone-700 bg-stone-800 text-stone-400 hover:text-red-400 cursor-pointer"
+              className="p-2 rounded-2xl border border-stone-700 bg-stone-800/80 hover:bg-stone-700 active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0"
               title="Hủy mẻ này"
             >
-              <GameAssetIcon name="close" size={16} />
+              <Image
+                src={PHASE3_UI_ASSETS.ui_cancel_huy.src}
+                alt="Hủy"
+                width={PHASE3_UI_ASSETS.ui_cancel_huy.width}
+                height={PHASE3_UI_ASSETS.ui_cancel_huy.height}
+                className="h-6 w-auto object-contain pointer-events-none"
+              />
             </button>
           </div>
         ) : (
@@ -270,18 +289,30 @@ export const KimbapStation: React.FC = () => {
             <button
               type="button"
               onClick={finishKimbap}
-              className="flex-1 py-2.5 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-black text-xs rounded-2xl shadow-xl active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer border border-emerald-300/40"
+              className="flex-1 flex items-center justify-center cursor-pointer active:scale-95 transition-all drop-shadow-md py-1"
+              title="Hoàn tất và cho ra đĩa"
             >
-              <GameAssetIcon name="complete" size={18} />
-              <span>Cho Ra Đĩa Sẵn Sàng Giao</span>
+              <Image
+                src={PHASE3_UI_ASSETS.btn_complete_hoan_tat.src}
+                alt="Hoàn Tất"
+                width={PHASE3_UI_ASSETS.btn_complete_hoan_tat.width}
+                height={PHASE3_UI_ASSETS.btn_complete_hoan_tat.height}
+                className="h-10 w-auto object-contain pointer-events-none"
+              />
             </button>
             <button
               type="button"
               onClick={discardKimbap}
-              className="p-2.5 rounded-2xl border border-stone-700 bg-stone-800 text-stone-400 hover:text-red-400 cursor-pointer"
+              className="p-2 rounded-2xl border border-stone-700 bg-stone-800/80 hover:bg-stone-700 active:scale-95 transition-all cursor-pointer flex items-center justify-center shrink-0"
               title="Hủy mẻ này"
             >
-              <GameAssetIcon name="close" size={16} />
+              <Image
+                src={PHASE3_UI_ASSETS.ui_cancel_huy.src}
+                alt="Hủy"
+                width={PHASE3_UI_ASSETS.ui_cancel_huy.width}
+                height={PHASE3_UI_ASSETS.ui_cancel_huy.height}
+                className="h-6 w-auto object-contain pointer-events-none"
+              />
             </button>
           </div>
         )}

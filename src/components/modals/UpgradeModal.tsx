@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/stores/useGameStore';
 import { GameAssetIcon } from '@/components/ui/game/GameAssetIcon';
@@ -19,19 +20,32 @@ export const UpgradeModal: React.FC = () => {
           exit={{ opacity: 0, scale: 0.9, y: 15 }}
           className="bg-stone-900 rounded-3xl max-w-xl w-full p-4 sm:p-6 shadow-2xl border-4 border-amber-600/60 relative flex flex-col max-h-[90vh] text-stone-100"
         >
-          {/* Close button */}
+          {/* Close button (Phase 3 PNG: ui_close_dong.png) */}
           <button
             type="button"
             onClick={() => setActiveModal('none')}
-            className="absolute top-4 right-4 p-1.5 rounded-full bg-stone-800 hover:bg-stone-700 text-stone-400 hover:text-stone-100 border border-stone-700 transition-colors cursor-pointer"
+            title="Đóng nâng cấp"
+            className="absolute top-4 right-4 w-8 h-8 rounded-xl overflow-hidden cursor-pointer transition-transform active:scale-90 z-20"
           >
-            <GameAssetIcon name="close" size={18} />
+            <Image
+              src="/assets/phase3-ui/ui_close_dong.png"
+              alt="Đóng"
+              width={32}
+              height={32}
+              className="w-full h-full object-contain pointer-events-none drop-shadow"
+            />
           </button>
 
           {/* Modal Header */}
-          <div className="flex items-center gap-2.5 mb-4">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center">
-              <GameAssetIcon name="upgrade" size={24} />
+          <div className="flex items-center gap-2.5 mb-4 pr-10">
+            <div className="w-12 h-10 rounded-2xl bg-amber-500/20 border border-amber-400/40 p-1 flex items-center justify-center shrink-0">
+              <Image
+                src="/assets/phase3-ui/btn_upgrade_nang_cap.png"
+                alt="Nâng cấp"
+                width={589}
+                height={279}
+                className="w-full h-full object-contain pointer-events-none"
+              />
             </div>
             <div>
               <h2 className="text-base sm:text-lg font-black text-amber-200 tracking-wide uppercase">
@@ -55,9 +69,15 @@ export const UpgradeModal: React.FC = () => {
                   className="bg-stone-950/70 border-2 border-stone-800 hover:border-amber-600/50 rounded-2xl p-3 sm:p-4 flex items-center justify-between gap-3 transition-colors shadow-md"
                 >
                   <div className="flex items-start gap-3">
-                    <span className="text-2xl p-2 bg-stone-800 rounded-xl shadow-inner border border-amber-500/30">
-                      <GameAssetIcon name="upgrade" size={24} />
-                    </span>
+                    <div className="w-12 h-10 p-1 bg-stone-800 rounded-xl shadow-inner border border-amber-500/30 flex items-center justify-center shrink-0">
+                      <Image
+                        src="/assets/phase3-ui/btn_upgrade_nang_cap.png"
+                        alt="Nâng cấp"
+                        width={589}
+                        height={279}
+                        className="w-full h-full object-contain pointer-events-none"
+                      />
+                    </div>
                     <div>
                       <div className="flex items-center gap-2">
                         <h4 className="font-black text-amber-100 text-xs sm:text-sm">
@@ -76,23 +96,37 @@ export const UpgradeModal: React.FC = () => {
 
                   <div className="shrink-0">
                     {isMax ? (
-                      <span className="text-xs font-black text-emerald-300 bg-emerald-950/80 border border-emerald-500/40 px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-inner">
-                        <GameAssetIcon name="complete" size={14} />
-                        Tối Đa
-                      </span>
+                      <div className="h-8 aspect-[375/199] relative flex items-center justify-center">
+                        <Image
+                          src="/assets/phase3-ui/status_perfect_hoan_hao.png"
+                          alt="Tối đa"
+                          width={375}
+                          height={199}
+                          className="h-full w-auto object-contain pointer-events-none drop-shadow-sm"
+                        />
+                      </div>
                     ) : (
                       <button
                         type="button"
                         onClick={() => buyUpgrade(upgrade.id)}
                         disabled={!canAfford}
-                        className={`px-3 py-2 rounded-xl font-black text-xs flex items-center gap-1.5 shadow-md transition-all cursor-pointer ${
+                        title={`Nâng cấp (${upgrade.cost} Xu)`}
+                        className={`h-9 sm:h-10 px-2.5 rounded-xl font-black text-xs flex items-center gap-1.5 shadow-md transition-all cursor-pointer ${
                           canAfford
-                            ? 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white active:scale-95 border border-amber-300'
-                            : 'bg-stone-800 text-stone-500 border border-stone-700 cursor-not-allowed'
+                            ? 'bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400 text-white active:scale-95'
+                            : 'bg-stone-800 text-stone-500 border border-stone-700 cursor-not-allowed opacity-60'
                         }`}
                       >
-                        <GameAssetIcon name="coin" size={14} />
-                        <span>{upgrade.cost} Xu</span>
+                        <div className="h-6 w-auto aspect-[589/279] relative">
+                          <Image
+                            src="/assets/phase3-ui/btn_upgrade_nang_cap.png"
+                            alt="Nâng cấp"
+                            width={589}
+                            height={279}
+                            className="h-full w-auto object-contain pointer-events-none"
+                          />
+                        </div>
+                        <span className="text-amber-300 font-black">{upgrade.cost} Xu</span>
                       </button>
                     )}
                   </div>

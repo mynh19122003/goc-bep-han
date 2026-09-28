@@ -33,19 +33,32 @@ export const MenuModal: React.FC = () => {
           exit={{ opacity: 0, scale: 0.9, y: 15 }}
           className="bg-stone-900 rounded-3xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl border-4 border-amber-600/60 relative flex flex-col max-h-[90vh] text-stone-100"
         >
-          {/* Close button */}
+          {/* Close button (Phase 3 PNG: ui_close_dong.png) */}
           <button
             type="button"
             onClick={() => setActiveModal('none')}
-            className="absolute top-4 right-4 p-1.5 rounded-full bg-stone-800 hover:bg-stone-700 text-stone-400 hover:text-stone-100 border border-stone-700 transition-colors cursor-pointer"
+            title="Đóng thực đơn"
+            className="absolute top-4 right-4 w-8 h-8 rounded-xl overflow-hidden cursor-pointer transition-transform active:scale-90 z-20"
           >
-            <GameAssetIcon name="close" size={18} />
+            <Image
+              src="/assets/phase3-ui/ui_close_dong.png"
+              alt="Đóng"
+              width={32}
+              height={32}
+              className="w-full h-full object-contain pointer-events-none drop-shadow"
+            />
           </button>
 
-          {/* Modal Header */}
-          <div className="flex items-center gap-2.5 mb-4">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center">
-              <GameAssetIcon name="recipe" size={24} />
+          {/* Modal Header (Phase 3 PNG: tab_menu_thuc_don.png) */}
+          <div className="flex items-center gap-2.5 mb-4 pr-10">
+            <div className="w-11 h-11 rounded-2xl bg-amber-500/20 border border-amber-400/40 p-1 flex items-center justify-center shrink-0">
+              <Image
+                src="/assets/phase3-ui/tab_menu_thuc_don.png"
+                alt="Thực đơn"
+                width={40}
+                height={40}
+                className="w-full h-full object-contain pointer-events-none"
+              />
             </div>
             <div>
               <h2 className="text-base sm:text-lg font-black text-amber-200 tracking-wide uppercase">
@@ -135,23 +148,39 @@ export const MenuModal: React.FC = () => {
                     {/* Unlock Action or Status */}
                     <div className="shrink-0">
                       {dish.isUnlocked ? (
-                        <span className="flex items-center gap-1 text-xs font-black text-emerald-300 bg-emerald-950/80 border border-emerald-500/50 px-3 py-1 rounded-xl shadow-inner">
-                          <GameAssetIcon name="complete" size={14} />
-                          Đang Phục Vụ
-                        </span>
+                        <div className="h-8 aspect-[375/199] relative flex items-center justify-center">
+                          <Image
+                            src="/assets/phase3-ui/status_perfect_hoan_hao.png"
+                            alt="Đang Phục Vụ"
+                            width={375}
+                            height={199}
+                            className="h-full w-auto object-contain pointer-events-none drop-shadow-sm"
+                          />
+                        </div>
                       ) : (
                         <button
                           type="button"
                           onClick={() => unlockDish(dish.id)}
                           disabled={!canUnlock}
-                          className={`px-3 py-1.5 rounded-xl font-black text-xs flex items-center gap-1.5 shadow-md transition-all cursor-pointer ${
+                          title={`Mở khóa món ${dish.name} (${dish.unlockCost} Xu)`}
+                          className={`h-8 sm:h-9 px-2 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                             canUnlock
-                              ? 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white active:scale-95 border border-amber-300'
-                              : 'bg-stone-800 text-stone-500 border border-stone-700 cursor-not-allowed'
+                              ? 'bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400 active:scale-95'
+                              : 'bg-stone-800/80 border border-stone-700 opacity-60 cursor-not-allowed'
                           }`}
                         >
-                          <GameAssetIcon name="lock" size={14} />
-                          <span>Mở Khóa ({dish.unlockCost} Xu)</span>
+                          <div className="h-6 w-auto aspect-[593/295] relative">
+                            <Image
+                              src={canUnlock ? '/assets/phase3-ui/btn_open_mo.png' : '/assets/phase3-ui/btn_lock_khoa.png'}
+                              alt={canUnlock ? 'Mở Khóa' : 'Khóa'}
+                              width={593}
+                              height={295}
+                              className="h-full w-auto object-contain pointer-events-none"
+                            />
+                          </div>
+                          <span className="text-xs font-black text-amber-300">
+                            {dish.unlockCost} Xu
+                          </span>
                         </button>
                       )}
                     </div>

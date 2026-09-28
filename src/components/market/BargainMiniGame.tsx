@@ -8,6 +8,7 @@ import confetti from 'canvas-confetti';
 import { GAME_ASSETS } from '@/config/gameAssets';
 import { CustomerSprite } from '@/components/ui/game/CustomerSprite';
 import { GameAssetIcon } from '@/components/ui/game/GameAssetIcon';
+import { PHASE3_UI_ASSETS } from '@/game/assets/phase3UiAssets';
 
 export const BargainMiniGame: React.FC = () => {
   const { bargainSession, inventory, stopBargain, cancelBargain } = useGameStore();
@@ -201,9 +202,16 @@ export const BargainMiniGame: React.FC = () => {
               <button
                 type="button"
                 onClick={cancelBargain}
-                className="w-full py-2.5 bg-stone-800 hover:bg-stone-700 text-amber-200 font-black text-xs rounded-2xl shadow-md transition-all active:scale-95 border border-stone-700 cursor-pointer"
+                className="w-full flex items-center justify-center cursor-pointer active:scale-95 transition-all drop-shadow-md py-1"
+                title="Quay lại chợ"
               >
-                Quay Lại Chợ
+                <Image
+                  src={PHASE3_UI_ASSETS.ui_back_quay_lai.src}
+                  alt="Quay Lại"
+                  width={PHASE3_UI_ASSETS.ui_back_quay_lai.width}
+                  height={PHASE3_UI_ASSETS.ui_back_quay_lai.height}
+                  className="h-10 w-auto object-contain pointer-events-none"
+                />
               </button>
             )}
           </div>

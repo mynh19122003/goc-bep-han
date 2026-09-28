@@ -1,9 +1,11 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/stores/useGameStore';
 import { GameAssetIcon } from '@/components/ui/game/GameAssetIcon';
+import { PHASE3_UI_ASSETS } from '@/game/assets/phase3UiAssets';
 import confetti from 'canvas-confetti';
 
 export const DayEndModal: React.FC = () => {
@@ -84,10 +86,16 @@ export const DayEndModal: React.FC = () => {
           <button
             type="button"
             onClick={handleNextDay}
-            className="w-full py-3 bg-gradient-to-r from-red-600 via-orange-500 to-amber-500 hover:from-red-700 hover:to-amber-600 text-white font-black rounded-2xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 text-sm border border-amber-300/40 cursor-pointer"
+            className="w-full flex items-center justify-center cursor-pointer active:scale-95 transition-all drop-shadow-xl mt-2"
+            title="Bắt đầu ngày tiếp theo"
           >
-            <span>Bắt Đầu Ngày Tiếp Theo</span>
-            <GameAssetIcon name="start" size={16} />
+            <Image
+              src={PHASE3_UI_ASSETS.btn_start_bat_dau.src}
+              alt="Bắt Đầu Ngày Tiếp Theo"
+              width={PHASE3_UI_ASSETS.btn_start_bat_dau.width}
+              height={PHASE3_UI_ASSETS.btn_start_bat_dau.height}
+              className="h-12 w-auto object-contain pointer-events-none"
+            />
           </button>
         </motion.div>
       </div>

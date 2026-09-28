@@ -107,7 +107,15 @@ export const ActiveOrderQueue: React.FC<ActiveOrderQueueProps> = ({
               onClick={() => onCookFreeDish('spicy_ramyeon')}
               className="mt-3 px-4 py-2 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white font-black text-xs rounded-xl shadow border border-amber-400 active:scale-95 transition-all flex items-center gap-1.5"
             >
-              <GameAssetIcon name="start" size={16} />
+              <div className="h-5 w-auto aspect-[622/251] relative">
+                <Image
+                  src="/assets/phase3-ui/btn_start_bat_dau.png"
+                  alt="Bắt đầu"
+                  width={622}
+                  height={251}
+                  className="h-full w-auto object-contain pointer-events-none"
+                />
+              </div>
               <span>Nấu Thử Mì Cay Dự Trữ</span>
             </button>
           )}
@@ -165,7 +173,15 @@ export const ActiveOrderQueue: React.FC<ActiveOrderQueueProps> = ({
                           : 'bg-amber-100 text-amber-800 border-amber-300'
                       }`}
                     >
-                      <GameAssetIcon name="clock" size={12} />
+                      <div className="w-3.5 h-3.5 relative shrink-0">
+                        <Image
+                          src="/assets/phase3-ui/ui_timer_thoi_gian.png"
+                          alt="Timer"
+                          width={24}
+                          height={24}
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
                       <span>{order.timeRemaining}s</span>
                     </div>
                   )}
@@ -242,9 +258,17 @@ export const ActiveOrderQueue: React.FC<ActiveOrderQueueProps> = ({
                 <button
                   type="button"
                   onClick={() => onSelectOrder(order)}
-                  className="w-full h-9 sm:h-10 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white font-black text-xs sm:text-sm rounded-xl shadow border border-amber-400 flex items-center justify-center gap-1.5 active:scale-95 transition-all"
+                  className="w-full h-10 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white font-black text-xs sm:text-sm rounded-xl shadow border border-amber-400 flex items-center justify-center gap-2 active:scale-95 transition-all"
                 >
-                  <GameAssetIcon name="cooking" size={16} />
+                  <div className="h-6 w-auto aspect-[543/270] relative">
+                    <Image
+                      src="/assets/phase3-ui/btn_cook_nau.png"
+                      alt="Nấu"
+                      width={543}
+                      height={270}
+                      className="h-full w-auto object-contain pointer-events-none"
+                    />
+                  </div>
                   <span>BẮT ĐẦU NẤU</span>
                 </button>
               </div>
