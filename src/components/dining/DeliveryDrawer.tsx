@@ -141,7 +141,6 @@ export const DeliveryDrawer: React.FC<DeliveryDrawerProps> = ({ isOpen, onClose 
                       <div>
                         {order.shipperStatus === 'on_the_way' ? (
                           <span className="flex items-center gap-1 text-[10px] font-bold text-stone-600 bg-stone-100 px-2 py-0.5 rounded-full">
-                            <GameAssetIcon name="clock" size={11} />
                             Tới sau: {Math.ceil(order.shipperArriveSeconds)}s
                           </span>
                         ) : (
