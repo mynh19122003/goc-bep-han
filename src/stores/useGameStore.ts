@@ -53,6 +53,7 @@ interface GameState {
   dayTimeSeconds: number; // 0 to 100s per day
   isDayActive: boolean;
   isPaused: boolean;
+  pauseBeforeModal: boolean;
   rating: number; // 1.0 to 5.0
   dayStartRating: number;
   reputationPoints: number;
@@ -217,6 +218,7 @@ export const useGameStore = create<GameState>()(
       dayTimeSeconds: 0,
       isDayActive: false,
       isPaused: false,
+      pauseBeforeModal: false,
       rating: 4.8,
       dayStartRating: 4.8,
       reputationPoints: 25,
@@ -1607,14 +1609,21 @@ export const useGameStore = create<GameState>()(
       setActiveModal: (modal: ModalType) => {
         soundManager.playClick();
         const state = get();
+
+        if (modal === 'none') {
+          set({
+            activeModal: 'none',
+            isPaused: state.pauseBeforeModal,
+            pauseBeforeModal: false,
+          });
+          return;
+        }
+
         set({
           activeModal: modal,
-          isPaused:
-            modal === 'none'
-              ? false
-              : state.isDayActive
-              ? true
-              : state.isPaused,
+          pauseBeforeModal:
+            state.activeModal === 'none' ? state.isPaused : state.pauseBeforeModal,
+          isPaused: state.isDayActive ? true : state.isPaused,
         });
       },
 
@@ -1638,6 +1647,7 @@ export const useGameStore = create<GameState>()(
           dayTimeSeconds: 0,
           isDayActive: false,
           isPaused: false,
+          pauseBeforeModal: false,
           rating: 4.8,
           dayStartRating: 4.8,
           reputationPoints: 25,
