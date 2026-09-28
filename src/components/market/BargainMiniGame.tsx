@@ -67,7 +67,7 @@ export const BargainMiniGame: React.FC = () => {
   const itemAsset =
     (GAME_ASSETS.ingredients as Record<string, string>)[bargainSession.ingredientId] ||
     (GAME_ASSETS.toppings as Record<string, string>)[bargainSession.ingredientId] ||
-    GAME_ASSETS.ingredients.trung;
+    null;
 
   const handleStop = () => {
     if (isFinished) return;
@@ -118,7 +118,7 @@ export const BargainMiniGame: React.FC = () => {
 
           {/* Item details */}
           <div className="bg-stone-950/80 rounded-2xl p-2.5 my-3 border-2 border-stone-800 text-left flex items-center gap-2.5 shadow-inner">
-            <div className="w-12 h-12 p-1 bg-stone-850 rounded-xl shadow-xs border border-amber-500/30 flex items-center justify-center shrink-0">
+            <div className="w-12 h-12 p-1 bg-stone-800 rounded-xl shadow-sm border border-amber-500/30 flex items-center justify-center shrink-0">
               <Image
                 src={itemAsset}
                 alt={item?.vietnameseName || ''}
