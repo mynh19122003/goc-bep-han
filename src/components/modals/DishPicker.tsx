@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import Image from 'next/image';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useGameStore } from '@/stores/useGameStore';
@@ -16,10 +16,15 @@ interface DishPickerProps {
 
 export const DishPicker: React.FC<DishPickerProps> = ({ isOpen, onClose, onSelectDish }) => {
   const { dishes } = useGameStore();
+  const [category, setCategory] = useState<'all' | 'main' | 'drink'>('all');
+
+  const dishList = useMemo(() => {
+    const all = Object.values(dishes);
+    if (category === 'all') return all;
+    return all.filter((dish) => dish.category === category);
+  }, [dishes, category]);
 
   if (!isOpen) return null;
-
-  const dishList = Object.values(dishes);
 
   const choose = (dishId: string, unlocked: boolean) => {
     if (!unlocked) {
@@ -58,7 +63,31 @@ export const DishPicker: React.FC<DishPickerProps> = ({ isOpen, onClose, onSelec
             <CloseButton onClick={onClose} />
           </header>
 
-          <div className="game-scrollbar grid flex-1 grid-cols-2 gap-2 overflow-y-auto p-3 sm:grid-cols-3 sm:gap-3 sm:p-4 lg:grid-cols-4">
+          <div className="flex shrink-0 gap-1.5 border-b border-stone-800 bg-black/20 px-3 py-2 sm:px-4">
+            {[
+              { id: 'all', label: 'Tất cả' },
+              { id: 'main', label: 'Món ăn' },
+              { id: 'drink', label: 'Đồ uống' },
+            ].map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setCategory(item.id as 'all' | 'main' | 'drink')}
+                className={`min-h-[36px] flex-1 rounded-xl border px-2 text-[9px] font-black transition active:scale-95 sm:flex-none sm:px-3 sm:text-[10px] ${
+                  category === item.id
+                    ? 'border-amber-300/45 bg-amber-600/65 text-white'
+                    : 'border-stone-700 bg-stone-900/70 text-stone-400'
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+            <span className="ml-auto hidden items-center text-[9px] font-bold text-stone-500 sm:flex">
+              {dishList.length} món
+            </span>
+          </div>
+
+          <div className="game-scrollbar grid flex-1 grid-cols-2 content-start gap-2 overflow-y-auto p-3 sm:grid-cols-3 sm:gap-3 sm:p-4 lg:grid-cols-4">
             {dishList.map((dish) => {
               const asset = (GAME_ASSETS.dishes as Record<string, string>)[dish.id];
               return (
@@ -67,7 +96,7 @@ export const DishPicker: React.FC<DishPickerProps> = ({ isOpen, onClose, onSelec
                   type="button"
                   disabled={!dish.isUnlocked}
                   onClick={() => choose(dish.id, dish.isUnlocked)}
-                  className={`relative flex min-h-[150px] flex-col items-center justify-between rounded-2xl border p-2.5 text-center transition ${
+                  className={`relative flex min-h-[136px] flex-col items-center justify-between rounded-2xl border p-2 text-center transition sm:min-h-[150px] sm:p-2.5 ${
                     dish.isUnlocked
                       ? 'border-amber-500/25 bg-stone-900/70 hover:border-amber-300/55 hover:bg-stone-800/80 active:scale-95'
                       : 'cursor-not-allowed border-stone-800 bg-black/25 opacity-55'
@@ -81,7 +110,7 @@ export const DishPicker: React.FC<DishPickerProps> = ({ isOpen, onClose, onSelec
                     </div>
                   )}
 
-                  <div className="relative h-20 w-20 sm:h-24 sm:w-24">
+                  <div className="relative h-16 w-16 sm:h-24 sm:w-24">
                     {asset ? (
                       <Image src={asset} alt={dish.name} fill sizes="96px" className="object-contain drop-shadow" />
                     ) : (
