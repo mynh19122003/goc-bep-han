@@ -294,10 +294,10 @@ export const TokbokkiStation: React.FC = () => {
             <button
               type="button"
               onClick={discardTokbokki}
-              className="p-2.5 rounded-2xl border border-stone-700 bg-stone-800 text-stone-400 hover:text-red-400 cursor-pointer"
+              className="min-w-[52px] px-3 py-2.5 rounded-2xl border border-red-900/60 bg-stone-800 text-red-300 hover:bg-red-950/40 hover:text-red-200 cursor-pointer font-black text-[10px] tracking-wide"
               title="Hủy mẻ này"
             >
-              <GameAssetIcon name="close" size={16} />
+              HỦY
             </button>
           </div>
         ) : (
@@ -317,10 +317,10 @@ export const TokbokkiStation: React.FC = () => {
             <button
               type="button"
               onClick={discardTokbokki}
-              className="p-2.5 rounded-2xl border border-stone-700 bg-stone-800 text-stone-400 hover:text-red-400 cursor-pointer"
+              className="min-w-[52px] px-3 py-2.5 rounded-2xl border border-red-900/60 bg-stone-800 text-red-300 hover:bg-red-950/40 hover:text-red-200 cursor-pointer font-black text-[10px] tracking-wide"
               title="Hủy mẻ này"
             >
-              <GameAssetIcon name="close" size={16} />
+              HỦY
             </button>
           </div>
         )}
