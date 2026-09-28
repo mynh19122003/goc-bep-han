@@ -176,20 +176,20 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex justify-end bg-stone-950/70 backdrop-blur-xs select-none font-baloo">
+      <div className="fixed inset-0 z-50 flex items-end sm:items-stretch sm:justify-end bg-stone-950/70 backdrop-blur-sm select-none font-baloo">
         {/* Backdrop click to close */}
         <div className="absolute inset-0 cursor-pointer" onClick={onClose} />
 
         {/* Drawer Container (Right side on Desktop, Bottom Sheet on Mobile) */}
         <motion.div
-          initial={{ x: '100%' }}
-          animate={{ x: 0 }}
-          exit={{ x: '100%' }}
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 40 }}
           transition={{ type: 'spring', damping: 28, stiffness: 280 }}
-          className="relative z-10 w-full sm:max-w-2xl lg:max-w-3xl h-full bg-stone-900/95 backdrop-blur-xl border-l-2 border-amber-600/50 shadow-2xl flex flex-col justify-between overflow-hidden text-stone-100"
+          className="relative z-10 w-full h-[88dvh] sm:h-full sm:max-w-2xl lg:max-w-3xl bg-stone-900/95 backdrop-blur-xl border-t-2 sm:border-t-0 sm:border-l-2 border-amber-600/50 rounded-t-3xl sm:rounded-none shadow-2xl flex flex-col overflow-hidden text-stone-100"
         >
           {/* 1. Drawer Header */}
-          <div className="shrink-0 p-3 sm:p-4 border-b border-amber-600/30 bg-stone-950/80 flex items-center justify-between">
+          <div className="shrink-0 p-3 sm:p-4 border-b border-amber-600/30 bg-stone-950/80 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-amber-600/20 border border-amber-400/40 flex items-center justify-center shrink-0">
                 <Image
@@ -214,11 +214,11 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
             </div>
 
             {/* Header Actions: + Nấu Tự Do & Close Button */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 shrink-0">
               <button
                 type="button"
                 onClick={() => setIsDishPickerOpen(true)}
-                className="px-3 py-1.5 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 text-white rounded-xl text-xs font-black shadow border border-amber-400/50 flex items-center gap-1 active:scale-95 transition-all cursor-pointer"
+                className="min-h-[40px] px-2.5 sm:px-3 py-1.5 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 text-white rounded-xl text-[11px] sm:text-xs font-black shadow border border-amber-400/50 flex items-center gap-1 active:scale-95 transition-all cursor-pointer"
               >
                 <GameAssetIcon name="menu" size={14} />
                 <span>+ Nấu Tự Do</span>
@@ -235,7 +235,7 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
           </div>
 
           {/* 2. Quick Active Orders Chips Bar */}
-          <div className="shrink-0 px-3 py-2 bg-stone-950/60 border-b border-stone-800 flex items-center gap-1.5 overflow-x-auto scrollbar-none">
+          <div className="game-scrollbar shrink-0 px-3 py-2 bg-stone-950/60 border-b border-stone-800 flex items-center gap-1.5 overflow-x-auto overscroll-x-contain">
             <span className="text-[10px] font-bold text-stone-400 shrink-0 uppercase tracking-wider">
               Đơn Chờ:
             </span>
@@ -295,7 +295,7 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
           </div>
 
           {/* 3. Main Cooking Area (CookingEngine or Specific Stations) */}
-          <div className="flex-1 overflow-y-auto p-2 sm:p-4">
+          <div className="game-scrollbar flex-1 overflow-y-auto p-2 sm:p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
             {currentOrder ? (
               <CookingEngine
                 key={`${currentOrder.orderType}-${currentOrder.orderId || currentOrder.dishId}-${currentOrder.tableId || 'free'}`}
@@ -336,7 +336,7 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
           {/* 4. Drawer Footer: Prepared Dishes Tray */}
           {preparedDishes.length > 0 && (
             <div className="shrink-0 p-2 sm:p-3 bg-stone-950 border-t border-amber-600/30 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-1.5 overflow-x-auto">
+              <div className="game-scrollbar flex items-center gap-1.5 overflow-x-auto">
                 <span className="text-[10px] font-bold text-amber-300/80 shrink-0 uppercase">
                   Món Đã Nấu Xong:
                 </span>
