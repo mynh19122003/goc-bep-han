@@ -10,6 +10,7 @@ import { ShipperSprite } from '@/components/ui/game/ShipperSprite';
 import { OrderBubble } from '@/components/ui/game/OrderBubble';
 import { GameAssetIcon } from '@/components/ui/game/GameAssetIcon';
 import { CookingTargetOrder } from '@/components/cooking/CookingEngine';
+import { preparedDishMatchesOrder } from '@/core/gameCore';
 
 interface RestaurantSceneProps {
   onCookOrder: (order: CookingTargetOrder) => void;
@@ -141,7 +142,16 @@ export const RestaurantScene: React.FC<RestaurantSceneProps> = ({
                           ? activeShipperOrder.shipperWaitSeconds
                           : activeShipperOrder.shipperArriveSeconds
                       }
-                      canServe={preparedDishes.some((p) => p.dishId === activeShipperOrder.dishId)}
+                      canServe={preparedDishes.some((p) =>
+                        preparedDishMatchesOrder({
+                          prepared: p,
+                          orderId: activeShipperOrder.id,
+                          dishId: activeShipperOrder.dishId,
+                          requiredToppings: activeShipperOrder.requiredToppings,
+                          excludedToppings: activeShipperOrder.excludedToppings,
+                          spiceLevel: activeShipperOrder.spiceLevel,
+                        })
+                      )}
                       onServeClick={(e?: any) => {
                         if (e?.stopPropagation) e.stopPropagation();
                         serveDeliveryOrder(activeShipperOrder.id);
