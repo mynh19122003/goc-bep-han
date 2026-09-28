@@ -26,7 +26,7 @@ export default function GamePage() {
   // Start continuous 1s game loop for customer patience, timers & day cycle
   useGameLoop();
 
-  const { setActiveModal } = useGameStore();
+  const { activeModal, setActiveModal } = useGameStore();
 
   // Single active panel state (Contextual Drawer pattern: ONE GAME SCREEN)
   const [activePanel, setActivePanel] = useState<'kitchen' | 'delivery' | null>(null);
@@ -45,26 +45,66 @@ export default function GamePage() {
     setShowIntro(false);
   };
 
-  // Handle panel selection from bottom dock
+  const dockActivePanel: GamePanelType =
+    activeModal === 'menu'
+      ? 'menu'
+      : activeModal === 'market' || activeModal === 'bargain'
+      ? 'inventory'
+      : activeModal === 'upgrades'
+      ? 'upgrade'
+      : activePanel;
+
+  // Handle panel selection from bottom dock.
+  // Drawer and modal surfaces are mutually exclusive so the UI never stacks.
   const handleSelectDockPanel = (panel: GamePanelType) => {
+    setTargetedCookingOrder(null);
+
+    if (panel === null) {
+      setActivePanel(null);
+      setActiveModal('none');
+      return;
+    }
+
     if (panel === 'menu') {
       setActivePanel(null);
       setActiveModal('menu');
-    } else if (panel === 'inventory') {
+      return;
+    }
+
+    if (panel === 'inventory') {
       setActivePanel(null);
       setActiveModal('market');
-    } else if (panel === 'upgrade') {
+      return;
+    }
+
+    if (panel === 'upgrade') {
       setActivePanel(null);
       setActiveModal('upgrades');
-    } else {
-      setActivePanel(panel);
+      return;
     }
+
+    setActiveModal('none');
+    setActivePanel(panel);
   };
 
   // Handle direct click on a table order to cook
   const handleCookOrder = (order: CookingTargetOrder) => {
+    setActiveModal('none');
     setTargetedCookingOrder(order);
     setActivePanel('kitchen');
+  };
+
+  const openGlobalModal = (modal: 'settings' | 'reviews') => {
+    setActivePanel(null);
+    setTargetedCookingOrder(null);
+    setActiveModal(modal);
+  };
+
+  const openGuide = () => {
+    setActivePanel(null);
+    setTargetedCookingOrder(null);
+    setActiveModal('none');
+    setShowIntro(true);
   };
 
   return (
@@ -73,9 +113,13 @@ export default function GamePage() {
       {/* 1. TOP GLOBAL HUD (28-34px standardized icons, day/time, coin, rating)    */}
       {/* ========================================================================= */}
       <HeaderHUD
-        onOpenDelivery={() => setActivePanel('delivery')}
-        onOpenSettings={() => setActiveModal('settings')}
-        onOpenGuide={() => setShowIntro(true)}
+        onOpenDelivery={() => {
+          setActiveModal('none');
+          setActivePanel('delivery');
+        }}
+        onOpenSettings={() => openGlobalModal('settings')}
+        onOpenReviews={() => openGlobalModal('reviews')}
+        onOpenGuide={openGuide}
       />
 
       {/* ========================================================================= */}
@@ -110,7 +154,7 @@ export default function GamePage() {
       {/* 4. GAME ACTION DOCK (Centered on desktop, full-width on mobile)           */}
       {/* ========================================================================= */}
       <GameActionDock
-        activePanel={activePanel}
+        activePanel={dockActivePanel}
         onSelectPanel={handleSelectDockPanel}
       />
 
