@@ -294,11 +294,11 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
     .join(' + ');
 
   return (
-    <div className="w-full flex flex-col justify-between select-none font-baloo relative pb-4">
+    <div className="relative flex w-full flex-col gap-2 select-none pb-2 font-baloo">
       {/* ========================================================================= */}
       {/* 1. COMPACT COOKING HEADER                                                 */}
       {/* ========================================================================= */}
-      <div className="bg-stone-950/80 border border-amber-600/40 p-2.5 sm:p-3 rounded-2xl mb-2 sm:mb-3 shadow-md flex items-center justify-between gap-2">
+      <div className="flex items-center justify-between gap-2 rounded-2xl border border-amber-500/20 bg-black/25 p-2.5 shadow-sm">
         <div className="flex items-center gap-2 min-w-0">
           <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-600/20 border border-amber-400/40 flex items-center justify-center shrink-0">
             <Image
@@ -331,7 +331,7 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
       {/* ========================================================================= */}
       {/* 2. ORDER REQUIREMENTS SUMMARY PILL                                        */}
       {/* ========================================================================= */}
-      <div className="bg-stone-900/90 border border-amber-600/30 px-3 py-1.5 rounded-xl mb-2 flex items-center justify-between flex-wrap gap-1.5 text-xs">
+      <div className="flex flex-wrap items-center justify-between gap-1.5 rounded-xl border border-stone-700 bg-stone-900/55 px-2.5 py-2 text-xs">
         <div className="flex items-center gap-1.5 flex-wrap">
           <span className="text-[11px] font-bold text-amber-300">Yêu cầu:</span>
           {order.requiredToppings && order.requiredToppings.length > 0 ? (
@@ -396,7 +396,7 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
       {/* 3. COOKING WORKSPACE: COOKWARE + BOUNDED INGREDIENT OVERLAY               */}
       {/* ========================================================================= */}
       <div
-        className="relative w-full flex flex-col items-center justify-center my-1 bg-stone-950/70 border border-amber-600/30 rounded-2xl p-2 sm:p-3"
+        className="relative flex w-full flex-col items-center justify-center rounded-2xl border border-amber-500/20 bg-black/25 p-2 sm:p-3"
         onPointerDown={handleCookwarePointerDown}
         onPointerUp={handleCookwarePointerUp}
         onPointerCancel={() => {
@@ -404,7 +404,7 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
         }}
       >
         {/* Cookware Vessel Wrapper with clamp width and exact aspect ratio */}
-        <div className="relative w-[min(64vw,238px)] sm:w-[clamp(250px,30vw,330px)] aspect-square flex items-center justify-center touch-none">
+        <div className="relative flex aspect-square w-[min(58vw,220px)] touch-none items-center justify-center sm:w-[clamp(230px,28vw,310px)]">
           {/* Stove shadow glow */}
           <div className="absolute -bottom-1 w-3/4 h-5 bg-black/60 rounded-full blur-md" />
 
@@ -465,7 +465,7 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
                   const asset =
                     (GAME_ASSETS.toppings as Record<string, string>)[topId] ||
                     (GAME_ASSETS.ingredients as Record<string, string>)[topId] ||
-                    GAME_ASSETS.ingredients.trung;
+                    null;
 
                   const slot = TOPPING_SLOTS[index % TOPPING_SLOTS.length];
 
@@ -487,13 +487,17 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
                       title={`Bấm để gỡ ${item ? item.vietnameseName : topId}`}
                       className="w-8 h-8 sm:w-10 sm:h-10 p-0.5 rounded-full bg-black/40 border border-white/60 shadow-md cursor-pointer hover:border-red-400 active:scale-90 transition-transform flex items-center justify-center z-20"
                     >
-                      <Image
-                        src={asset}
-                        alt={topId}
-                        width={36}
-                        height={36}
-                        className="w-full h-full object-contain pointer-events-none drop-shadow"
-                      />
+                      {asset ? (
+                        <Image
+                          src={asset}
+                          alt={topId}
+                          width={36}
+                          height={36}
+                          className="w-full h-full object-contain pointer-events-none drop-shadow"
+                        />
+                      ) : (
+                        <span className="text-[7px] font-black text-red-300">Thiếu ảnh</span>
+                      )}
                     </motion.button>
                   );
                 })}
@@ -601,7 +605,7 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
       {/* ========================================================================= */}
       {/* 4. BASE INGREDIENT & SPICE LEVEL CONTROLS (Touch Targets >= 44px)        */}
       {/* ========================================================================= */}
-      <div className="w-full flex items-center justify-between gap-2 flex-wrap bg-stone-900/90 border border-amber-600/40 p-2 sm:p-2.5 rounded-2xl mb-2 shadow-inner">
+      <div className="flex w-full flex-wrap items-center justify-between gap-2 rounded-2xl border border-stone-700 bg-stone-900/55 p-2">
         {/* Base Ingredient Toggle Button */}
         <button
           type="button"
@@ -657,7 +661,7 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
       {/* ========================================================================= */}
       {/* 5. TOPPING SELECTOR BAR                                                    */}
       {/* ========================================================================= */}
-      <div className="w-full bg-stone-900/90 border border-amber-600/40 p-2 sm:p-2.5 rounded-2xl mb-2.5 shadow">
+      <div className="w-full rounded-2xl border border-stone-700 bg-stone-900/55 p-2 sm:p-2.5">
         <ToppingSelector
           allowedToppings={recipe.allowedToppings}
           selectedToppings={selectedToppings}
@@ -671,7 +675,7 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
       {/* ========================================================================= */}
       {/* 6. PRIMARY ACTION BUTTONS                                                 */}
       {/* ========================================================================= */}
-      <div className="w-full flex items-center gap-2 pt-1 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+      <div className="sticky bottom-0 z-20 flex w-full items-center gap-2 rounded-2xl border border-stone-700 bg-[#1a1411]/96 p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-xl backdrop-blur">
         {/* Back / Cancel button */}
         <button
           type="button"
