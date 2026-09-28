@@ -73,7 +73,7 @@ export const RestaurantScene: React.FC<RestaurantSceneProps> = ({
           )}
         </div>
 
-        <div className="game-scrollbar mx-auto grid w-full max-w-[1380px] flex-1 grid-cols-1 gap-3 overflow-y-auto px-2 pb-24 pt-2 sm:px-4 lg:grid-cols-[210px_minmax(0,1fr)]">
+        <div className="game-scrollbar mx-auto grid w-full max-w-[1380px] flex-1 grid-cols-1 gap-2.5 overflow-y-auto px-2 pb-24 pt-2 sm:gap-3 sm:px-4 lg:grid-cols-[200px_minmax(0,1fr)]">
           <aside>
             <button type="button" onClick={onOpenDelivery} className="block w-full text-left">
               <GameSurface className="p-2.5 transition hover:border-teal-300/60" strong>
@@ -89,7 +89,7 @@ export const RestaurantScene: React.FC<RestaurantSceneProps> = ({
                   </span>
                 </div>
 
-                <div className="flex min-h-[112px] flex-col items-center justify-center rounded-xl border border-teal-400/15 bg-black/20 p-2">
+                <div className="flex min-h-[84px] flex-col items-center justify-center rounded-xl border border-teal-400/15 bg-black/20 p-2 sm:min-h-[104px]">
                   {activeShipperOrder ? (
                     <>
                       <div className="mb-1 w-full">
@@ -183,7 +183,7 @@ export const RestaurantScene: React.FC<RestaurantSceneProps> = ({
               return (
                 <GameSurface
                   key={table.id}
-                  className="relative flex min-h-[190px] flex-col p-2.5 sm:min-h-[205px] sm:p-3"
+                  className="relative flex min-h-[170px] flex-col p-2.5 sm:min-h-[198px] sm:p-3"
                 >
                   <div className="mb-1 flex items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5">
@@ -203,7 +203,7 @@ export const RestaurantScene: React.FC<RestaurantSceneProps> = ({
                     )}
                   </div>
 
-                  <div className="flex flex-1 items-center justify-center">
+                  <div className="flex min-h-0 flex-1 items-center justify-center">
                     {seated && customer && (
                       <div className="flex w-full flex-col items-center">
                         <button
