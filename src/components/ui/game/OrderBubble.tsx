@@ -3,8 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { GameAssetIcon } from '@/components/ui/game/GameAssetIcon';
-import { GAME_ASSETS } from '@/config/gameAssets';
+import { GAME_ASSETS } from '@/game/assets/gameAssets';
 
 interface OrderBubbleProps {
   dishName: string;
@@ -13,85 +12,60 @@ interface OrderBubbleProps {
   patiencePercent?: number;
   secondsRemaining?: number;
   className?: string;
-  onServeClick?: () => void;
+  onServeClick?: (event?: React.MouseEvent<HTMLButtonElement>) => void;
   canServe?: boolean;
 }
 
 export const OrderBubble: React.FC<OrderBubbleProps> = ({
   dishName,
   dishId,
-  dishEmoji,
   patiencePercent = 100,
   secondsRemaining,
   className = '',
   onServeClick,
   canServe = false,
 }) => {
-  // Resolve real dish asset strictly, falling back to name keywords before any generic icon
-  const getDishAsset = (): string | null => {
-    const dishes = GAME_ASSETS.dishes as Record<string, string>;
-    if (dishId && dishes[dishId]) return dishes[dishId];
-    const lower = dishName.toLowerCase();
-    if (lower.includes('tokbokki')) return dishes.tokbokki;
-    if (lower.includes('ramyeon') || lower.includes('mì')) return dishes.spicy_ramyeon || dishes.ramyeon;
-    if (lower.includes('kimbap')) return dishes.kimbap;
-    if (lower.includes('canh') || lower.includes('kimchi')) return dishes.canh_kimchi;
-    if (lower.includes('bibimbap') || lower.includes('cơm trộn')) return dishes.bibimbap;
-    if (lower.includes('gà rán')) return dishes.ga_ran_han_quoc;
-    if (lower.includes('phô mai que')) return dishes.pho_mai_que;
-    if (lower.includes('mandu')) return dishes.mandu;
-    if (lower.includes('bánh xèo')) return dishes.banh_xeo_han;
-    if (lower.includes('cơm nắm')) return dishes.com_nam;
-    if (lower.includes('trà đào')) return dishes.tra_dao;
-    return dishes.ramyeon;
-  };
-
-  const dishAsset = getDishAsset();
+  const dishAsset = dishId
+    ? (GAME_ASSETS.dishes as Record<string, string>)[dishId] || null
+    : null;
 
   return (
     <motion.div
-      initial={{ scale: 0.85, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      className={`relative bg-[#FFFDF8] border-2 border-amber-400 rounded-2xl p-2 shadow-cozy flex flex-col justify-between select-none font-baloo ${className}`}
+      initial={{ scale: 0.94, opacity: 0, y: 4 }}
+      animate={{ scale: 1, opacity: 1, y: 0 }}
+      className={`relative flex min-h-[54px] flex-col justify-between rounded-2xl border border-amber-400/70 bg-[#fffaf1] p-2 text-stone-900 shadow-lg ${className}`}
     >
-      {/* Speech bubble beak / arrow pointing down */}
-      <div className="absolute -bottom-2 left-6 w-3 h-3 bg-[#FFFDF8] border-r-2 border-b-2 border-amber-400 transform rotate-45" />
+      <span className="absolute -bottom-1.5 left-7 h-3 w-3 rotate-45 border-b border-r border-amber-400/70 bg-[#fffaf1]" />
 
-      {/* Dish Name & Icon */}
-      <div className="flex items-center gap-1.5">
-        <div className="w-6 h-6 relative shrink-0 flex items-center justify-center">
+      <div className="flex items-center gap-2">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-100/80">
           {dishAsset ? (
-            <Image
-              src={dishAsset}
-              alt={dishName}
-              width={24}
-              height={24}
-              className="w-full h-full object-contain pointer-events-none drop-shadow-xs"
-            />
+            <div className="relative h-7 w-7">
+              <Image src={dishAsset} alt={dishName} fill sizes="28px" className="object-contain" />
+            </div>
           ) : (
-            <GameAssetIcon name="bowl" size={20} />
+            <div className="relative h-7 w-7 opacity-60">
+              <Image src={GAME_ASSETS.cooking.bowl} alt="" fill sizes="28px" className="object-contain" />
+            </div>
           )}
         </div>
+
         <div className="min-w-0 flex-1">
-          <span className="font-black text-stone-900 text-xs truncate block leading-tight">
-            {dishName}
-          </span>
+          <span className="block truncate text-[11px] font-black leading-tight sm:text-xs">{dishName}</span>
           {secondsRemaining !== undefined && (
-            <span className="text-[10px] text-amber-800 font-bold block flex items-center gap-1">
-              <GameAssetIcon name="clock" size={10} />
-              <span>{Math.ceil(secondsRemaining)}s</span>
+            <span className="mt-0.5 block text-[9px] font-black text-amber-800">
+              Còn {Math.ceil(secondsRemaining)}s
             </span>
           )}
         </div>
       </div>
 
-      {/* Patience Progress Bar */}
       {patiencePercent !== undefined && (
-        <div className="w-full bg-stone-200 h-1.5 rounded-full mt-1.5 overflow-hidden border border-stone-300">
+        <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-stone-200">
           <div
-            className={`h-full transition-all duration-200 ${
+            className={`h-full rounded-full transition-all duration-200 ${
               patiencePercent < 30
-                ? 'bg-red-500 animate-pulse'
+                ? 'bg-red-500'
                 : patiencePercent < 60
                 ? 'bg-amber-500'
                 : 'bg-emerald-500'
@@ -101,19 +75,21 @@ export const OrderBubble: React.FC<OrderBubbleProps> = ({
         </div>
       )}
 
-      {/* Fast Serve Button */}
       {onServeClick && (
         <button
           type="button"
-          onClick={onServeClick}
+          onClick={(event) => {
+            event.stopPropagation();
+            onServeClick(event);
+          }}
           disabled={!canServe}
-          className={`w-full mt-1.5 py-1 rounded-xl font-black text-[11px] shadow-xs transition-all active:scale-95 ${
+          className={`mt-1.5 min-h-[30px] w-full rounded-lg text-[9px] font-black transition active:scale-95 ${
             canServe
-              ? 'bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white cursor-pointer'
-              : 'bg-stone-200 text-stone-400 cursor-not-allowed'
+              ? 'bg-emerald-600 text-white hover:bg-emerald-500'
+              : 'cursor-not-allowed bg-stone-200 text-stone-400'
           }`}
         >
-          {canServe ? 'Giao Món Này' : 'Đang chuẩn bị...'}
+          {canServe ? 'Giao món' : 'Chưa nấu xong'}
         </button>
       )}
     </motion.div>
