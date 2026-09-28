@@ -12,6 +12,7 @@ export const RamyeonStation: React.FC = () => {
     dishes,
     startRamyeon,
     pourRamyeonWater,
+    confirmRamyeonWater,
     addRamyeonContents,
     tapEggCrack,
     finishRamyeon,
@@ -49,6 +50,8 @@ export const RamyeonStation: React.FC = () => {
             ? `Gõ Trứng (${ramyeonSession.eggCrackTaps}/2)`
             : ramyeonSession.step === 'boiling'
             ? `Đang Sôi (${Math.ceil(ramyeonSession.boilProgress)}%)`
+            : ramyeonSession.step === 'burned'
+            ? 'Mì Đã Quá Lửa'
             : 'Mì Chín Tới'}
         </span>
       </div>
@@ -146,14 +149,32 @@ export const RamyeonStation: React.FC = () => {
             </button>
           </div>
         ) : ramyeonSession.step === 'pouring_water' ? (
-          <div className="flex gap-2">
+          <div className="grid grid-cols-[auto_1fr_auto_auto] gap-2">
             <button
               type="button"
-              onClick={() => pourRamyeonWater(25)}
-              className="flex-1 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-xs rounded-2xl shadow-xl active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer border border-blue-400/40"
+              onClick={() => pourRamyeonWater(-5)}
+              className="w-11 py-3 bg-stone-800 hover:bg-stone-700 text-white font-black text-xs rounded-2xl border border-stone-600 active:scale-95"
+            >
+              -5
+            </button>
+            <button
+              type="button"
+              onClick={() => pourRamyeonWater(5)}
+              className="py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-xs rounded-2xl shadow-xl active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer border border-blue-400/40"
             >
               <GameAssetIcon name="ladle" size={18} />
-              <span>Đổ Nước Dashi Vào Nồi (+25%)</span>
+              <span>Thêm nước +5%</span>
+            </button>
+            <button
+              type="button"
+              onClick={confirmRamyeonWater}
+              className={`px-3 py-3 rounded-2xl font-black text-xs border active:scale-95 ${
+                ramyeonSession.waterLevel >= 70 && ramyeonSession.waterLevel <= 80
+                  ? 'bg-emerald-600 border-emerald-300 text-white'
+                  : 'bg-stone-800 border-stone-700 text-stone-500'
+              }`}
+            >
+              Chốt
             </button>
             <button
               type="button"
@@ -222,6 +243,20 @@ export const RamyeonStation: React.FC = () => {
           <div className="w-full py-3 bg-amber-950/80 text-amber-200 font-black text-xs rounded-2xl text-center border-2 border-amber-500/50 animate-pulse shadow-md flex items-center justify-center gap-2">
             <GameAssetIcon name="fire" size={16} />
             <span>Nồi mì đang sôi sục... Chờ sợi mì nở chín tới!</span>
+          </div>
+        ) : ramyeonSession.step === 'burned' ? (
+          <div className="flex gap-2">
+            <div className="flex-1 py-3 rounded-2xl border border-red-500/50 bg-red-950/60 text-red-200 text-xs font-black text-center">
+              Mì đã quá lửa. Hủy mẻ và nấu lại.
+            </div>
+            <button
+              type="button"
+              onClick={discardRamyeon}
+              className="p-2.5 rounded-2xl border border-red-700 bg-stone-900 text-red-300 hover:bg-red-950 cursor-pointer"
+              title="Hủy mẻ này"
+            >
+              <GameAssetIcon name="close" size={16} />
+            </button>
           </div>
         ) : (
           <div className="flex gap-2">
