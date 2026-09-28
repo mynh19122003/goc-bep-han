@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/stores/useGameStore';
 import { GAME_ASSETS } from '@/config/gameAssets';
 import { GameAssetIcon } from '@/components/ui/game/GameAssetIcon';
+import { CloseButton } from '@/components/ui/game/CloseButton';
 import { preparedDishMatchesOrder } from '@/core/gameCore';
 
 interface DeliveryDrawerProps {
@@ -47,13 +48,7 @@ export const DeliveryDrawer: React.FC<DeliveryDrawerProps> = ({ isOpen, onClose 
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-1.5 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 transition-colors cursor-pointer"
-            >
-              <GameAssetIcon name="close" size={16} />
-            </button>
+            <CloseButton onClick={onClose} label="Đóng" variant="light" />
           </div>
 
           {/* Delivery Orders List */}
