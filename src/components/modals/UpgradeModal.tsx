@@ -29,7 +29,7 @@ export const UpgradeModal: React.FC = () => {
           {/* Modal Header */}
           <div className="flex items-center gap-2.5 mb-4">
             <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center">
-              <GameAssetIcon name="upgrade" size={24} />
+              <span className="text-[10px] font-black text-amber-200">UP</span>
             </div>
             <div>
               <h2 className="text-base sm:text-lg font-black text-amber-200 tracking-wide uppercase">
@@ -54,7 +54,7 @@ export const UpgradeModal: React.FC = () => {
                 >
                   <div className="flex items-start gap-3">
                     <span className="text-2xl p-2 bg-stone-800 rounded-xl shadow-inner border border-amber-500/30">
-                      <GameAssetIcon name="upgrade" size={24} />
+                      <span className="text-[10px] font-black text-amber-200">UP</span>
                     </span>
                     <div>
                       <div className="flex items-center gap-2">
@@ -75,7 +75,7 @@ export const UpgradeModal: React.FC = () => {
                   <div className="shrink-0">
                     {isMax ? (
                       <span className="text-xs font-black text-emerald-300 bg-emerald-950/80 border border-emerald-500/40 px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-inner">
-                        <GameAssetIcon name="complete" size={14} />
+                        <span className="text-[9px] font-black">MUA</span>
                         Tối Đa
                       </span>
                     ) : (
