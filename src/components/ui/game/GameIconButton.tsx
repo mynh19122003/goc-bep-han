@@ -48,9 +48,9 @@ export const GameIconButton: React.FC<GameIconButtonProps> = ({
       text: 'text-sm font-bold',
     },
     dock: {
-      button: 'px-3 py-1.5 min-w-[60px] min-h-[50px] rounded-2xl flex-col',
-      icon: 30,
-      text: 'text-[11px] font-bold tracking-tight',
+      button: 'px-1 sm:px-2.5 py-1 min-w-0 min-h-[50px] rounded-xl sm:rounded-2xl flex-col',
+      icon: 27,
+      text: 'text-[9px] sm:text-[11px] font-bold tracking-tight',
     },
   };
 
