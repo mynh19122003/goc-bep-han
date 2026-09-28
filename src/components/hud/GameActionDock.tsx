@@ -29,9 +29,9 @@ export const GameActionDock: React.FC<GameActionDockProps> = ({
   return (
     <nav
       aria-label="Thanh điều hướng trò chơi"
-      className="fixed bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none pb-[max(0.5rem,env(safe-area-inset-bottom))] px-2"
+      className="fixed bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none pb-[max(0.35rem,env(safe-area-inset-bottom))] px-1.5 sm:px-2"
     >
-      <div className="pointer-events-auto flex items-center justify-around gap-1 sm:gap-2 p-1.5 sm:p-2 bg-stone-900/95 backdrop-blur-md border-2 border-amber-600/50 rounded-2xl sm:rounded-3xl shadow-2xl max-w-lg w-full">
+      <div className="pointer-events-auto grid grid-cols-5 items-stretch gap-0.5 sm:gap-1.5 p-1 sm:p-2 bg-stone-900/95 backdrop-blur-md border border-amber-600/50 rounded-2xl sm:rounded-3xl shadow-2xl max-w-lg w-full">
         {/* 1. Quán (Màn hình chính) */}
         <GameIconButton
           asset={GAME_ASSETS.navigation.restaurant}
