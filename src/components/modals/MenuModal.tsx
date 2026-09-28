@@ -7,6 +7,7 @@ import { useGameStore } from '@/stores/useGameStore';
 import { DishCategory } from '@/types/game';
 import { GAME_ASSETS } from '@/config/gameAssets';
 import { GameAssetIcon } from '@/components/ui/game/GameAssetIcon';
+import { restaurantLevelFromReputation } from '@/core/gameCore';
 
 export const MenuModal: React.FC = () => {
   const {
@@ -15,6 +16,7 @@ export const MenuModal: React.FC = () => {
     dishes,
     coins,
     inventory,
+    reputationPoints,
     unlockDish,
   } = useGameStore();
 
@@ -23,6 +25,7 @@ export const MenuModal: React.FC = () => {
   if (activeModal !== 'menu') return null;
 
   const dishList = Object.values(dishes).filter((d) => d.category === activeCategory);
+  const restaurantLevel = restaurantLevelFromReputation(reputationPoints);
 
   return (
     <AnimatePresence>
@@ -81,7 +84,15 @@ export const MenuModal: React.FC = () => {
           {/* Dish List */}
           <div className="overflow-y-auto space-y-3 pr-1 flex-1">
             {dishList.map((dish) => {
-              const canUnlock = coins >= dish.unlockCost && !dish.isUnlocked;
+              const meetsLevel = restaurantLevel >= dish.unlockLevel;
+              const canUnlock =
+                coins >= dish.unlockCost && meetsLevel && !dish.isUnlocked;
+              const ingredientCost = Object.entries(dish.requiredIngredients).reduce(
+                (sum, [ingredientId, qty]) =>
+                  sum + (inventory[ingredientId]?.baseCost || 0) * (qty || 0),
+                0
+              );
+              const margin = dish.price - ingredientCost;
               const dishAsset =
                 (GAME_ASSETS.dishes as Record<string, string>)[dish.id] ||
                 GAME_ASSETS.dishes.ramyeon;
@@ -124,6 +135,14 @@ export const MenuModal: React.FC = () => {
                             Giá bán: {dish.price} Xu
                           </span>
                           <span className="text-stone-600">|</span>
+                          <span
+                            className={`font-black ${
+                              margin >= 0 ? 'text-emerald-400' : 'text-red-400'
+                            }`}
+                          >
+                            Lãi gộp: {margin >= 0 ? '+' : ''}{margin} Xu
+                          </span>
+                          <span className="text-stone-600">|</span>
                           <span className="text-stone-400 flex items-center gap-1">
                             <GameAssetIcon name="clock" size={14} />
                             Nấu trong: {dish.prepTime}s
@@ -151,7 +170,11 @@ export const MenuModal: React.FC = () => {
                           }`}
                         >
                           <GameAssetIcon name="lock" size={14} />
-                          <span>Mở Khóa ({dish.unlockCost} Xu)</span>
+                          <span>
+                            {meetsLevel
+                              ? `Mở Khóa (${dish.unlockCost} Xu)`
+                              : `Cần Cấp ${dish.unlockLevel}`}
+                          </span>
                         </button>
                       )}
                     </div>
