@@ -8,7 +8,7 @@ import { GAME_ASSETS } from '@/game/assets/gameAssets';
 import { CookingEngine, CookingTargetOrder } from '@/components/cooking/CookingEngine';
 import { DishPicker } from '@/components/modals/DishPicker';
 import { GameAssetIcon } from '@/components/ui/game/GameAssetIcon';
-import { GameIconButton } from '@/components/ui/game/GameIconButton';
+import { CloseButton } from '@/components/ui/game/CloseButton';
 
 interface KitchenDrawerProps {
   isOpen: boolean;
@@ -220,17 +220,10 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
                 onClick={() => setIsDishPickerOpen(true)}
                 className="min-h-[40px] px-2.5 sm:px-3 py-1.5 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 text-white rounded-xl text-[11px] sm:text-xs font-black shadow border border-amber-400/50 flex items-center gap-1 active:scale-95 transition-all cursor-pointer"
               >
-                <GameAssetIcon name="menu" size={14} />
                 <span>+ Nấu Tự Do</span>
               </button>
 
-              <GameIconButton
-                asset={GAME_ASSETS.actions.close}
-                size="sm"
-                variant="glass"
-                onClick={onClose}
-                title="Đóng gian bếp"
-              />
+              <CloseButton onClick={onClose} label="Đóng" />
             </div>
           </div>
 
@@ -365,7 +358,7 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
                         className="text-stone-400 hover:text-red-400 text-xs ml-1 cursor-pointer"
                         title="Hủy món này"
                       >
-                        <GameAssetIcon name="close" size={12} />
+                        <span className="text-[9px] font-black">BỎ</span>
                       </button>
                     </div>
                   );
