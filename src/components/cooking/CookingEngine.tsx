@@ -214,7 +214,6 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
 
       if (validation.quality === 'perfect' || validation.quality === 'good') {
         soundManager.playSuccess();
-        soundManager.playCoin();
       } else {
         soundManager.playError();
       }
@@ -592,7 +591,7 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
             />
           </div>
           <span>
-            {isCookingActive ? 'Đang Nấu Món...' : 'Hoàn Thành & Giao Món'}
+            {isCookingActive ? 'Đang Nấu Món...' : 'Hoàn Thành Món'}
           </span>
         </button>
       </div>
@@ -653,7 +652,7 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
                   </span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-stone-400 block font-bold">Tiền Thưởng</span>
+                  <span className="text-[10px] text-stone-400 block font-bold">Giá trị dự kiến</span>
                   <span className="text-base font-black text-emerald-400">
                     +{Math.round(
                       (order.price || 50) *
@@ -675,7 +674,7 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
                 onClick={handleConfirmResult}
                 className="w-full mt-2 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-green-600 hover:brightness-110 text-white font-black text-sm shadow-lg border border-emerald-300 active:scale-95 cursor-pointer"
               >
-                Giao Món Ngay
+                Đặt Lên Khay Giữ Nóng
               </button>
             </motion.div>
           </div>
