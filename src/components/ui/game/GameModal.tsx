@@ -26,12 +26,23 @@ export const GameModal: React.FC<GameModalProps> = ({
   showClose = true,
 }) => (
   <div className="fixed inset-0 z-50 flex items-end bg-black/70 backdrop-blur-sm sm:items-center sm:justify-center sm:p-4">
-    <button type="button" className="absolute inset-0" aria-label="Đóng" onClick={onClose} />
+    {showClose ? (
+      <button
+        type="button"
+        className="absolute inset-0 cursor-default"
+        aria-label="Đóng"
+        onClick={onClose}
+      />
+    ) : (
+      <div className="absolute inset-0" aria-hidden="true" />
+    )}
     <motion.section
       initial={{ y: 28, opacity: 0, scale: 0.98 }}
       animate={{ y: 0, opacity: 1, scale: 1 }}
       exit={{ y: 28, opacity: 0, scale: 0.98 }}
       transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+      role="dialog"
+      aria-modal="true"
       className={`relative z-10 flex h-[88dvh] max-h-[88dvh] w-full flex-col overflow-hidden rounded-t-3xl border-t border-amber-500/30 bg-[#1a1411]/98 text-stone-100 shadow-2xl sm:h-auto sm:max-h-[88dvh] sm:rounded-3xl sm:border ${maxWidth} ${className}`}
     >
       <div className="mx-auto mt-2 h-1.5 w-12 rounded-full bg-stone-600/70 sm:hidden" />
