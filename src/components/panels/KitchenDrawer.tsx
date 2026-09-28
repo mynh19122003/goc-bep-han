@@ -31,6 +31,7 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
     inventory,
     preparedDishes,
     completeCustomOrder,
+    prepareInstantItem,
     activeStation,
     setActiveStation,
     discardPreparedDish,
@@ -41,6 +42,9 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
 
   // Update currentOrder when initialOrder changes from outside
   useEffect(() => {
+    if (!isOpen) return;
+    setActiveStation(null);
+
     if (initialOrder) {
       setCurrentOrder(initialOrder);
       setActiveStation(null);
@@ -76,17 +80,7 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
           price: firstDel.price,
         });
       } else {
-        // Free cook default dish
-        setCurrentOrder({
-          orderType: 'free_cook',
-          customerName: 'Đầu Bếp Tự Do',
-          dishId: 'spicy_ramyeon',
-          dishName: 'Mì Cay Seoul 7 Cấp Độ',
-          dishEmoji: '',
-          requiredToppings: ['beef', 'sausage', 'kimchi'],
-          spiceLevel: 2,
-          price: 65,
-        });
+        setCurrentOrder(null);
       }
     }
   }, [initialOrder, isOpen]);
@@ -132,15 +126,25 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
   // Handle selecting a dish from Dish Picker
   const handleSelectFreeDish = (dishId: string) => {
     const dish = dishes[dishId];
+    if (!dish || !dish.isUnlocked) return;
+
+    if (dish.stationType === 'instant') {
+      prepareInstantItem(dishId);
+      setCurrentOrder(null);
+      setActiveStation(null);
+      return;
+    }
+
     setCurrentOrder({
       orderType: 'free_cook',
       customerName: 'Đầu Bếp Sáng Tạo',
-      dishId: dishId,
-      dishName: dish ? dish.name : 'Món Tự Chọn',
+      dishId,
+      dishName: dish.name,
       dishEmoji: '',
-      requiredToppings: ['beef', 'sausage', 'kimchi'],
-      spiceLevel: 1,
-      price: dish ? dish.price : 60,
+      requiredToppings: [],
+      excludedToppings: [],
+      spiceLevel: undefined,
+      price: dish.price,
     });
     setActiveStation(null);
   };
@@ -307,6 +311,7 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
               <KimbapStation />
             ) : currentOrder ? (
               <CookingEngine
+                key={`${currentOrder.orderType}-${currentOrder.orderId || currentOrder.dishId}-${currentOrder.tableId || 'free'}`}
                 order={currentOrder}
                 inventory={inventory}
                 onFinishCook={handleFinishCustomCook}
@@ -373,7 +378,7 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
                         className="text-stone-400 hover:text-red-400 text-xs ml-1 cursor-pointer"
                         title="Hủy món này"
                       >
-                        ✕
+                        <GameAssetIcon name="close" size={12} />
                       </button>
                     </div>
                   );
