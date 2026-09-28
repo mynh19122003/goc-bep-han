@@ -1,27 +1,21 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useGameStore } from '@/stores/useGameStore';
 import confetti from 'canvas-confetti';
-import { GAME_ASSETS } from '@/config/gameAssets';
+import { useGameStore } from '@/stores/useGameStore';
+import { GAME_ASSETS } from '@/game/assets/gameAssets';
 import { CustomerSprite } from '@/components/ui/game/CustomerSprite';
-import { GameAssetIcon } from '@/components/ui/game/GameAssetIcon';
+import { GameButton } from '@/components/ui/game/GameButton';
 
 export const BargainMiniGame: React.FC = () => {
   const { bargainSession, inventory, upgrades, stopBargain, cancelBargain } = useGameStore();
-
   const [sliderPos, setSliderPos] = useState(20);
   const [sliderDir, setSliderDir] = useState<1 | -1>(1);
   const [isFinished, setIsFinished] = useState(false);
-  const [resultOutcome, setResultOutcome] = useState<{
-    success: boolean;
-    discount: number;
-    banned: boolean;
-  } | null>(null);
-
+  const [result, setResult] = useState<{ success: boolean; discount: number; banned: boolean } | null>(null);
   const requestRef = useRef<number | null>(null);
+
   const charmLevel = upgrades.find((upgrade) => upgrade.id === 'bargain_charm')?.level || 0;
   const bestZoneStart = Math.max(60, 80 - charmLevel * 10);
 
@@ -30,10 +24,9 @@ export const BargainMiniGame: React.FC = () => {
     setSliderPos(20);
     setSliderDir(1);
     setIsFinished(false);
-    setResultOutcome(null);
+    setResult(null);
   }, [bargainSession?.ingredientId, bargainSession?.originalPrice]);
 
-  // Fast rhythm animation loop
   useEffect(() => {
     if (!bargainSession || isFinished) return;
 
@@ -55,7 +48,6 @@ export const BargainMiniGame: React.FC = () => {
     };
 
     requestRef.current = requestAnimationFrame(animate);
-
     return () => {
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
     };
@@ -64,167 +56,94 @@ export const BargainMiniGame: React.FC = () => {
   if (!bargainSession) return null;
 
   const item = inventory[bargainSession.ingredientId];
-  const itemAsset =
+  const asset =
     (GAME_ASSETS.ingredients as Record<string, string>)[bargainSession.ingredientId] ||
-    (GAME_ASSETS.toppings as Record<string, string>)[bargainSession.ingredientId] ||
-    GAME_ASSETS.ingredients.trung;
+    (GAME_ASSETS.toppings as Record<string, string>)[bargainSession.ingredientId];
 
-  const handleStop = () => {
+  const stop = () => {
     if (isFinished) return;
     if (requestRef.current) cancelAnimationFrame(requestRef.current);
-    setIsFinished(true);
 
-    // Save final pos to store and evaluate
+    setIsFinished(true);
     useGameStore.setState({
-      bargainSession: {
-        ...bargainSession,
-        sliderPosition: sliderPos,
-      },
+      bargainSession: { ...bargainSession, sliderPosition: sliderPos },
     });
 
-    const res = stopBargain();
-    setResultOutcome(res);
+    const outcome = stopBargain();
+    setResult(outcome);
 
-    if (res.success && res.discount >= 0.1) {
-      confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
+    if (outcome.success && outcome.discount >= 0.1) {
+      confetti({ particleCount: 40, spread: 55, origin: { y: 0.65 } });
     }
   };
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-50 bg-stone-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 select-none font-baloo">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="bg-stone-900 rounded-3xl max-w-sm w-full p-4 sm:p-5 shadow-2xl border-4 border-amber-600/60 relative flex flex-col text-center text-stone-100"
-        >
-          {/* Header Graphic with Real Elderly Female Chibi Sprite */}
-          <div className="flex flex-col items-center justify-center mb-1">
-            <CustomerSprite
-              spriteSrc={GAME_ASSETS.customers.elderly.female}
-              name="Bà bán rau Noryangjin"
-              mood={resultOutcome?.banned ? 'angry' : isFinished ? 'happy' : 'normal'}
-              size="md"
-            />
-          </div>
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 p-3 backdrop-blur-sm">
+      <section className="w-full max-w-sm rounded-3xl border border-amber-500/30 bg-[#1a1411]/98 p-4 text-stone-100 shadow-2xl">
+        <div className="flex flex-col items-center text-center">
+          <CustomerSprite
+            spriteSrc={GAME_ASSETS.customers.elderly.female}
+            name="Bà chủ sạp"
+            mood={result?.banned ? 'angry' : isFinished ? 'happy' : 'normal'}
+            size="md"
+          />
+          <h2 className="mt-1 text-sm font-black uppercase text-amber-100">Mặc cả chợ sáng</h2>
+          <p className="mt-0.5 text-[10px] font-bold text-stone-400">Dừng kim ở vùng tốt để nhận giảm giá</p>
+        </div>
 
-          <h3 className="font-black text-amber-200 text-base uppercase">
-            MẶC CẢ VỚI BÀ CHỦ SẠP
-          </h3>
-          <p className="text-[11px] text-amber-300/80 mt-0.5 font-bold">
-            Bấm dừng đúng thời điểm để nhận mức giảm giá hời!
-          </p>
-
-          {/* Item details */}
-          <div className="bg-stone-950/80 rounded-2xl p-2.5 my-3 border-2 border-stone-800 text-left flex items-center gap-2.5 shadow-inner">
-            <div className="w-12 h-12 p-1 bg-stone-850 rounded-xl shadow-xs border border-amber-500/30 flex items-center justify-center shrink-0">
-              <Image
-                src={itemAsset}
-                alt={item?.vietnameseName || ''}
-                width={36}
-                height={36}
-                className="w-full h-full object-contain pointer-events-none drop-shadow"
-              />
-            </div>
-            <div>
-              <h4 className="font-black text-amber-100 text-xs sm:text-sm">
-                {item?.vietnameseName} (x{bargainSession.quantity})
-              </h4>
-              <span className="text-xs text-amber-400 font-bold flex items-center gap-1">
-                <GameAssetIcon name="coin" size={14} />
-                Giá gốc: {bargainSession.originalPrice} Xu
-              </span>
-            </div>
-          </div>
-
-          {/* Timing Slider Visual */}
-          <div className="my-2">
-            <div className="flex justify-between text-[10px] font-black mb-1">
-              <span className="text-red-400">Bị Mắng</span>
-              <span className="text-amber-400">Giảm 5%</span>
-              <span className="text-blue-400">Giảm 10%</span>
-              <span className="text-emerald-400">Giảm 20%</span>
-            </div>
-
-            {/* Slider track with colored target zones */}
-            <div className="w-full h-8 bg-stone-950 rounded-full relative overflow-hidden border-2 border-stone-700 shadow-inner flex">
-              {/* Red Zone: 0 to 25 */}
-              <div className="w-[25%] h-full bg-red-600/80 flex items-center justify-center text-[10px] font-black text-white">
-                Bị Mắng
-              </div>
-              {/* Amber Zone: 25 to 50 */}
-              <div className="w-[25%] h-full bg-amber-500/80 flex items-center justify-center text-[10px] font-black text-white">
-                -5%
-              </div>
-              {/* Blue Zone: 50 to best discount zone */}
-              <div
-                className="h-full bg-blue-600/80 flex items-center justify-center text-[10px] font-black text-white"
-                style={{ width: `${bestZoneStart - 50}%` }}
-              >
-                -10%
-              </div>
-              {/* Emerald Zone expands with bargain_charm upgrade */}
-              <div
-                className="h-full bg-emerald-500 flex items-center justify-center text-[10px] font-black text-white animate-pulse"
-                style={{ width: `${100 - bestZoneStart}%` }}
-              >
-                -20%
-              </div>
-
-              {/* Oscillating Needle Pointer */}
-              <div
-                className="absolute top-0 bottom-0 w-2.5 bg-yellow-300 border-2 border-amber-950 rounded-full shadow-lg transition-transform duration-75 -translate-x-1/2"
-                style={{ left: `${sliderPos}%` }}
-              />
-            </div>
-          </div>
-
-          {/* Result outcome message */}
-          {resultOutcome && (
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className={`p-3 rounded-2xl text-xs font-black my-2 border-2 ${
-                resultOutcome.banned
-                  ? 'bg-red-950/80 border-red-500 text-red-200 shadow-md'
-                  : 'bg-emerald-950/80 border-emerald-400 text-emerald-200 shadow-md'
-              }`}
-            >
-              {resultOutcome.banned ? (
-                <span>
-                  &quot;Trả giá kiểu đó hả cháu? Hôm nay bà không bán món này cho cháu nữa!&quot;
-                </span>
-              ) : (
-                <span>
-                  &quot;Được rồi, bà bớt cho cháu {Math.round(resultOutcome.discount * 100)}% đó nha!&quot;
-                </span>
-              )}
-            </motion.div>
-          )}
-
-          {/* Action Button */}
-          <div className="mt-3">
-            {!isFinished ? (
-              <button
-                type="button"
-                onClick={handleStop}
-                className="w-full py-3.5 bg-gradient-to-r from-red-600 via-orange-500 to-amber-500 hover:from-red-700 hover:to-amber-600 text-white font-black text-sm rounded-2xl shadow-xl active:scale-95 transition-all cursor-pointer border border-amber-300/40"
-              >
-                <span>BẤM DỪNG ĐỂ TRẢ GIÁ!</span>
-              </button>
+        <div className="mt-3 flex items-center gap-2 rounded-2xl border border-stone-700 bg-black/20 p-2.5">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-stone-700 bg-stone-900 p-1">
+            {asset ? (
+              <div className="relative h-9 w-9"><Image src={asset} alt={item?.vietnameseName || ''} fill sizes="36px" className="object-contain" /></div>
             ) : (
-              <button
-                type="button"
-                onClick={cancelBargain}
-                className="w-full py-2.5 bg-stone-800 hover:bg-stone-700 text-amber-200 font-black text-xs rounded-2xl shadow-md transition-all active:scale-95 border border-stone-700 cursor-pointer"
-              >
-                Quay Lại Chợ
-              </button>
+              <span className="text-center text-[8px] font-black text-red-300">Thiếu asset</span>
             )}
           </div>
-        </motion.div>
-      </div>
-    </AnimatePresence>
+          <div className="min-w-0">
+            <h3 className="truncate text-xs font-black text-amber-100">{item?.vietnameseName} ×{bargainSession.quantity}</h3>
+            <p className="text-[10px] font-bold text-amber-300">Giá gốc {bargainSession.originalPrice} Xu</p>
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <div className="mb-1 flex justify-between text-[8px] font-black">
+            <span className="text-red-300">Trượt</span>
+            <span className="text-amber-300">-5%</span>
+            <span className="text-blue-300">-10%</span>
+            <span className="text-emerald-300">-20%</span>
+          </div>
+          <div className="relative flex h-8 overflow-hidden rounded-full border border-stone-600 bg-stone-950">
+            <div className="w-[25%] bg-red-700/80" />
+            <div className="w-[25%] bg-amber-600/80" />
+            <div className="bg-blue-700/80" style={{ width: `${bestZoneStart - 50}%` }} />
+            <div className="bg-emerald-600" style={{ width: `${100 - bestZoneStart}%` }} />
+            <div
+              className="absolute inset-y-0 w-2 -translate-x-1/2 rounded-full border border-amber-950 bg-yellow-200 shadow"
+              style={{ left: `${sliderPos}%` }}
+            />
+          </div>
+        </div>
+
+        {result && (
+          <div className={`mt-3 rounded-2xl border p-3 text-center text-[11px] font-black ${
+            result.banned
+              ? 'border-red-500/40 bg-red-950/50 text-red-200'
+              : 'border-emerald-500/30 bg-emerald-950/45 text-emerald-200'
+          }`}>
+            {result.banned
+              ? 'Trả giá thất bại. Món hàng này bị khóa trong hôm nay.'
+              : `Thành công: giảm ${Math.round(result.discount * 100)}%`}
+          </div>
+        )}
+
+        <div className="mt-3">
+          {!isFinished ? (
+            <GameButton fullWidth tone="primary" onClick={stop}>Dừng để trả giá</GameButton>
+          ) : (
+            <GameButton fullWidth tone="neutral" onClick={cancelBargain}>Quay lại chợ</GameButton>
+          )}
+        </div>
+      </section>
+    </div>
   );
 };
