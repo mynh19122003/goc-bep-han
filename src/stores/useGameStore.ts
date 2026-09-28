@@ -131,6 +131,7 @@ interface GameState {
   startTokbokki: (dishId: string) => boolean;
   addTokbokkiSauceSpoon: (type: 'gochujang' | 'soySauce' | 'sugar') => void;
   setTokbokkiStirring: (isStirring: boolean) => void;
+  flipTokbokkiPan: () => void;
   finishTokbokki: () => boolean;
   discardTokbokki: () => void;
 
@@ -271,7 +272,7 @@ export const useGameStore = create<GameState>()(
             const customization = generateOrderCustomization(randomDish.id);
 
             const newCust: Customer = {
-              id: `cust_${Date.now()}`,
+              id: createGameId('cust'),
               name: randomVisual.name,
               avatar: randomVisual.sprite,
               avatarColor: randomVisual.category === 'student' ? 'bg-amber-100' : 'bg-orange-100',
@@ -319,11 +320,14 @@ export const useGameStore = create<GameState>()(
         };
 
         // Freshness decay on inventory
-        const updatedInventory = { ...state.inventory };
+        const updatedInventory = cloneInventory(state.inventory);
         Object.keys(updatedInventory).forEach((key) => {
           const item = updatedInventory[key];
           const decay = Math.floor(100 / item.shelfLifeDays);
-          item.freshness = Math.max(0, item.freshness - decay);
+          updatedInventory[key] = {
+            ...item,
+            freshness: Math.max(0, item.freshness - decay),
+          };
         });
 
         soundManager.playSuccess();
@@ -340,15 +344,31 @@ export const useGameStore = create<GameState>()(
         const nextNews = MARKET_NEWS_LIST[(state.day) % MARKET_NEWS_LIST.length];
 
         // Apply price fluctuation based on news
-        const updatedInventory = { ...state.inventory };
+        const updatedInventory = cloneInventory(state.inventory);
+        const notice = nextNews.affectedNotice.toLocaleLowerCase('vi-VN');
         Object.keys(updatedInventory).forEach((key) => {
           const item = updatedInventory[key];
-          let changePercent = Math.floor(Math.random() * 30) - 15; // -15% to +15% default
-          if (nextNews.affectedNotice.includes(item.vietnameseName)) {
-            changePercent = nextNews.headline.includes('giảm') || nextNews.affectedNotice.includes('giảm') ? -25 : +35;
+          let changePercent = Math.floor(Math.random() * 30) - 15;
+
+          const aliases = [
+            item.vietnameseName,
+            item.vietnameseName.replace(/\s+(Sợi|Tươi|Giòn|Thơm|Vàng)$/i, ''),
+            item.name,
+          ].map((value) => value.toLocaleLowerCase('vi-VN'));
+
+          if (aliases.some((alias) => alias && notice.includes(alias))) {
+            changePercent =
+              nextNews.headline.toLocaleLowerCase('vi-VN').includes('giảm') ||
+              notice.includes('giảm')
+                ? -25
+                : +35;
           }
-          item.priceChangePercent = changePercent;
-          item.cost = Math.max(2, Math.round(item.baseCost * (1 + changePercent / 100)));
+
+          updatedInventory[key] = {
+            ...item,
+            priceChangePercent: changePercent,
+            cost: Math.max(2, Math.round(item.baseCost * (1 + changePercent / 100))),
+          };
         });
 
         set({
@@ -516,7 +536,7 @@ export const useGameStore = create<GameState>()(
           if (unlockedDishes.length > 0) {
             const randomDish = unlockedDishes[Math.floor(Math.random() * unlockedDishes.length)];
             const randomShipper = SHIPPER_LIST[Math.floor(Math.random() * SHIPPER_LIST.length)];
-            const orderNum = Math.floor(100 + Math.random() * 900);
+            const orderNum = createGameId('DH').replace('DH_', '').slice(0, 8).toUpperCase();
             const addresses = ['P. Hongdae, Tòa B5', 'Đại Học Quốc Gia Seoul', 'Chung cư Mapo, Tầng 12', 'Văn phòng Yeouido'];
             const customization = generateOrderCustomization(randomDish.id);
 
@@ -623,7 +643,16 @@ export const useGameStore = create<GameState>()(
         const table = state.tables.find((t) => t.id === tableId);
         if (!table || !table.customer || table.status !== 'seated') return false;
 
-        const preparedIdx = state.preparedDishes.findIndex((p) => p.dishId === table.customer?.orderDishId);
+        const preparedIdx = state.preparedDishes.findIndex((p) =>
+          preparedDishMatchesOrder({
+            prepared: p,
+            orderId: table.customer?.id,
+            dishId: table.customer?.orderDishId || '',
+            requiredToppings: table.customer?.requiredToppings,
+            excludedToppings: table.customer?.excludedToppings,
+            spiceLevel: table.customer?.spiceLevel,
+          })
+        );
         if (preparedIdx === -1) {
           soundManager.playError();
           return false;
@@ -693,14 +722,25 @@ export const useGameStore = create<GameState>()(
         const order = state.deliveryQueue.find((o) => o.id === orderId);
         if (!order || order.shipperStatus !== 'arrived') return false;
 
-        const preparedIdx = state.preparedDishes.findIndex((p) => p.dishId === order.dishId);
+        const preparedIdx = state.preparedDishes.findIndex((p) =>
+          preparedDishMatchesOrder({
+            prepared: p,
+            orderId: order.id,
+            dishId: order.dishId,
+            requiredToppings: order.requiredToppings,
+            excludedToppings: order.excludedToppings,
+            spiceLevel: order.spiceLevel,
+          })
+        );
         if (preparedIdx === -1) {
           soundManager.playError();
           return false;
         }
 
         const prepared = state.preparedDishes[preparedIdx];
-        const totalEarned = order.price + order.tip;
+        const ebikeLevel = state.upgrades.find((u) => u.id === 'delivery_ebike')?.level || 0;
+        const boostedTip = Math.round(order.tip * (1 + ebikeLevel * 0.3));
+        const totalEarned = order.price + boostedTip;
 
         const updatedDishes = [...state.preparedDishes];
         updatedDishes.splice(preparedIdx, 1);
@@ -724,7 +764,7 @@ export const useGameStore = create<GameState>()(
           coins: state.coins + totalEarned,
           rating: Math.min(5, Number((state.rating + 0.04).toFixed(2))),
           dailyRevenue: state.dailyRevenue + totalEarned,
-          dailyTips: state.dailyTips + order.tip,
+          dailyTips: state.dailyTips + boostedTip,
           dailyDeliveriesCompleted: state.dailyDeliveriesCompleted + 1,
           preparedDishes: updatedDishes,
           deliveryQueue: state.deliveryQueue.filter((o) => o.id !== orderId),
@@ -749,118 +789,50 @@ export const useGameStore = create<GameState>()(
         const dish = state.dishes[params.dishId];
         if (!dish) return false;
 
-        // Deduct inventory
-        const updatedInventory = { ...state.inventory };
-        params.usedIngredients.forEach((ingId) => {
-          if (updatedInventory[ingId]) {
-            updatedInventory[ingId] = {
-              ...updatedInventory[ingId],
-              stock: Math.max(0, updatedInventory[ingId].stock - 1),
-            };
-          }
-        });
-
-        // Tip and revenue calculation
-        const scoreMultiplier = params.score / 100;
-        const baseEarned = Math.round(dish.price * Math.max(0.4, scoreMultiplier));
-        const tipEarned = Math.round(dish.price * (params.score >= 90 ? 0.3 : params.score >= 75 ? 0.15 : 0));
-        const totalCoins = baseEarned + tipEarned;
-
-        if (params.orderType === 'dine_in' && params.tableId) {
-          const table = state.tables.find((t) => t.id === params.tableId);
-          if (!table || !table.customer) return false;
-
-          const customer = table.customer;
-          const reviewRating = params.score >= 90 ? 5 : params.score >= 75 ? 4 : params.score >= 50 ? 3 : 1;
-          const reviewComment =
-            params.score >= 90
-              ? `Tô ${dish.name} chuẩn chỉnh đúng ý mình từng hạt topping! 10/10 điểm!`
-              : params.score >= 75
-              ? `Món ${dish.name} ăn rất vừa miệng, topping thơm lừng ấm bụng.`
-              : params.score >= 50
-              ? `Món ${dish.name} ăn tạm ổn, quán nêm hơi khác khẩu vị một chút.`
-              : `Món ${dish.name} sai yêu cầu topping rồi, hơi thất vọng!`;
-
-          const newReview: CustomerReview = {
-            id: `rev_${Date.now()}`,
-            author: customer.name,
-            avatar: customer.avatar,
-            rating: reviewRating,
-            comment: reviewComment,
-            dishName: dish.name,
-            orderType: 'dine_in',
-            timeAgo: 'Vừa xong',
-            tag: params.score >= 75 ? 'tasty' : 'broken',
-          };
-
-          const updatedTables = state.tables.map((t) =>
-            t.id === params.tableId
-              ? { ...t, status: 'eating' as const, eatingTimeRemaining: 8, customer }
-              : t
-          );
-
-          set({
-            coins: state.coins + totalCoins,
-            rating: Math.max(1, Math.min(5, Number((state.rating + (params.score >= 75 ? 0.04 : -0.05)).toFixed(2)))),
-            dailyRevenue: state.dailyRevenue + totalCoins,
-            dailyTips: state.dailyTips + tipEarned,
-            dailyCustomersServed: state.dailyCustomersServed + 1,
-            tables: updatedTables,
-            inventory: updatedInventory,
-            reviews: [newReview, ...state.reviews.slice(0, 15)],
-          });
-          return true;
+        const requirements = buildConsumptionRequirements(dish, params.toppings);
+        const updatedInventory = deductIngredients(state.inventory, requirements);
+        if (!updatedInventory) {
+          soundManager.playError();
+          return false;
         }
 
-        if (params.orderType === 'delivery' && params.orderId) {
-          const orderIdx = state.deliveryQueue.findIndex((o) => o.id === params.orderId);
-          if (orderIdx === -1) return false;
-          const order = state.deliveryQueue[orderIdx];
-
-          const updatedQueue = [...state.deliveryQueue];
-          updatedQueue.splice(orderIdx, 1);
-
-          const deliveryReview: CustomerReview = {
-            id: `rev_${Date.now()}`,
-            author: order.customerName,
-            avatar: '🛵',
-            rating: params.score >= 80 ? 5 : 3,
-            comment: `Đơn ${order.id} giao món ${order.dishName} nóng sốt đẫm topping!`,
-            dishName: order.dishName,
-            orderType: 'delivery',
-            timeAgo: 'Vừa xong',
-            tag: 'fast',
-          };
-
-          set({
-            coins: state.coins + totalCoins,
-            rating: Math.min(5, Number((state.rating + 0.04).toFixed(2))),
-            dailyRevenue: state.dailyRevenue + totalCoins,
-            dailyTips: state.dailyTips + tipEarned,
-            dailyDeliveriesCompleted: state.dailyDeliveriesCompleted + 1,
-            deliveryQueue: updatedQueue,
-            inventory: updatedInventory,
-            reviews: [deliveryReview, ...state.reviews.slice(0, 15)],
-          });
-          return true;
-        }
-
-        // Free cook: add to buffer tray
-        const newPrepared: PreparedDish = {
-          id: `prep_${Date.now()}`,
+        const prepared: PreparedDish = {
+          id: createGameId('prep'),
           dishId: params.dishId,
           name: dish.name,
           emoji: dish.emoji,
-          quality: params.quality === 'perfect' ? 'perfect' : params.quality === 'good' ? 'good' : 'burned',
+          quality:
+            params.quality === 'perfect'
+              ? 'perfect'
+              : params.quality === 'good'
+              ? 'good'
+              : 'burned',
           preparedAt: Date.now(),
-          toppings: params.toppings,
+          preparedOnDay: state.day,
+          toppings: [...params.toppings],
           spiceLevel: params.spiceLevel,
+          targetOrderId: params.orderId,
+          targetOrderType: params.orderType,
+          targetTableId: params.tableId,
+          score: params.score,
         };
 
+        // Cooking creates a prepared dish. Revenue is awarded only when the
+        // correct dine-in customer or arrived shipper actually receives it.
+        if (params.orderType === 'dine_in' || params.orderType === 'delivery') {
+          set({
+            inventory: updatedInventory,
+            preparedDishes: [prepared, ...state.preparedDishes].slice(0, 8),
+          });
+          soundManager.playSuccess();
+          return true;
+        }
+
         set({
-          preparedDishes: [newPrepared, ...state.preparedDishes.slice(0, 3)],
           inventory: updatedInventory,
+          preparedDishes: [prepared, ...state.preparedDishes].slice(0, 8),
         });
+        soundManager.playSuccess();
         return true;
       },
 
@@ -876,32 +848,27 @@ export const useGameStore = create<GameState>()(
         const dish = state.dishes[dishId];
         if (!dish) return false;
 
-        const inventory = { ...state.inventory };
-        for (const [ingId, qty] of Object.entries(dish.requiredIngredients)) {
-          if (!inventory[ingId] || inventory[ingId].stock < (qty || 1)) {
-            soundManager.playError();
-            return false;
-          }
+        const updatedInventory = deductIngredients(state.inventory, dish.requiredIngredients);
+        if (!updatedInventory) {
+          soundManager.playError();
+          return false;
         }
 
-        for (const [ingId, qty] of Object.entries(dish.requiredIngredients)) {
-          inventory[ingId].stock -= qty || 1;
-        }
-
-        soundManager.playCoin();
+        soundManager.playSuccess();
         set({
-          inventory,
+          inventory: updatedInventory,
           preparedDishes: [
-            ...state.preparedDishes,
             {
-              id: `dish_${Date.now()}`,
+              id: createGameId('prep'),
               dishId: dish.id,
               name: dish.name,
               emoji: dish.emoji,
               quality: 'perfect',
               preparedAt: Date.now(),
+              preparedOnDay: state.day,
             },
-          ],
+            ...state.preparedDishes,
+          ].slice(0, 8),
         });
         return true;
       },
@@ -922,11 +889,14 @@ export const useGameStore = create<GameState>()(
           return false;
         }
 
-        const updatedInventory = { ...state.inventory };
+        const updatedInventory = cloneInventory(state.inventory);
         items.forEach(({ id, quantity }) => {
           if (updatedInventory[id] && quantity > 0) {
-            updatedInventory[id].stock += quantity;
-            updatedInventory[id].freshness = 100;
+            updatedInventory[id] = {
+              ...updatedInventory[id],
+              stock: updatedInventory[id].stock + quantity,
+              freshness: 100,
+            };
           }
         });
 
@@ -966,40 +936,50 @@ export const useGameStore = create<GameState>()(
         if (!state.bargainSession) return { success: false, discount: 0, banned: false };
 
         const pos = state.bargainSession.sliderPosition;
+        const charmLevel = state.upgrades.find((u) => u.id === 'bargain_charm')?.level || 0;
+        const bestZoneStart = Math.max(60, 80 - charmLevel * 10);
+
         let discount = 0;
         let isBanned = false;
 
-        if (pos >= 80) {
-          discount = 0.2; // 20% off
-          soundManager.playSuccess();
+        if (pos >= bestZoneStart) {
+          discount = 0.2;
         } else if (pos >= 50) {
-          discount = 0.1; // 10% off
-          soundManager.playSuccess();
+          discount = 0.1;
         } else if (pos >= 25) {
-          discount = 0.05; // 5% off
-          soundManager.playCoin();
+          discount = 0.05;
         } else {
-          isBanned = true; // Bị mắng!
-          soundManager.playError();
+          isBanned = true;
         }
 
         if (isBanned) {
+          soundManager.playError();
           set({
-            bannedMarketItemsToday: [...state.bannedMarketItemsToday, state.bargainSession.ingredientId],
+            bannedMarketItemsToday: Array.from(
+              new Set([...state.bannedMarketItemsToday, state.bargainSession.ingredientId])
+            ),
             bargainSession: { ...state.bargainSession, status: 'banned', discountAwarded: 0 },
           });
           return { success: false, discount: 0, banned: true };
-        } else {
-          // Complete purchase with discount
-          get().buyIngredients(
-            [{ id: state.bargainSession.ingredientId, quantity: state.bargainSession.quantity }],
-            discount
-          );
-          set({
-            bargainSession: { ...state.bargainSession, status: 'success', discountAwarded: discount },
-          });
-          return { success: true, discount, banned: false };
         }
+
+        const purchased = get().buyIngredients(
+          [{ id: state.bargainSession.ingredientId, quantity: state.bargainSession.quantity }],
+          discount
+        );
+
+        if (!purchased) {
+          set({
+            bargainSession: { ...state.bargainSession, status: 'active', discountAwarded: 0 },
+          });
+          return { success: false, discount: 0, banned: false };
+        }
+
+        soundManager.playSuccess();
+        set({
+          bargainSession: { ...get().bargainSession!, status: 'success', discountAwarded: discount },
+        });
+        return { success: true, discount, banned: false };
       },
 
       cancelBargain: () => {
@@ -1030,18 +1010,19 @@ export const useGameStore = create<GameState>()(
           tokbokkiSession: {
             status: 'sauce_ratio',
             dishId,
-            gochujangSpoons: 2,
-            soySauceSpoons: 1,
-            sugarSpoons: 1,
-            spicyMeter: 60,
-            saltyMeter: 35,
-            sweetMeter: 40,
+            gochujangSpoons: 0,
+            soySauceSpoons: 0,
+            sugarSpoons: 0,
+            spicyMeter: 0,
+            saltyMeter: 0,
+            sweetMeter: 0,
             heatNeedle: 30,
             heatDirection: 1,
             isStirring: false,
             greenZoneTime: 0,
             totalCookTime: 0,
             requiredCookTime: 7,
+            flipCount: 0,
           },
         });
         return true;
@@ -1097,6 +1078,21 @@ export const useGameStore = create<GameState>()(
             },
           });
         }
+      },
+
+      flipTokbokkiPan: () => {
+        const state = get();
+        const session = state.tokbokkiSession;
+        if (session.status !== 'cooking_stir') return;
+
+        soundManager.playSizzle();
+        set({
+          tokbokkiSession: {
+            ...session,
+            flipCount: Math.min(5, session.flipCount + 1),
+            heatNeedle: Math.max(0, session.heatNeedle - 8),
+          },
+        });
       },
 
       finishTokbokki: () => {
@@ -1420,7 +1416,8 @@ export const useGameStore = create<GameState>()(
       unlockDish: (dishId: string) => {
         const state = get();
         const d = state.dishes[dishId];
-        if (!d || d.isUnlocked || state.coins < d.unlockCost) {
+        const restaurantLevel = restaurantLevelFromReputation(state.reputationPoints);
+        if (!d || d.isUnlocked || state.coins < d.unlockCost || restaurantLevel < d.unlockLevel) {
           soundManager.playError();
           return false;
         }
@@ -1496,6 +1493,10 @@ export const useGameStore = create<GameState>()(
           deliveryQueue: [],
           reviews: [...INITIAL_REVIEWS],
           preparedDishes: [],
+          tokbokkiSession: createInitialTokbokkiSession(),
+          kimbapSession: createInitialKimbapSession(),
+          ramyeonSession: createInitialRamyeonSession(),
+          activeScene: 'dining',
           activeTab: 'kitchen',
           activeStation: 'tokbokki',
           activeModal: 'none',
@@ -1504,11 +1505,24 @@ export const useGameStore = create<GameState>()(
     }),
     {
       name: 'goc-bep-han-tycoon-v2',
+      version: 3,
       storage: createJSONStorage(() => localStorage),
+      migrate: (persistedState: any) => {
+        const persisted = persistedState || {};
+        return {
+          ...persisted,
+          inventory: cloneInventory({ ...INITIAL_INGREDIENTS, ...(persisted.inventory || {}) }),
+          dishes: cloneDishes({ ...INITIAL_DISHES, ...(persisted.dishes || {}) }),
+          reputationPoints: persisted.reputationPoints ?? 25,
+          currentNews: persisted.currentNews ?? MARKET_NEWS_LIST[0],
+        };
+      },
       partialize: (state) => ({
         coins: state.coins,
         day: state.day,
         rating: state.rating,
+        reputationPoints: state.reputationPoints,
+        currentNews: state.currentNews,
         inventory: state.inventory,
         dishes: state.dishes,
         upgrades: state.upgrades,
