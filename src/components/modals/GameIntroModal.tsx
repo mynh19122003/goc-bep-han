@@ -50,23 +50,23 @@ export const GameIntroModal: React.FC<GameIntroModalProps> = ({ isOpen, onClose 
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 36, opacity: 0, scale: 0.98 }}
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-            className="relative flex max-h-[92dvh] w-full max-w-[760px] flex-col overflow-hidden rounded-t-[28px] border-t border-amber-500/35 bg-[#18110f]/98 text-stone-100 shadow-2xl sm:rounded-[28px] sm:border"
+            className="relative flex h-[92dvh] max-h-[92dvh] w-full max-w-[760px] flex-col overflow-hidden rounded-t-[28px] border-t border-amber-500/35 bg-[#18110f]/98 text-stone-100 shadow-2xl sm:h-auto sm:max-h-[88dvh] sm:rounded-[28px] sm:border"
           >
             <div className="mx-auto mt-2 h-1.5 w-12 rounded-full bg-stone-600/70 sm:hidden" />
 
-            <header className="relative overflow-hidden border-b border-amber-500/20 px-4 pb-3 pt-4 sm:px-5">
+            <header className="relative overflow-hidden border-b border-amber-500/20 px-3 pb-2.5 pt-3 sm:px-5 sm:pb-3 sm:pt-4">
               <div className="absolute inset-0 bg-gradient-to-r from-red-950/55 via-amber-950/25 to-transparent" />
               <div className="relative flex items-start justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-3">
-                  <span className="relative h-14 w-14 shrink-0 rounded-2xl border border-amber-400/20 bg-black/25 p-1.5 shadow-lg">
+                  <span className="relative h-11 w-11 shrink-0 rounded-xl sm:h-14 sm:w-14 sm:rounded-2xl border border-amber-400/20 bg-black/25 p-1.5 shadow-lg">
                     <Image src={GAME_ASSETS.props.food_stall} alt="" fill sizes="56px" className="object-contain p-1" />
                   </span>
                   <div className="min-w-0">
                     <span className="mb-1 inline-flex rounded-full border border-amber-400/25 bg-amber-950/55 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-amber-300">
                       {GAME_BUILD_LABEL}
                     </span>
-                    <h2 className="truncate text-lg font-black text-amber-100 sm:text-xl">{GAME_TITLE}</h2>
-                    <p className="mt-0.5 text-[10px] font-bold text-stone-400 sm:text-[11px]">
+                    <h2 className="truncate text-base font-black text-amber-100 sm:text-xl">{GAME_TITLE}</h2>
+                    <p className="mt-0.5 hidden text-[10px] font-bold text-stone-400 sm:block sm:text-[11px]">
                       Quản lý quán ăn Hàn Quốc • Nấu món • Phục vụ • Nâng cấp
                     </p>
                   </div>
