@@ -17,7 +17,8 @@ export interface ShipperVisualMeta {
 }
 
 import { GAME_ASSETS, type SemanticIconName } from '@/game/assets/gameAssets';
-export { GAME_ASSETS, type SemanticIconName };
+import { PHASE3_UI_ASSETS, PHASE3_SEMANTIC_MAP, type Phase3SemanticKey } from '@/game/assets/phase3UiAssets';
+export { GAME_ASSETS, PHASE3_UI_ASSETS, PHASE3_SEMANTIC_MAP, type SemanticIconName, type Phase3SemanticKey };
 
 export const SHIPPER_LIST: ShipperVisualMeta[] = [
   {
