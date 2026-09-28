@@ -28,15 +28,9 @@ export const GameAssetIcon: React.FC<GameAssetIconProps> = ({
   const src = semantic || ui || button || prop || ingredient || dish;
 
   if (!src) {
-    // If not found in game assets, return a fallback container
-    return (
-      <span
-        className={`inline-flex items-center justify-center font-bold text-amber-500 ${className}`}
-        style={{ width: size, height: size }}
-      >
-        ✦
-      </span>
-    );
+    // Never invent a glyph/SVG fallback. Missing assets stay visually empty so
+    // the asset audit can catch them instead of silently mixing art styles.
+    return null;
   }
 
   return (
