@@ -1028,10 +1028,19 @@ export const useGameStore = create<GameState>()(
         const updatedInventory = cloneInventory(state.inventory);
         items.forEach(({ id, quantity }) => {
           if (updatedInventory[id] && quantity > 0) {
+            const current = updatedInventory[id];
+            const newStock = current.stock + quantity;
+            const mixedFreshness =
+              newStock > 0
+                ? Math.round(
+                    (current.stock * current.freshness + quantity * 100) / newStock
+                  )
+                : 100;
+
             updatedInventory[id] = {
-              ...updatedInventory[id],
-              stock: updatedInventory[id].stock + quantity,
-              freshness: 100,
+              ...current,
+              stock: newStock,
+              freshness: mixedFreshness,
             };
           }
         });
