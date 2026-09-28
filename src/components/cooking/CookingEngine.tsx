@@ -13,6 +13,7 @@ import {
 import { ToppingSelector } from './ToppingSelector';
 import { GameAssetIcon } from '@/components/ui/game/GameAssetIcon';
 import { CloseButton } from '@/components/ui/game/CloseButton';
+import { GameButton } from '@/components/ui/game/GameButton';
 import { soundManager } from '@/utils/audio';
 import { buildConsumptionRequirements, hasIngredients } from '@/core/gameCore';
 
@@ -396,7 +397,7 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
       {/* 3. COOKING WORKSPACE: COOKWARE + BOUNDED INGREDIENT OVERLAY               */}
       {/* ========================================================================= */}
       <div
-        className="relative flex w-full flex-col items-center justify-center rounded-2xl border border-amber-500/20 bg-black/25 p-2 sm:p-3"
+        className="relative flex w-full flex-col items-center justify-center rounded-2xl border border-amber-500/20 bg-[radial-gradient(circle_at_top,rgba(180,83,9,.12),transparent_56%),rgba(0,0,0,.22)] p-2 sm:p-3"
         onPointerDown={handleCookwarePointerDown}
         onPointerUp={handleCookwarePointerUp}
         onPointerCancel={() => {
@@ -514,7 +515,7 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
         </div>
 
         {/* Clean Base State Indicator Pill below vessel */}
-        <div className="mt-1 flex items-center gap-1.5 text-[11px] font-bold text-amber-200">
+        <div className="mt-1 flex max-w-full items-center gap-1.5 rounded-full border border-stone-700 bg-black/25 px-2.5 py-1 text-[10px] font-bold text-amber-200">
           <span>Nguyên liệu nền:</span>
           <span
             className={`px-2 py-0.5 rounded-full border ${
@@ -686,25 +687,16 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
         </button>
 
         {/* Primary Finish Cooking Button */}
-        <button
-          type="button"
-          onClick={handleServeDish}
+        <GameButton
+          fullWidth
+          tone="primary"
           disabled={isCookingActive}
-          className="flex-1 h-11 sm:h-12 px-4 rounded-xl bg-gradient-to-r from-red-600 via-amber-600 to-red-600 hover:brightness-110 disabled:opacity-50 text-white font-black text-xs sm:text-base shadow-lg border-2 border-amber-300 flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
+          onClick={handleServeDish}
+          iconSrc={GAME_ASSETS.cooking.bowl}
+          className="flex-1"
         >
-          <div className="w-5 h-5 relative shrink-0">
-            <Image
-              src={GAME_ASSETS.actions.complete}
-              alt="Hoàn thành"
-              width={20}
-              height={20}
-              className="object-contain"
-            />
-          </div>
-          <span>
-            {isCookingActive ? 'Đang Nấu Món...' : 'Hoàn Thành Món'}
-          </span>
-        </button>
+          {isCookingActive ? 'Đang nấu món...' : 'Hoàn thành món'}
+        </GameButton>
       </div>
 
       {/* ========================================================================= */}
