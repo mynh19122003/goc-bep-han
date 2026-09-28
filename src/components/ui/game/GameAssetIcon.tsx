@@ -2,14 +2,41 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { GAME_ASSETS, SemanticIconName } from '@/config/gameAssets';
+import { GAME_ASSETS } from '@/game/assets/gameAssets';
 
 export interface GameAssetIconProps {
-  name: SemanticIconName | string;
+  name: string;
   size?: number;
   className?: string;
   alt?: string;
 }
+
+const SAFE_ICON_ASSETS: Record<string, string> = {
+  coin: GAME_ASSETS.hud.coin,
+  heart: GAME_ASSETS.hud.heart,
+  close: GAME_ASSETS.actions.close,
+  plus: GAME_ASSETS.actions.plus,
+  minus: GAME_ASSETS.actions.minus,
+  pot: GAME_ASSETS.cooking.pot,
+  pan: GAME_ASSETS.cooking.pan,
+  bowl: GAME_ASSETS.cooking.bowl,
+  board: GAME_ASSETS.cooking.board,
+  chilli: GAME_ASSETS.toppings.chilli,
+  sauce: GAME_ASSETS.ingredients.tuong_ot_gochujang,
+  menu: GAME_ASSETS.navigation.menu,
+  cooking: GAME_ASSETS.navigation.kitchen,
+  recipe: GAME_ASSETS.ui.sign_recipe,
+  ingredient: GAME_ASSETS.ui.sign_ingredient,
+  delivery: GAME_ASSETS.navigation.delivery,
+  takeaway: GAME_ASSETS.cooking.takeaway_box,
+  knife: GAME_ASSETS.cooking.knife,
+  gas_stove: GAME_ASSETS.cooking.stove,
+  ladle: GAME_ASSETS.cooking.ladle,
+  lantern: GAME_ASSETS.props.red_lantern,
+  home: GAME_ASSETS.navigation.restaurant,
+  serve: GAME_ASSETS.cooking.bowl,
+  fire: GAME_ASSETS.cooking.stove,
+};
 
 export const GameAssetIcon: React.FC<GameAssetIconProps> = ({
   name,
@@ -17,31 +44,12 @@ export const GameAssetIcon: React.FC<GameAssetIconProps> = ({
   className = '',
   alt,
 }) => {
-  // Try to find image source in semanticIcons
-  const semantic = (GAME_ASSETS.semanticIcons as Record<string, string>)[name];
-  const ui = (GAME_ASSETS.ui as Record<string, string>)[name];
-  const button = (GAME_ASSETS.buttons as Record<string, string>)[name];
-  const prop = (GAME_ASSETS.props as Record<string, string>)[name];
-  const ingredient = (GAME_ASSETS.ingredients as Record<string, string>)[name];
-  const dish = (GAME_ASSETS.dishes as Record<string, string>)[name];
-
-  const src = semantic || ui || button || prop || ingredient || dish;
-
-  if (!src) {
-    // If not found in game assets, return a fallback container
-    return (
-      <span
-        className={`inline-flex items-center justify-center font-bold text-amber-500 ${className}`}
-        style={{ width: size, height: size }}
-      >
-        ✦
-      </span>
-    );
-  }
+  const src = SAFE_ICON_ASSETS[name];
+  if (!src) return null;
 
   return (
     <span
-      className={`inline-flex items-center justify-center flex-shrink-0 select-none ${className}`}
+      className={`inline-flex shrink-0 items-center justify-center select-none ${className}`}
       style={{ width: size, height: size }}
     >
       <Image
@@ -49,7 +57,7 @@ export const GameAssetIcon: React.FC<GameAssetIconProps> = ({
         alt={alt || name}
         width={size}
         height={size}
-        className="w-full h-full object-contain pointer-events-none drop-shadow-sm"
+        className="h-full w-full object-contain pointer-events-none"
         draggable={false}
       />
     </span>
