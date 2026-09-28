@@ -72,7 +72,10 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
   const [isCookingActive, setIsCookingActive] = useState(false);
   const [validationResult, setValidationResult] = useState<DishValidationResult | null>(null);
   const [panFlipCount, setPanFlipCount] = useState(0);
-  const pointerStartY = useRef<number | null>(null);
+  const [boardRollProgress, setBoardRollProgress] = useState(0);
+  const [boardSliceCount, setBoardSliceCount] = useState(0);
+  const [potWaterLevel, setPotWaterLevel] = useState(60);
+  const pointerStart = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     setBaseAdded(false);
@@ -83,7 +86,10 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
     setIsCookingActive(false);
     setValidationResult(null);
     setPanFlipCount(0);
-    pointerStartY.current = null;
+    setBoardRollProgress(0);
+    setBoardSliceCount(0);
+    setPotWaterLevel(60);
+    pointerStart.current = null;
   }, [order.orderId, order.dishId, order.tableId]);
 
   // Add topping
@@ -143,15 +149,47 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
     setPanFlipCount((count) => Math.min(5, count + 1));
   };
 
+  const handleBoardRoll = () => {
+    if (recipe.stationType !== 'board' || !baseAdded) {
+      soundManager.playError();
+      return;
+    }
+    soundManager.playClick();
+    setBoardRollProgress((progress) => Math.min(100, progress + 34));
+  };
+
+  const handleBoardSlice = () => {
+    if (recipe.stationType !== 'board' || boardRollProgress < 100) {
+      soundManager.playError();
+      return;
+    }
+    soundManager.playChop();
+    setBoardSliceCount((count) => Math.min(8, count + 1));
+  };
+
   const handleCookwarePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    pointerStartY.current = event.clientY;
+    pointerStart.current = { x: event.clientX, y: event.clientY };
   };
 
   const handleCookwarePointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (recipe.stationType !== 'pan' || pointerStartY.current === null) return;
-    const deltaY = pointerStartY.current - event.clientY;
-    pointerStartY.current = null;
-    if (deltaY >= 24) handlePanFlip();
+    if (!pointerStart.current) return;
+
+    const deltaX = event.clientX - pointerStart.current.x;
+    const deltaY = pointerStart.current.y - event.clientY;
+    pointerStart.current = null;
+
+    if (recipe.stationType === 'pan' && deltaY >= 24) {
+      handlePanFlip();
+      return;
+    }
+
+    if (recipe.stationType === 'board') {
+      if (boardRollProgress < 100 && deltaY >= 24) {
+        handleBoardRoll();
+      } else if (boardRollProgress >= 100 && Math.abs(deltaX) >= 24) {
+        handleBoardSlice();
+      }
+    }
   };
 
   // Execute dish evaluation
@@ -161,6 +199,17 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
       return;
     }
     if (recipe.stationType === 'pan' && panFlipCount < 2) {
+      soundManager.playError();
+      return;
+    }
+    if (
+      recipe.stationType === 'board' &&
+      (boardRollProgress < 100 || boardSliceCount < 8)
+    ) {
+      soundManager.playError();
+      return;
+    }
+    if (recipe.stationType === 'pot' && (potWaterLevel < 70 || potWaterLevel > 80)) {
       soundManager.playError();
       return;
     }
@@ -358,7 +407,7 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
         onPointerDown={handleCookwarePointerDown}
         onPointerUp={handleCookwarePointerUp}
         onPointerCancel={() => {
-          pointerStartY.current = null;
+          pointerStart.current = null;
         }}
       >
         {/* Cookware Vessel Wrapper with clamp width and exact aspect ratio */}
@@ -487,6 +536,65 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
             <span className="text-[10px] text-amber-200/80 font-bold text-right max-w-[130px]">
               Vuốt chảo lên hoặc bấm nút ít nhất 2 lần
             </span>
+          </div>
+        )}
+
+        {recipe.stationType === 'board' && (
+          <div className="mt-2 w-full max-w-[420px] grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={handleBoardRoll}
+              disabled={boardRollProgress >= 100}
+              className="h-11 rounded-xl border border-emerald-400/50 bg-emerald-800/80 disabled:opacity-50 text-white font-black text-xs active:scale-95"
+            >
+              Cuộn kimbap ({boardRollProgress}%)
+            </button>
+            <button
+              type="button"
+              onClick={handleBoardSlice}
+              disabled={boardRollProgress < 100 || boardSliceCount >= 8}
+              className="h-11 rounded-xl border border-amber-400/50 bg-amber-700/80 disabled:opacity-50 text-white font-black text-xs active:scale-95"
+            >
+              Cắt khoanh ({boardSliceCount}/8)
+            </button>
+            <span className="col-span-2 text-[10px] text-emerald-200/80 font-bold text-center">
+              Vuốt lên để cuộn • Khi đủ 100%, vuốt ngang để cắt
+            </span>
+          </div>
+        )}
+
+        {recipe.stationType === 'pot' && (
+          <div className="mt-2 w-full max-w-[360px] rounded-xl border border-blue-400/30 bg-blue-950/30 p-2">
+            <div className="flex items-center justify-between gap-2">
+              <button
+                type="button"
+                onClick={() => setPotWaterLevel((value) => Math.max(0, value - 5))}
+                className="w-11 h-11 rounded-xl bg-stone-800 border border-stone-600 text-white font-black"
+              >
+                -5
+              </button>
+              <div className="flex-1 text-center">
+                <div className="text-xs font-black text-blue-200">Mực nước {potWaterLevel}%</div>
+                <div className="mt-1 h-2 rounded-full bg-stone-950 overflow-hidden border border-blue-500/30">
+                  <div
+                    className={`h-full transition-all ${
+                      potWaterLevel >= 70 && potWaterLevel <= 80
+                        ? 'bg-emerald-500'
+                        : 'bg-blue-500'
+                    }`}
+                    style={{ width: `${potWaterLevel}%` }}
+                  />
+                </div>
+                <div className="text-[10px] mt-1 text-blue-300/80">Chuẩn: 70–80%</div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPotWaterLevel((value) => Math.min(100, value + 5))}
+                className="w-11 h-11 rounded-xl bg-blue-700 border border-blue-400 text-white font-black"
+              >
+                +5
+              </button>
+            </div>
           </div>
         )}
       </div>
