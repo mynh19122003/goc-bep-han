@@ -249,6 +249,7 @@ export const useGameStore = create<GameState>()(
 
       // --- GAME FLOW ---
       startDay: () => {
+        if (get().isDayActive) return;
         soundManager.playCustomerBell();
         set({
           isDayActive: true,
@@ -742,9 +743,14 @@ export const useGameStore = create<GameState>()(
       cleanTable: (tableId: number) => {
         soundManager.playClick();
         soundManager.playCoin();
+        const state = get();
         set({
-          coins: get().coins + 5, // bonus tip for clean table
-          tables: get().tables.map((t) => (t.id === tableId ? { ...t, status: 'empty' as const } : t)),
+          coins: state.coins + 5,
+          dailyRevenue: state.dailyRevenue + 5,
+          dailyTips: state.dailyTips + 5,
+          tables: state.tables.map((t) =>
+            t.id === tableId ? { ...t, status: 'empty' as const } : t
+          ),
         });
       },
 
@@ -791,8 +797,14 @@ export const useGameStore = create<GameState>()(
           id: `rev_${Date.now()}`,
           author: order.customerName,
           avatar: '🛵',
-          rating: 5,
-          comment: `Đơn ${order.id} giao cực nhanh! Món ${order.dishName} tới nơi còn bốc khói nghi ngút. 5 sao cho quán!`,
+          rating:
+            prepared.quality === 'perfect' ? 5 : prepared.quality === 'good' ? 4 : 2,
+          comment:
+            prepared.quality === 'perfect'
+              ? `Đơn ${order.id} giao nhanh, món ${order.dishName} còn nóng hổi và rất ngon!`
+              : prepared.quality === 'good'
+              ? `Đơn ${order.id} giao ổn, món ${order.dishName} khá vừa miệng.`
+              : `Đơn ${order.id} giao tới nhưng món ${order.dishName} chưa đạt chất lượng mong đợi.`,
           dishName: order.dishName,
           orderType: 'delivery',
           timeAgo: 'Vừa xong',
@@ -860,6 +872,19 @@ export const useGameStore = create<GameState>()(
           return false;
         }
 
+        if (
+          params.orderId &&
+          state.preparedDishes.some((prepared) => prepared.targetOrderId === params.orderId)
+        ) {
+          soundManager.playError();
+          return false;
+        }
+
+        if (state.preparedDishes.length >= 8) {
+          soundManager.playError();
+          return false;
+        }
+
         const requirements = buildConsumptionRequirements(dish, params.toppings);
         const updatedInventory = deductIngredients(state.inventory, requirements);
         if (!updatedInventory) {
@@ -893,7 +918,7 @@ export const useGameStore = create<GameState>()(
         if (params.orderType === 'dine_in' || params.orderType === 'delivery') {
           set({
             inventory: updatedInventory,
-            preparedDishes: [prepared, ...state.preparedDishes].slice(0, 8),
+            preparedDishes: [prepared, ...state.preparedDishes],
           });
           soundManager.playSuccess();
           return true;
@@ -901,7 +926,7 @@ export const useGameStore = create<GameState>()(
 
         set({
           inventory: updatedInventory,
-          preparedDishes: [prepared, ...state.preparedDishes].slice(0, 8),
+          preparedDishes: [prepared, ...state.preparedDishes],
         });
         soundManager.playSuccess();
         return true;
@@ -918,6 +943,11 @@ export const useGameStore = create<GameState>()(
         const state = get();
         const dish = state.dishes[dishId];
         if (!dish) return false;
+
+        if (state.preparedDishes.length >= 8) {
+          soundManager.playError();
+          return false;
+        }
 
         const updatedInventory = deductIngredients(state.inventory, dish.requiredIngredients);
         if (!updatedInventory) {
@@ -939,7 +969,7 @@ export const useGameStore = create<GameState>()(
               preparedOnDay: state.day,
             },
             ...state.preparedDishes,
-          ].slice(0, 8),
+          ],
         });
         return true;
       },
