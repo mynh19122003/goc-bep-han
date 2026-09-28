@@ -42,7 +42,7 @@ export function cloneDishes<T extends Record<string, Dish>>(source: T): T {
 
 export function mergeDishesWithDefaults<T extends Record<string, Dish>>(
   defaults: T,
-  persisted?: Partial<T>
+  persisted?: Record<string, Dish>
 ): T {
   return Object.fromEntries(
     Object.entries(defaults).map(([id, dish]) => {
