@@ -52,13 +52,13 @@ export const DishPicker: React.FC<DishPickerProps> = ({
           {/* Header */}
           <div className="shrink-0 p-3 sm:p-4 border-b border-amber-600/40 bg-stone-950/90 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-amber-600/20 border border-amber-400/40 flex items-center justify-center shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-amber-600/20 border border-amber-400/40 p-1 flex items-center justify-center shrink-0">
                 <Image
-                  src={GAME_ASSETS.navigation.menu}
+                  src="/assets/phase3-ui/tab_menu_thuc_don.png"
                   alt="Thực đơn"
-                  width={24}
-                  height={24}
-                  className="object-contain"
+                  width={36}
+                  height={36}
+                  className="w-full h-full object-contain pointer-events-none"
                 />
               </div>
               <div>
@@ -71,13 +71,20 @@ export const DishPicker: React.FC<DishPickerProps> = ({
               </div>
             </div>
 
-            <GameIconButton
-              asset={GAME_ASSETS.actions.close}
-              size="sm"
-              variant="glass"
+            <button
+              type="button"
               onClick={onClose}
               title="Đóng chọn món"
-            />
+              className="w-8 h-8 rounded-xl overflow-hidden cursor-pointer transition-transform active:scale-90"
+            >
+              <Image
+                src="/assets/phase3-ui/ui_close_dong.png"
+                alt="Đóng"
+                width={32}
+                height={32}
+                className="w-full h-full object-contain pointer-events-none drop-shadow"
+              />
+            </button>
           </div>
 
           {/* Dish Grid: 2 per row on mobile, 3-4 per row on desktop */}
@@ -101,14 +108,14 @@ export const DishPicker: React.FC<DishPickerProps> = ({
                 >
                   {/* Lock Overlay if not unlocked */}
                   {!isUnlocked && (
-                    <div className="absolute inset-0 bg-stone-950/70 rounded-2xl flex flex-col items-center justify-center p-2 z-10 backdrop-blur-[1px]">
-                      <div className="w-6 h-6 relative mb-1">
+                    <div className="absolute inset-0 bg-stone-950/75 rounded-2xl flex flex-col items-center justify-center p-2 z-10 backdrop-blur-[1px]">
+                      <div className="h-6 w-auto aspect-[563/255] relative mb-1">
                         <Image
-                          src={GAME_ASSETS.actions.lock}
+                          src="/assets/phase3-ui/btn_lock_khoa.png"
                           alt="Khóa"
-                          width={24}
-                          height={24}
-                          className="object-contain"
+                          width={563}
+                          height={255}
+                          className="h-full w-auto object-contain pointer-events-none"
                         />
                       </div>
                       <span className="text-[10px] font-black text-amber-400">

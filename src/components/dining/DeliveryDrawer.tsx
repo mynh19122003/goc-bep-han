@@ -30,8 +30,14 @@ export const DeliveryDrawer: React.FC<DeliveryDrawerProps> = ({ isOpen, onClose 
           {/* Header */}
           <div className="flex items-center justify-between border-b border-stone-200 pb-3 mb-3">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-2xl bg-teal-100 flex items-center justify-center shadow-xs">
-                <GameAssetIcon name="delivery" size={24} />
+              <div className="w-12 h-10 rounded-2xl bg-teal-100 flex items-center justify-center p-1 shrink-0">
+                <Image
+                  src="/assets/phase3-ui/btn_delivery_giao_hang.png"
+                  alt="Giao hàng"
+                  width={747}
+                  height={251}
+                  className="w-full h-full object-contain pointer-events-none"
+                />
               </div>
               <div>
                 <h3 className="font-black text-stone-800 text-sm sm:text-base flex items-center gap-1.5 uppercase">
@@ -49,9 +55,16 @@ export const DeliveryDrawer: React.FC<DeliveryDrawerProps> = ({ isOpen, onClose 
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 transition-colors cursor-pointer"
+              title="Đóng giao hàng"
+              className="w-8 h-8 rounded-xl overflow-hidden cursor-pointer transition-transform active:scale-90"
             >
-              <GameAssetIcon name="close" size={16} />
+              <Image
+                src="/assets/phase3-ui/ui_close_dong.png"
+                alt="Đóng"
+                width={32}
+                height={32}
+                className="w-full h-full object-contain pointer-events-none drop-shadow"
+              />
             </button>
           </div>
 
@@ -131,14 +144,27 @@ export const DeliveryDrawer: React.FC<DeliveryDrawerProps> = ({ isOpen, onClose 
                       <div>
                         {order.shipperStatus === 'on_the_way' ? (
                           <span className="flex items-center gap-1 text-[10px] font-bold text-stone-600 bg-stone-100 px-2 py-0.5 rounded-full">
-                            <GameAssetIcon name="clock" size={11} />
+                            <div className="w-3.5 h-3.5 relative">
+                              <Image
+                                src="/assets/phase3-ui/ui_timer_thoi_gian.png"
+                                alt="Timer"
+                                width={24}
+                                height={24}
+                                className="w-full h-full object-contain"
+                              />
+                            </div>
                             Tới sau: {Math.ceil(order.shipperArriveSeconds)}s
                           </span>
                         ) : (
-                          <span className="flex items-center gap-1 text-[10px] font-black text-teal-800 bg-teal-100 border border-teal-300 px-2 py-0.5 rounded-full animate-pulse">
-                            <GameAssetIcon name="delivery" size={12} />
-                            Đang chờ ({Math.ceil(order.shipperWaitSeconds)}s)
-                          </span>
+                          <div className="h-6 w-auto aspect-[343/210] relative flex items-center justify-center">
+                            <Image
+                              src="/assets/phase3-ui/status_waiting_dang_cho.png"
+                              alt="Đang chờ"
+                              width={343}
+                              height={210}
+                              className="h-full w-auto object-contain pointer-events-none drop-shadow-xs"
+                            />
+                          </div>
                         )}
                       </div>
                     </div>
@@ -148,7 +174,7 @@ export const DeliveryDrawer: React.FC<DeliveryDrawerProps> = ({ isOpen, onClose 
                       type="button"
                       onClick={() => serveDeliveryOrder(order.id)}
                       disabled={!canServe}
-                      className={`w-full py-2 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 shadow-sm transition-all ${
+                      className={`w-full h-10 rounded-xl text-xs font-black flex items-center justify-center gap-2 shadow-sm transition-all ${
                         canServe
                           ? 'bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-white cursor-pointer active:scale-95 animate-bounce-slight'
                           : order.shipperStatus === 'on_the_way'
@@ -156,14 +182,26 @@ export const DeliveryDrawer: React.FC<DeliveryDrawerProps> = ({ isOpen, onClose 
                           : 'bg-stone-200 text-stone-400 cursor-not-allowed'
                       }`}
                     >
-                      <GameAssetIcon name="complete" size={14} />
-                      <span>
-                        {canServe
-                          ? 'Giao Cho Shipper Ngay'
-                          : order.shipperStatus === 'on_the_way'
-                          ? 'Đang Chờ Shipper Đến'
-                          : 'Cần Nấu Món Này Trước'}
-                      </span>
+                      {canServe ? (
+                        <>
+                          <div className="h-6 w-auto aspect-[480/212] relative">
+                            <Image
+                              src="/assets/phase3-ui/btn_serve_giao_mon.png"
+                              alt="Giao Món"
+                              width={480}
+                              height={212}
+                              className="h-full w-auto object-contain pointer-events-none"
+                            />
+                          </div>
+                          <span>Giao Cho Shipper Ngay</span>
+                        </>
+                      ) : (
+                        <span>
+                          {order.shipperStatus === 'on_the_way'
+                            ? 'Đang Chờ Shipper Đến'
+                            : 'Cần Nấu Món Này Trước'}
+                        </span>
+                      )}
                     </button>
                   </div>
                 );

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/stores/useGameStore';
 import { GameAssetIcon } from '@/components/ui/game/GameAssetIcon';
@@ -27,19 +28,32 @@ export const SettingsModal: React.FC = () => {
           exit={{ opacity: 0, scale: 0.9, y: 15 }}
           className="bg-stone-900 rounded-3xl max-w-md w-full p-4 sm:p-5 shadow-2xl border-4 border-amber-600/60 relative flex flex-col text-stone-100"
         >
-          {/* Close button */}
+          {/* Close button (Phase 3 PNG: ui_close_dong.png) */}
           <button
             type="button"
             onClick={() => setActiveModal('none')}
-            className="absolute top-3.5 right-3.5 p-1.5 rounded-full bg-stone-800 hover:bg-stone-700 text-stone-400 hover:text-stone-100 border border-stone-700 transition-colors cursor-pointer"
+            title="Đóng cài đặt"
+            className="absolute top-3.5 right-3.5 w-8 h-8 rounded-xl overflow-hidden cursor-pointer transition-transform active:scale-90"
           >
-            <GameAssetIcon name="close" size={18} />
+            <Image
+              src="/assets/phase3-ui/ui_close_dong.png"
+              alt="Đóng"
+              width={32}
+              height={32}
+              className="w-full h-full object-contain pointer-events-none drop-shadow"
+            />
           </button>
 
           {/* Modal Header */}
           <div className="flex items-center gap-2.5 mb-4">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center">
-              <GameAssetIcon name="settings" size={24} />
+            <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-400/40 p-1 flex items-center justify-center shrink-0">
+              <Image
+                src="/assets/phase3-ui/ui_settings_cai_dat.png"
+                alt="Cài đặt"
+                width={36}
+                height={36}
+                className="w-full h-full object-contain pointer-events-none"
+              />
             </div>
             <div>
               <h2 className="text-base sm:text-lg font-black text-amber-200 tracking-wide uppercase">
@@ -61,42 +75,60 @@ export const SettingsModal: React.FC = () => {
               {/* SFX Toggle */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-xl bg-stone-800 flex items-center justify-center">
-                    <GameAssetIcon name="sound" size={16} />
+                  <div className="w-7 h-7 rounded-xl bg-stone-800 flex items-center justify-center p-0.5">
+                    <Image
+                      src={sfxEnabled ? '/assets/phase3-ui/ui_sfx_on.png' : '/assets/phase3-ui/ui_sfx_off.png'}
+                      alt="SFX"
+                      width={24}
+                      height={24}
+                      className="w-full h-full object-contain"
+                    />
                   </div>
                   <span className="text-xs font-bold text-stone-200">Hiệu ứng âm thanh (SFX)</span>
                 </div>
                 <button
                   type="button"
                   onClick={toggleSfx}
-                  className={`px-3 py-1 rounded-xl font-black text-xs border transition-all cursor-pointer ${
-                    sfxEnabled
-                      ? 'bg-emerald-600/30 border-emerald-400 text-emerald-300 shadow-sm'
-                      : 'bg-stone-800 border-stone-700 text-stone-500'
-                  }`}
+                  title={sfxEnabled ? 'Tắt hiệu ứng âm thanh' : 'Bật hiệu ứng âm thanh'}
+                  className="w-9 h-9 relative shrink-0 cursor-pointer active:scale-95 transition-transform"
                 >
-                  {sfxEnabled ? 'Đang Bật' : 'Đang Tắt'}
+                  <Image
+                    src={sfxEnabled ? '/assets/phase3-ui/ui_sfx_on.png' : '/assets/phase3-ui/ui_sfx_off.png'}
+                    alt={sfxEnabled ? 'SFX Bật' : 'SFX Tắt'}
+                    width={36}
+                    height={36}
+                    className="w-full h-full object-contain pointer-events-none drop-shadow-sm"
+                  />
                 </button>
               </div>
 
               {/* BGM Toggle */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-xl bg-stone-800 flex items-center justify-center">
-                    <GameAssetIcon name="sound" size={16} />
+                  <div className="w-7 h-7 rounded-xl bg-stone-800 flex items-center justify-center p-0.5">
+                    <Image
+                      src={bgmEnabled ? '/assets/phase3-ui/ui_bgm_on.png' : '/assets/phase3-ui/ui_bgm_off.png'}
+                      alt="BGM"
+                      width={24}
+                      height={24}
+                      className="w-full h-full object-contain"
+                    />
                   </div>
                   <span className="text-xs font-bold text-stone-200">Nhạc nền quán ăn (BGM)</span>
                 </div>
                 <button
                   type="button"
                   onClick={toggleBgm}
-                  className={`px-3 py-1 rounded-xl font-black text-xs border transition-all cursor-pointer ${
-                    bgmEnabled
-                      ? 'bg-amber-600/30 border-amber-400 text-amber-300 shadow-sm'
-                      : 'bg-stone-800 border-stone-700 text-stone-500'
-                  }`}
+                  title={bgmEnabled ? 'Tắt nhạc nền' : 'Bật nhạc nền'}
+                  className="w-9 h-9 relative shrink-0 cursor-pointer active:scale-95 transition-transform"
                 >
-                  {bgmEnabled ? 'Đang Bật' : 'Đang Tắt'}
+                  <Image
+                    src={bgmEnabled ? '/assets/phase3-ui/ui_bgm_on.png' : '/assets/phase3-ui/ui_bgm_off.png'}
+                    alt={bgmEnabled ? 'BGM Bật' : 'BGM Tắt'}
+                    width={36}
+                    height={36}
+                    className="w-full h-full object-contain pointer-events-none drop-shadow-sm"
+                  />
                 </button>
               </div>
             </div>
@@ -127,9 +159,17 @@ export const SettingsModal: React.FC = () => {
                     resetGameData();
                   }
                 }}
-                className="w-full py-2.5 rounded-xl border border-red-500/50 bg-red-950/40 hover:bg-red-900/60 text-red-300 font-extrabold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                className="w-full py-2 px-3 rounded-2xl border border-red-500/50 bg-red-950/40 hover:bg-red-900/60 text-red-300 font-extrabold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
               >
-                <GameAssetIcon name="back" size={14} />
+                <div className="w-5 h-5 relative shrink-0">
+                  <Image
+                    src="/assets/phase3-ui/ui_cancel_huy.png"
+                    alt="Hủy"
+                    width={20}
+                    height={20}
+                    className="object-contain w-full h-full"
+                  />
+                </div>
                 <span>Đặt Lại Trò Chơi (Reset Dữ Liệu)</span>
               </button>
             </div>

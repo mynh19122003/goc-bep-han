@@ -20,19 +20,32 @@ export const ReviewFeedModal: React.FC = () => {
           exit={{ opacity: 0, scale: 0.9, y: 15 }}
           className="bg-stone-900 rounded-3xl max-w-md w-full p-4 sm:p-5 shadow-2xl border-4 border-amber-600/60 relative flex flex-col max-h-[85vh] text-stone-100"
         >
-          {/* Close button */}
+          {/* Close button (Phase 3 PNG: ui_close_dong.png) */}
           <button
             type="button"
             onClick={() => setActiveModal('none')}
-            className="absolute top-3.5 right-3.5 p-1.5 rounded-full bg-stone-800 hover:bg-stone-700 text-stone-400 hover:text-stone-100 border border-stone-700 transition-colors cursor-pointer"
+            title="Đóng đánh giá"
+            className="absolute top-3.5 right-3.5 w-8 h-8 rounded-xl overflow-hidden cursor-pointer transition-transform active:scale-90 z-20"
           >
-            <GameAssetIcon name="close" size={18} />
+            <Image
+              src="/assets/phase3-ui/ui_close_dong.png"
+              alt="Đóng"
+              width={32}
+              height={32}
+              className="w-full h-full object-contain pointer-events-none drop-shadow"
+            />
           </button>
 
           {/* Header */}
-          <div className="flex items-center gap-2.5 mb-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-300">
-              <GameAssetIcon name="star" size={24} />
+          <div className="flex items-center gap-2.5 mb-3 pr-10">
+            <div className="w-11 h-11 rounded-2xl bg-amber-500/20 border border-amber-400/40 p-1 flex items-center justify-center shrink-0">
+              <Image
+                src="/assets/phase3-ui/tab_review_danh_gia.png"
+                alt="Đánh giá"
+                width={40}
+                height={40}
+                className="w-full h-full object-contain pointer-events-none"
+              />
             </div>
             <div>
               <div className="flex items-center gap-2">

@@ -57,8 +57,17 @@ export const HeaderHUD: React.FC<HeaderHUDProps> = ({
             <span className="tracking-wide hidden xs:inline">GÓC BẾP HÀN</span>
           </div>
 
-          {/* Day & Business Time */}
+          {/* Day & Business Time with Phase 3 Timer Asset */}
           <div className="flex items-center gap-1.5 bg-stone-950/80 border border-amber-500/30 text-amber-200 px-2.5 py-1 rounded-2xl font-black text-xs sm:text-sm shadow-inner">
+            <div className="w-5 h-5 relative shrink-0">
+              <Image
+                src="/assets/phase3-ui/ui_timer_thoi_gian.png"
+                alt="Thời gian"
+                width={24}
+                height={24}
+                className="object-contain w-full h-full"
+              />
+            </div>
             <span className="text-amber-400">Ngày {day}</span>
             <span className="text-stone-600">|</span>
             <span className="font-mono text-stone-100">
@@ -105,56 +114,68 @@ export const HeaderHUD: React.FC<HeaderHUDProps> = ({
 
         {/* Right: Sound, Day Action & Settings */}
         <div className="flex items-center gap-1.5 sm:gap-2">
-          {/* Sound Toggle (28-32px icon) */}
-          <GameIconButton
-            asset={GAME_ASSETS.hud.sound}
-            size="sm"
-            variant="glass"
-            active={sfxEnabled}
+          {/* Sound Toggle (Phase 3 PNG: ui_sfx_on / ui_sfx_off) */}
+          <button
+            type="button"
             onClick={toggleSfx}
             title={sfxEnabled ? 'Âm thanh: Đang bật' : 'Âm thanh: Đang tắt'}
-            className={sfxEnabled ? 'opacity-100' : 'opacity-40 grayscale'}
-          />
+            className="w-8 h-8 sm:w-9 sm:h-9 relative shrink-0 rounded-xl bg-stone-900/60 hover:bg-stone-900/90 border border-white/20 flex items-center justify-center cursor-pointer transition-all active:scale-95 p-1"
+          >
+            <Image
+              src={sfxEnabled ? '/assets/phase3-ui/ui_sfx_on.png' : '/assets/phase3-ui/ui_sfx_off.png'}
+              alt={sfxEnabled ? 'SFX Bật' : 'SFX Tắt'}
+              width={28}
+              height={28}
+              className="w-full h-full object-contain pointer-events-none drop-shadow-sm"
+            />
+          </button>
 
           {/* Day Open/Pause Toggle */}
           {!isDayActive ? (
             <button
               type="button"
               onClick={startDay}
-              className="bg-gradient-to-r from-emerald-600 to-green-600 hover:brightness-110 text-white font-black px-3 py-1.5 rounded-2xl text-xs sm:text-sm shadow-md active:scale-95 flex items-center gap-1.5 border border-emerald-400/40 cursor-pointer transition-all"
+              title="Mở quán bắt đầu ngày"
+              className="h-8 sm:h-9 px-2 sm:px-2.5 rounded-xl bg-stone-900/60 hover:bg-stone-900/90 border border-emerald-400/50 flex items-center justify-center cursor-pointer transition-all active:scale-95 shadow-md"
             >
-              <div className="w-5 h-5 relative shrink-0">
+              <div className="h-6 w-auto aspect-[593/295] relative">
                 <Image
-                  src={GAME_ASSETS.actions.start}
+                  src="/assets/phase3-ui/btn_open_mo.png"
                   alt="Mở quán"
-                  width={20}
-                  height={20}
-                  className="object-contain w-full h-full"
+                  width={593}
+                  height={295}
+                  className="h-full w-auto object-contain pointer-events-none"
                 />
               </div>
-              <span className="hidden sm:inline">Mở Quán</span>
             </button>
           ) : (
             <button
               type="button"
               onClick={isPaused ? resumeGame : pauseGame}
-              className="bg-amber-600 hover:bg-amber-700 text-white font-black px-3 py-1.5 rounded-2xl text-xs sm:text-sm shadow-md active:scale-95 border border-amber-400/40 cursor-pointer transition-all flex items-center gap-1"
+              className="h-8 sm:h-9 px-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-black text-xs shadow-md active:scale-95 border border-amber-400/40 cursor-pointer transition-all flex items-center gap-1"
             >
               <span>{isPaused ? 'Tiếp tục' : 'Tạm dừng'}</span>
             </button>
           )}
 
-          {/* Settings Modal Button */}
-          <GameIconButton
-            asset={GAME_ASSETS.hud.settings}
-            size="sm"
-            variant="glass"
+          {/* Settings Modal Button (Phase 3 PNG: ui_settings_cai_dat.png) */}
+          <button
+            type="button"
             onClick={() => {
               if (onOpenSettings) onOpenSettings();
               else setActiveModal('settings');
             }}
             title="Cài đặt trò chơi"
-          />
+            className="w-8 h-8 sm:w-9 sm:h-9 relative shrink-0 rounded-xl bg-stone-900/60 hover:bg-stone-900/90 border border-white/20 flex items-center justify-center cursor-pointer transition-all active:scale-95 p-1"
+          >
+            <Image
+              src="/assets/phase3-ui/ui_settings_cai_dat.png"
+              alt="Cài đặt"
+              width={28}
+              height={28}
+              className="w-full h-full object-contain pointer-events-none drop-shadow-sm"
+            />
+          </button>
         </div>
       </div>
 
