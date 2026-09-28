@@ -336,6 +336,7 @@ export const useGameStore = create<GameState>()(
         soundManager.playSuccess();
         set({
           isDayActive: false,
+          isPaused: true,
           dailyReport: report,
           activeModal: 'day_end',
           inventory: updatedInventory,
@@ -377,6 +378,7 @@ export const useGameStore = create<GameState>()(
         set({
           day: state.day + 1,
           dayTimeSeconds: 0,
+          isPaused: false,
           currentNews: nextNews,
           bannedMarketItemsToday: [],
           tables: JSON.parse(JSON.stringify(INITIAL_TABLES)),
@@ -623,14 +625,15 @@ export const useGameStore = create<GameState>()(
         }
 
         let ramSession = { ...state.ramyeonSession };
-        if (ramSession.step === 'boiling') {
+        if (ramSession.step === 'boiling' || ramSession.step === 'ready') {
+          const wasReady = ramSession.step === 'ready';
           ramSession.boilProgress += deltaSeconds * 18 * stoveSpeed;
           if (ramSession.boilProgress >= 125) {
             ramSession.step = 'burned';
             soundManager.playError();
           } else if (ramSession.boilProgress >= 100) {
             ramSession.step = 'ready';
-            soundManager.playSuccess();
+            if (!wasReady) soundManager.playSuccess();
           }
         }
 
@@ -1543,7 +1546,16 @@ export const useGameStore = create<GameState>()(
 
       setActiveModal: (modal: ModalType) => {
         soundManager.playClick();
-        set({ activeModal: modal });
+        const state = get();
+        set({
+          activeModal: modal,
+          isPaused:
+            modal === 'none'
+              ? false
+              : state.isDayActive
+              ? true
+              : state.isPaused,
+        });
       },
 
       toggleBgm: () => {
