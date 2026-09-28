@@ -155,6 +155,18 @@ export const MarketModal: React.FC = () => {
                         <span className="text-stone-300">Kho: {item.stock}</span>
                         <span className="text-stone-600">•</span>
                         <span className="text-emerald-400 font-semibold">Hạn: {item.shelfLifeDays}d</span>
+                        <span className="text-stone-600">•</span>
+                        <span
+                          className={`font-black ${
+                            item.freshness > 60
+                              ? 'text-emerald-300'
+                              : item.freshness > 10
+                              ? 'text-amber-300'
+                              : 'text-red-400'
+                          }`}
+                        >
+                          Tươi: {item.freshness}%
+                        </span>
                       </div>
                     </div>
                   </div>
