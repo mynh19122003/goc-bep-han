@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { IngredientId, Ingredient } from '@/types/game';
@@ -13,6 +13,7 @@ import {
 import { ToppingSelector } from './ToppingSelector';
 import { GameAssetIcon } from '@/components/ui/game/GameAssetIcon';
 import { soundManager } from '@/utils/audio';
+import { buildConsumptionRequirements, hasIngredients } from '@/core/gameCore';
 
 export interface CookingTargetOrder {
   orderType: 'dine_in' | 'delivery' | 'free_cook';
@@ -70,6 +71,20 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
   );
   const [isCookingActive, setIsCookingActive] = useState(false);
   const [validationResult, setValidationResult] = useState<DishValidationResult | null>(null);
+  const [panFlipCount, setPanFlipCount] = useState(0);
+  const pointerStartY = useRef<number | null>(null);
+
+  useEffect(() => {
+    setBaseAdded(false);
+    setSelectedToppings([]);
+    setCurrentSpice(
+      order.spiceLevel !== undefined ? order.spiceLevel : recipe.defaultSpiceLevel
+    );
+    setIsCookingActive(false);
+    setValidationResult(null);
+    setPanFlipCount(0);
+    pointerStartY.current = null;
+  }, [order.orderId, order.dishId, order.tableId]);
 
   // Add topping
   const handleAddTopping = (toppingId: IngredientId) => {
@@ -119,8 +134,66 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
     }
   };
 
+  const handlePanFlip = () => {
+    if (recipe.stationType !== 'pan' || !baseAdded) {
+      soundManager.playError();
+      return;
+    }
+    soundManager.playSizzle();
+    setPanFlipCount((count) => Math.min(5, count + 1));
+  };
+
+  const handleCookwarePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    pointerStartY.current = event.clientY;
+  };
+
+  const handleCookwarePointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (recipe.stationType !== 'pan' || pointerStartY.current === null) return;
+    const deltaY = pointerStartY.current - event.clientY;
+    pointerStartY.current = null;
+    if (deltaY >= 24) handlePanFlip();
+  };
+
   // Execute dish evaluation
   const handleServeDish = () => {
+    if (!baseAdded) {
+      soundManager.playError();
+      return;
+    }
+    if (recipe.stationType === 'pan' && panFlipCount < 2) {
+      soundManager.playError();
+      return;
+    }
+
+    const virtualDish = {
+      id: order.dishId,
+      name: recipe.name,
+      koreanName: recipe.koreanName,
+      category: 'main' as const,
+      stationType:
+        recipe.stationType === 'pan'
+          ? ('tokbokki' as const)
+          : recipe.stationType === 'board'
+          ? ('kimbap' as const)
+          : ('ramyeon' as const),
+      price: order.price || 0,
+      prepTime: recipe.idealCookSeconds,
+      emoji: '',
+      requiredIngredients: Object.fromEntries(
+        recipe.baseIngredients.map((id) => [id, 1])
+      ),
+      recipeSteps: [],
+      unlockLevel: 1,
+      unlockCost: 0,
+      isUnlocked: true,
+      description: '',
+    };
+
+    if (!hasIngredients(inventory, buildConsumptionRequirements(virtualDish, selectedToppings))) {
+      soundManager.playError();
+      return;
+    }
+
     setIsCookingActive(true);
     soundManager.playClick();
 
@@ -281,7 +354,14 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
       {/* ========================================================================= */}
       {/* 3. COOKING WORKSPACE: COOKWARE + BOUNDED INGREDIENT OVERLAY               */}
       {/* ========================================================================= */}
-      <div className="relative w-full flex flex-col items-center justify-center my-1 bg-stone-950/70 border border-amber-600/30 rounded-2xl p-2 sm:p-3">
+      <div
+        className="relative w-full flex flex-col items-center justify-center my-1 bg-stone-950/70 border border-amber-600/30 rounded-2xl p-2 sm:p-3"
+        onPointerDown={handleCookwarePointerDown}
+        onPointerUp={handleCookwarePointerUp}
+        onPointerCancel={() => {
+          pointerStartY.current = null;
+        }}
+      >
         {/* Cookware Vessel Wrapper with clamp width and exact aspect ratio */}
         <div className="relative w-[min(70vw,260px)] sm:w-[clamp(240px,30vw,340px)] aspect-square flex items-center justify-center">
           {/* Stove shadow glow */}
@@ -293,7 +373,14 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
             alt={recipe.stationType}
             width={340}
             height={340}
-            className="w-full h-full object-contain pointer-events-none drop-shadow-xl z-10"
+            className="w-full h-full object-contain pointer-events-none drop-shadow-xl z-10 transition-transform duration-200"
+            style={
+              recipe.stationType === 'pan'
+                ? {
+                    transform: `rotate(${panFlipCount % 2 === 0 ? 0 : -5}deg) translateY(${panFlipCount % 2 === 0 ? 0 : -4}px)`,
+                  }
+                : undefined
+            }
             priority
           />
 
@@ -388,6 +475,21 @@ export const CookingEngine: React.FC<CookingEngineProps> = ({
             {baseAdded ? `Đã cho: ${baseIngredientNames}` : 'Chưa cho vào nồi'}
           </span>
         </div>
+
+        {recipe.stationType === 'pan' && (
+          <div className="mt-2 w-full max-w-[340px] flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handlePanFlip}
+              className="flex-1 h-11 rounded-xl border border-amber-400/50 bg-amber-700/80 hover:bg-amber-600 text-white font-black text-xs active:scale-95 transition-all"
+            >
+              Lật chảo ({panFlipCount}/2)
+            </button>
+            <span className="text-[10px] text-amber-200/80 font-bold text-right max-w-[130px]">
+              Vuốt chảo lên hoặc bấm nút ít nhất 2 lần
+            </span>
+          </div>
+        )}
       </div>
 
       {/* ========================================================================= */}
