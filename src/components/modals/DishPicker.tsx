@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/stores/useGameStore';
 import { GAME_ASSETS } from '@/game/assets/gameAssets';
-import { GameIconButton } from '@/components/ui/game/GameIconButton';
+import { CloseButton } from '@/components/ui/game/CloseButton';
 import { soundManager } from '@/utils/audio';
 
 interface DishPickerProps {
@@ -71,13 +71,7 @@ export const DishPicker: React.FC<DishPickerProps> = ({
               </div>
             </div>
 
-            <GameIconButton
-              asset={GAME_ASSETS.actions.close}
-              size="sm"
-              variant="glass"
-              onClick={onClose}
-              title="Đóng chọn món"
-            />
+            <CloseButton onClick={onClose} label="Đóng" />
           </div>
 
           {/* Dish Grid: 2 per row on mobile, 3-4 per row on desktop */}
@@ -95,7 +89,7 @@ export const DishPicker: React.FC<DishPickerProps> = ({
                   onClick={() => handlePickDish(dish.id, isUnlocked)}
                   className={`relative rounded-2xl p-2.5 sm:p-3 flex flex-col items-center justify-between border-2 transition-all cursor-pointer text-center ${
                     isUnlocked
-                      ? 'bg-stone-850 hover:bg-stone-800 border-amber-500/40 hover:border-amber-400 shadow-md hover:shadow-amber-500/20 active:scale-95'
+                      ? 'bg-stone-800 hover:bg-stone-800 border-amber-500/40 hover:border-amber-400 shadow-md hover:shadow-amber-500/20 active:scale-95'
                       : 'bg-stone-950/60 border-stone-800 opacity-60 cursor-not-allowed'
                   }`}
                 >
