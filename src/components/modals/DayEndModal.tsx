@@ -23,6 +23,7 @@ export const DayEndModal: React.FC = () => {
       title={`Tổng kết ngày ${dailyReport.day}`}
       subtitle="Kết quả vận hành quán hôm nay"
       onClose={() => {}}
+      showClose={false}
       maxWidth="max-w-md"
       icon={<span className="relative h-10 w-10"><Image src={GAME_ASSETS.props.red_lantern} alt="" fill sizes="40px" className="object-contain" /></span>}
     >
