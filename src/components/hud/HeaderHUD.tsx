@@ -44,8 +44,8 @@ export const HeaderHUD: React.FC<HeaderHUDProps> = ({
 
   return (
     <header className="relative z-40 shrink-0 border-b border-amber-500/25 bg-[#17110f]/95 text-stone-100 shadow-lg">
-      <div className="mx-auto flex min-h-[62px] max-w-[1500px] items-center gap-2 px-2 py-2 sm:px-4">
-        <div className="flex min-w-0 flex-1 items-center gap-2">
+      <div className="mx-auto flex max-w-[1500px] flex-wrap items-center gap-1.5 px-2 py-1.5 sm:min-h-[62px] sm:flex-nowrap sm:gap-2 sm:px-4 sm:py-2">
+        <div className="flex min-w-0 w-full items-center gap-2 sm:flex-1">
           <div className="flex h-10 shrink-0 items-center gap-2 rounded-2xl border border-red-400/25 bg-gradient-to-r from-red-700 to-orange-700 px-2.5 shadow">
             <span className="relative h-7 w-7 shrink-0">
               <Image src={GAME_ASSETS.props.food_stall} alt="Góc Bếp Hàn" fill sizes="28px" className="object-contain" />
@@ -70,8 +70,8 @@ export const HeaderHUD: React.FC<HeaderHUDProps> = ({
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center gap-1.5">
-          <div className="flex h-10 items-center gap-1.5 rounded-2xl border border-amber-500/30 bg-amber-950/70 px-2.5 text-xs font-black text-amber-200">
+        <div className="flex w-full shrink-0 items-center justify-between gap-1 sm:w-auto sm:justify-end sm:gap-1.5">
+          <div className="flex h-9 items-center gap-1 rounded-xl border border-amber-500/30 bg-amber-950/70 px-2 text-[11px] font-black text-amber-200 sm:h-10 sm:gap-1.5 sm:rounded-2xl sm:px-2.5 sm:text-xs">
             <span className="relative h-6 w-6">
               <Image src={GAME_ASSETS.hud.coin} alt="Xu" fill sizes="24px" className="object-contain" />
             </span>
@@ -81,7 +81,7 @@ export const HeaderHUD: React.FC<HeaderHUDProps> = ({
           <button
             type="button"
             onClick={() => setActiveModal('reviews')}
-            className="flex h-10 items-center gap-1.5 rounded-2xl border border-amber-500/30 bg-amber-950/70 px-2.5 text-xs font-black text-amber-200 transition hover:bg-amber-900 active:scale-95"
+            className="flex h-9 items-center gap-1 rounded-xl border border-amber-500/30 bg-amber-950/70 px-2 text-[11px] font-black text-amber-200 transition hover:bg-amber-900 active:scale-95 sm:h-10 sm:gap-1.5 sm:rounded-2xl sm:px-2.5 sm:text-xs"
             title="Đánh giá khách hàng"
           >
             <span className="relative h-6 w-6">
@@ -116,7 +116,7 @@ export const HeaderHUD: React.FC<HeaderHUDProps> = ({
           <button
             type="button"
             onClick={onOpenGuide}
-            className="h-10 min-w-[40px] rounded-xl border border-teal-500/25 bg-teal-950/35 px-2 text-[10px] font-black text-teal-200 transition hover:bg-teal-900/40 active:scale-95"
+            className="h-9 min-w-[38px] sm:h-10 sm:min-w-[40px] rounded-xl border border-teal-500/25 bg-teal-950/35 px-2 text-[10px] font-black text-teal-200 transition hover:bg-teal-900/40 active:scale-95"
             title="Giới thiệu & hướng dẫn chơi"
           >
             <span className="sm:hidden">?</span><span className="hidden sm:inline">HDSD</span>
@@ -128,7 +128,7 @@ export const HeaderHUD: React.FC<HeaderHUDProps> = ({
               if (onOpenSettings) onOpenSettings();
               else setActiveModal('settings');
             }}
-            className="h-10 min-w-[48px] rounded-xl border border-amber-500/25 bg-stone-900 px-2 text-[10px] font-black text-amber-200 transition hover:bg-stone-800 active:scale-95"
+            className="h-9 min-w-[42px] sm:h-10 sm:min-w-[48px] rounded-xl border border-amber-500/25 bg-stone-900 px-2 text-[10px] font-black text-amber-200 transition hover:bg-stone-800 active:scale-95"
           >
             <span className="sm:hidden">Cài</span>
             <span className="hidden sm:inline">Cài đặt</span>
