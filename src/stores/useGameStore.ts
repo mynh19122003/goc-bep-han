@@ -253,7 +253,8 @@ export const useGameStore = create<GameState>()(
 
       // --- GAME FLOW ---
       startDay: () => {
-        if (get().isDayActive) return;
+        const state = get();
+        if (state.isDayActive) return;
         soundManager.playCustomerBell();
         set({
           isDayActive: true,
