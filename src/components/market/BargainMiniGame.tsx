@@ -10,7 +10,7 @@ import { CustomerSprite } from '@/components/ui/game/CustomerSprite';
 import { GameAssetIcon } from '@/components/ui/game/GameAssetIcon';
 
 export const BargainMiniGame: React.FC = () => {
-  const { bargainSession, inventory, stopBargain, cancelBargain } = useGameStore();
+  const { bargainSession, inventory, upgrades, stopBargain, cancelBargain } = useGameStore();
 
   const [sliderPos, setSliderPos] = useState(20);
   const [sliderDir, setSliderDir] = useState<1 | -1>(1);
@@ -22,6 +22,16 @@ export const BargainMiniGame: React.FC = () => {
   } | null>(null);
 
   const requestRef = useRef<number | null>(null);
+  const charmLevel = upgrades.find((upgrade) => upgrade.id === 'bargain_charm')?.level || 0;
+  const bestZoneStart = Math.max(60, 80 - charmLevel * 10);
+
+  useEffect(() => {
+    if (!bargainSession) return;
+    setSliderPos(20);
+    setSliderDir(1);
+    setIsFinished(false);
+    setResultOutcome(null);
+  }, [bargainSession?.ingredientId, bargainSession?.originalPrice]);
 
   // Fast rhythm animation loop
   useEffect(() => {
@@ -147,12 +157,18 @@ export const BargainMiniGame: React.FC = () => {
               <div className="w-[25%] h-full bg-amber-500/80 flex items-center justify-center text-[10px] font-black text-white">
                 -5%
               </div>
-              {/* Blue Zone: 50 to 80 */}
-              <div className="w-[30%] h-full bg-blue-600/80 flex items-center justify-center text-[10px] font-black text-white">
+              {/* Blue Zone: 50 to best discount zone */}
+              <div
+                className="h-full bg-blue-600/80 flex items-center justify-center text-[10px] font-black text-white"
+                style={{ width: `${bestZoneStart - 50}%` }}
+              >
                 -10%
               </div>
-              {/* Emerald Zone: 80 to 100 */}
-              <div className="w-[20%] h-full bg-emerald-500 flex items-center justify-center text-[10px] font-black text-white animate-pulse">
+              {/* Emerald Zone expands with bargain_charm upgrade */}
+              <div
+                className="h-full bg-emerald-500 flex items-center justify-center text-[10px] font-black text-white animate-pulse"
+                style={{ width: `${100 - bestZoneStart}%` }}
+              >
                 -20%
               </div>
 
