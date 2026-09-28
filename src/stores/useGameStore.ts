@@ -54,6 +54,7 @@ interface GameState {
   isDayActive: boolean;
   isPaused: boolean;
   rating: number; // 1.0 to 5.0
+  dayStartRating: number;
   reputationPoints: number;
 
   // Day Statistics
@@ -217,6 +218,7 @@ export const useGameStore = create<GameState>()(
       isDayActive: false,
       isPaused: false,
       rating: 4.8,
+      dayStartRating: 4.8,
       reputationPoints: 25,
 
       dailyRevenue: 0,
@@ -257,6 +259,7 @@ export const useGameStore = create<GameState>()(
           isDayActive: true,
           isPaused: false,
           dayTimeSeconds: 0,
+          dayStartRating: state.rating,
           dailyRevenue: 0,
           dailyCustomersServed: 0,
           dailyDeliveriesCompleted: 0,
@@ -289,7 +292,14 @@ export const useGameStore = create<GameState>()(
               orderDishEmoji: randomDish.emoji,
               maxPatience: 45,
               currentPatience: 45,
-              tipMultiplier: 1.0,
+              tipMultiplier:
+                randomVisual.personality === 'friendly'
+                  ? 1.15
+                  : randomVisual.personality === 'critic'
+                  ? 1.25
+                  : randomVisual.personality === 'student'
+                  ? 0.9
+                  : 1.05,
               personality: randomVisual.personality,
               mood: 'happy',
               quote: randomVisual.defaultQuote,
@@ -318,9 +328,7 @@ export const useGameStore = create<GameState>()(
           customersServed: state.dailyCustomersServed,
           deliveriesCompleted: state.dailyDeliveriesCompleted,
           customersLost: state.dailyCustomersLost,
-          ratingChange: Number(
-            ((state.dailyCustomersServed + state.dailyDeliveriesCompleted) * 0.04 - state.dailyCustomersLost * 0.12).toFixed(2)
-          ),
+          ratingChange: Number((state.rating - state.dayStartRating).toFixed(2)),
           tipsEarned: state.dailyTips,
         };
 
@@ -423,7 +431,7 @@ export const useGameStore = create<GameState>()(
               lostCountDelta += 1;
               // Add disappointed review
               const badReview: CustomerReview = {
-                id: `rev_${Date.now()}`,
+                id: createGameId('rev'),
                 author: table.customer.name,
                 avatar: table.customer.avatar,
                 rating: 1,
@@ -520,7 +528,7 @@ export const useGameStore = create<GameState>()(
               ratingDelta -= 0.12;
               lostCountDelta += 1;
               const badDeliveryReview: CustomerReview = {
-                id: `rev_${Date.now()}`,
+                id: createGameId('rev'),
                 author: order.customerName,
                 avatar: '🛵',
                 rating: 2,
@@ -692,7 +700,7 @@ export const useGameStore = create<GameState>()(
 
         // Customer leaves positive review
         const newReview: CustomerReview = {
-          id: `rev_${Date.now()}`,
+          id: createGameId('rev'),
           author: table.customer.name,
           avatar: table.customer.avatar,
           rating:
@@ -724,11 +732,16 @@ export const useGameStore = create<GameState>()(
               Number(
                 (
                   state.rating +
-                  (prepared.quality === 'perfect'
-                    ? 0.04
-                    : prepared.quality === 'good'
-                    ? 0.01
-                    : -0.08)
+                  (() => {
+                    const comfortLevel =
+                      state.upgrades.find((upgrade) => upgrade.id === 'table_comfort')?.level || 0;
+                    const comfortBonus = comfortLevel * 0.005;
+                    return prepared.quality === 'perfect'
+                      ? 0.04 + comfortBonus
+                      : prepared.quality === 'good'
+                      ? 0.01 + comfortBonus
+                      : -0.08 + Math.min(0.03, comfortLevel * 0.01);
+                  })()
                 ).toFixed(2)
               )
             )
@@ -799,7 +812,7 @@ export const useGameStore = create<GameState>()(
         soundManager.playSuccess();
 
         const deliveryReview: CustomerReview = {
-          id: `rev_${Date.now()}`,
+          id: createGameId('rev'),
           author: order.customerName,
           avatar: '🛵',
           rating:
@@ -1616,6 +1629,7 @@ export const useGameStore = create<GameState>()(
           isDayActive: false,
           isPaused: false,
           rating: 4.8,
+          dayStartRating: 4.8,
           reputationPoints: 25,
           dailyRevenue: 0,
           dailyCustomersServed: 0,
