@@ -1,14 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useGameStore } from '@/stores/useGameStore';
 import { GAME_ASSETS } from '@/game/assets/gameAssets';
 import { CookingEngine, CookingTargetOrder } from '@/components/cooking/CookingEngine';
 import { DishPicker } from '@/components/modals/DishPicker';
-import { GameAssetIcon } from '@/components/ui/game/GameAssetIcon';
 import { CloseButton } from '@/components/ui/game/CloseButton';
+import { GameButton } from '@/components/ui/game/GameButton';
 
 interface KitchenDrawerProps {
   isOpen: boolean;
@@ -32,91 +32,70 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
     discardPreparedDish,
   } = useGameStore();
 
-  const [currentOrder, setCurrentOrder] = useState<CookingTargetOrder | null>(initialOrder);
+  const [currentOrder, setCurrentOrder] = useState<CookingTargetOrder | null>(null);
   const [isDishPickerOpen, setIsDishPickerOpen] = useState(false);
 
-  // Update currentOrder when initialOrder changes from outside
+  const waitingOrders = useMemo<CookingTargetOrder[]>(() => {
+    const result: CookingTargetOrder[] = [];
+
+    tables.forEach((table) => {
+      if (table.status === 'seated' && table.customer) {
+        result.push({
+          orderType: 'dine_in',
+          orderId: table.customer.id,
+          tableId: table.id,
+          customerName: table.customer.name,
+          dishId: table.customer.orderDishId,
+          dishName: table.customer.orderDishName,
+          dishEmoji: table.customer.orderDishEmoji,
+          requiredToppings: table.customer.requiredToppings,
+          excludedToppings: table.customer.excludedToppings,
+          spiceLevel: table.customer.spiceLevel,
+          price: dishes[table.customer.orderDishId]?.price || 50,
+        });
+      }
+    });
+
+    deliveryQueue.forEach((order) => {
+      result.push({
+        orderType: 'delivery',
+        orderId: order.id,
+        customerName: order.customerName,
+        dishId: order.dishId,
+        dishName: order.dishName,
+        dishEmoji: order.dishEmoji,
+        requiredToppings: order.requiredToppings,
+        excludedToppings: order.excludedToppings,
+        spiceLevel: order.spiceLevel,
+        price: order.price,
+      });
+    });
+
+    return result;
+  }, [tables, deliveryQueue, dishes]);
+
   useEffect(() => {
     if (!isOpen) return;
 
     if (initialOrder) {
       setCurrentOrder(initialOrder);
-    } else if (!currentOrder) {
-      // Default to first waiting table customer or first delivery
-      const firstSeated = tables.find((t) => t.status === 'seated' && t.customer);
-      if (firstSeated?.customer) {
-        setCurrentOrder({
-          orderType: 'dine_in',
-          orderId: firstSeated.customer.id,
-          tableId: firstSeated.id,
-          customerName: firstSeated.customer.name,
-          dishId: firstSeated.customer.orderDishId,
-          dishName: firstSeated.customer.orderDishName,
-          dishEmoji: firstSeated.customer.orderDishEmoji,
-          requiredToppings: firstSeated.customer.requiredToppings,
-          excludedToppings: firstSeated.customer.excludedToppings,
-          spiceLevel: firstSeated.customer.spiceLevel,
-          price: dishes[firstSeated.customer.orderDishId]?.price || 50,
-        });
-      } else if (deliveryQueue.length > 0) {
-        const firstDel = deliveryQueue[0];
-        setCurrentOrder({
-          orderType: 'delivery',
-          orderId: firstDel.id,
-          customerName: firstDel.customerName,
-          dishId: firstDel.dishId,
-          dishName: firstDel.dishName,
-          dishEmoji: firstDel.dishEmoji,
-          requiredToppings: firstDel.requiredToppings,
-          excludedToppings: firstDel.excludedToppings,
-          spiceLevel: firstDel.spiceLevel,
-          price: firstDel.price,
-        });
-      } else {
-        setCurrentOrder(null);
-      }
+      return;
     }
-  }, [initialOrder, isOpen]);
+
+    setCurrentOrder((current) => {
+      if (current?.orderType === 'free_cook') return current;
+      if (
+        current?.orderId &&
+        waitingOrders.some((order) => order.orderId === current.orderId)
+      ) {
+        return current;
+      }
+      return waitingOrders[0] || null;
+    });
+  }, [isOpen, initialOrder, waitingOrders]);
 
   if (!isOpen) return null;
 
-  // Compile list of all waiting orders for quick switching chips
-  const waitingOrders: CookingTargetOrder[] = [];
-
-  tables.forEach((table) => {
-    if (table.status === 'seated' && table.customer) {
-      waitingOrders.push({
-        orderType: 'dine_in',
-        orderId: table.customer.id,
-        tableId: table.id,
-        customerName: table.customer.name,
-        dishId: table.customer.orderDishId,
-        dishName: table.customer.orderDishName,
-        dishEmoji: table.customer.orderDishEmoji,
-        requiredToppings: table.customer.requiredToppings,
-        excludedToppings: table.customer.excludedToppings,
-        spiceLevel: table.customer.spiceLevel,
-        price: dishes[table.customer.orderDishId]?.price || 50,
-      });
-    }
-  });
-
-  deliveryQueue.forEach((del) => {
-    waitingOrders.push({
-      orderType: 'delivery',
-      orderId: del.id,
-      customerName: del.customerName,
-      dishId: del.dishId,
-      dishName: del.dishName,
-      dishEmoji: del.dishEmoji,
-      requiredToppings: del.requiredToppings,
-      excludedToppings: del.excludedToppings,
-      spiceLevel: del.spiceLevel,
-      price: del.price,
-    });
-  });
-
-  // Handle selecting a dish from Dish Picker
   const handleSelectFreeDish = (dishId: string) => {
     const dish = dishes[dishId];
     if (!dish || !dish.isUnlocked) return;
@@ -129,7 +108,7 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
 
     setCurrentOrder({
       orderType: 'free_cook',
-      customerName: 'Đầu Bếp Sáng Tạo',
+      customerName: 'Nấu tự do',
       dishId,
       dishName: dish.name,
       dishEmoji: '',
@@ -140,7 +119,7 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
     });
   };
 
-  const handleFinishCustomCook = (result: {
+  const handleFinish = (result: {
     order: CookingTargetOrder;
     validation: any;
     usedIngredients: any[];
@@ -159,222 +138,163 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
       usedIngredients: result.usedIngredients,
     });
 
-    if (!completed) {
-      return;
-    }
+    if (!completed) return;
 
-    // Auto advance to next waiting order or close if none left
-    const remaining = waitingOrders.filter(
-      (o) => o.orderId !== result.order.orderId
-    );
-    if (remaining.length > 0) {
-      setCurrentOrder(remaining[0]);
-    } else {
-      onClose();
-    }
+    const next = waitingOrders.find((order) => order.orderId !== result.order.orderId);
+    setCurrentOrder(next || null);
   };
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-end sm:items-stretch sm:justify-end bg-stone-950/70 backdrop-blur-sm select-none font-baloo">
-        {/* Backdrop click to close */}
-        <div className="absolute inset-0 cursor-pointer" onClick={onClose} />
+      <div className="fixed inset-0 z-50 flex items-end bg-black/65 backdrop-blur-sm sm:items-stretch sm:justify-end">
+        <button
+          type="button"
+          aria-label="Đóng gian bếp"
+          className="absolute inset-0 cursor-default"
+          onClick={onClose}
+        />
 
-        {/* Drawer Container (Right side on Desktop, Bottom Sheet on Mobile) */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 40 }}
-          transition={{ type: 'spring', damping: 28, stiffness: 280 }}
-          className="relative z-10 w-full h-[88dvh] sm:h-full sm:max-w-2xl lg:max-w-3xl bg-stone-900/95 backdrop-blur-xl border-t-2 sm:border-t-0 sm:border-l-2 border-amber-600/50 rounded-t-3xl sm:rounded-none shadow-2xl flex flex-col overflow-hidden text-stone-100"
+        <motion.section
+          initial={{ y: 36, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 36, opacity: 0 }}
+          transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+          className="relative z-10 flex h-[88dvh] w-full flex-col overflow-hidden rounded-t-3xl border-t border-amber-500/35 bg-[#1b1411]/98 text-stone-100 shadow-2xl sm:h-full sm:max-w-[760px] sm:rounded-none sm:border-l sm:border-t-0"
         >
-          {/* 1. Drawer Header */}
-          <div className="shrink-0 p-3 sm:p-4 border-b border-amber-600/30 bg-stone-950/80 flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-amber-600/20 border border-amber-400/40 flex items-center justify-center shrink-0">
-                <Image
-                  src={GAME_ASSETS.navigation.kitchen}
-                  alt="Bếp nấu"
-                  width={30}
-                  height={30}
-                  className="object-contain"
-                />
-              </div>
-              <div>
-                <h2 className="text-sm sm:text-base font-black text-amber-200 uppercase tracking-wide flex items-center gap-2 leading-tight">
-                  <span>GIAN BẾP NẤU HÀN QUỐC</span>
-                  <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-500/40">
-                    Khay: {preparedDishes.length}/8
+          <div className="mx-auto mt-2 h-1.5 w-12 rounded-full bg-stone-600/70 sm:hidden" />
+
+          <header className="flex shrink-0 items-center justify-between gap-2 border-b border-amber-500/20 px-3 py-2.5 sm:px-4 sm:py-3">
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="relative h-9 w-9 shrink-0 rounded-xl border border-amber-400/20 bg-amber-600/10 p-1">
+                <Image src={GAME_ASSETS.navigation.kitchen} alt="" fill sizes="36px" className="object-contain p-1" />
+              </span>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <h2 className="truncate text-xs font-black uppercase tracking-wide text-amber-100 sm:text-sm">
+                    Gian bếp
+                  </h2>
+                  <span className="rounded-full border border-emerald-500/25 bg-emerald-950/60 px-2 py-0.5 text-[9px] font-black text-emerald-300">
+                    Khay {preparedDishes.length}/8
                   </span>
-                </h2>
-                <span className="text-[11px] text-amber-300/80 font-bold block leading-none">
-                  Chế biến theo yêu cầu • Mì Cay, Tokbokki, Kimbap
-                </span>
+                </div>
+                <p className="truncate text-[10px] font-bold text-amber-200/55">
+                  Chọn đơn hoặc nấu tự do
+                </p>
               </div>
             </div>
 
-            {/* Header Actions: + Nấu Tự Do & Close Button */}
-            <div className="flex items-center gap-1.5 shrink-0">
-              <button
-                type="button"
+            <div className="flex shrink-0 items-center gap-1.5">
+              <GameButton
+                compact
                 onClick={() => setIsDishPickerOpen(true)}
-                className="min-h-[40px] px-2.5 sm:px-3 py-1.5 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 text-white rounded-xl text-[11px] sm:text-xs font-black shadow border border-amber-400/50 flex items-center gap-1 active:scale-95 transition-all cursor-pointer"
+                iconSrc={GAME_ASSETS.navigation.menu}
               >
-                <span>+ Nấu Tự Do</span>
-              </button>
-
-              <CloseButton onClick={onClose} label="Đóng" />
+                Nấu tự do
+              </GameButton>
+              <CloseButton onClick={onClose} />
             </div>
-          </div>
+          </header>
 
-          {/* 2. Quick Active Orders Chips Bar */}
-          <div className="game-scrollbar shrink-0 px-3 py-2 bg-stone-950/60 border-b border-stone-800 flex items-center gap-1.5 overflow-x-auto overscroll-x-contain">
-            <span className="text-[10px] font-bold text-stone-400 shrink-0 uppercase tracking-wider">
-              Đơn Chờ:
+          <div className="game-scrollbar flex shrink-0 items-center gap-1.5 overflow-x-auto border-b border-stone-800 bg-black/20 px-3 py-2">
+            <span className="shrink-0 text-[9px] font-black uppercase tracking-wider text-stone-500">
+              Đơn chờ
             </span>
 
             {waitingOrders.length === 0 ? (
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-amber-300/80 font-bold italic">
-                  Chưa có đơn chờ từ khách
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setIsDishPickerOpen(true)}
-                  className="text-xs font-black text-amber-400 underline cursor-pointer hover:text-amber-300"
-                >
-                  Chọn món nấu ngay
-                </button>
-              </div>
+              <span className="text-[10px] font-bold text-stone-400">Không có đơn đang chờ</span>
             ) : (
-              waitingOrders.map((order, idx) => {
-                const isSelected = currentOrder?.orderId === order.orderId;
-                const dishAsset =
-                  (GAME_ASSETS.dishes as Record<string, string>)[order.dishId] ||
-                  GAME_ASSETS.dishes.ramyeon;
+              waitingOrders.map((order) => {
+                const selected = currentOrder?.orderId === order.orderId;
+                const dishAsset = (GAME_ASSETS.dishes as Record<string, string>)[order.dishId];
 
                 return (
                   <button
-                    key={`${order.orderType}-${order.orderId || idx}`}
+                    key={`${order.orderType}-${order.orderId}`}
                     type="button"
-                    onClick={() => {
-                      setCurrentOrder(order);
-                                    }}
-                    className={`shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-black border transition-all cursor-pointer ${
-                      isSelected
-                        ? 'bg-amber-600 text-white border-amber-300 shadow-md scale-105'
-                        : 'bg-stone-800/80 hover:bg-stone-800 text-stone-300 border-stone-700'
+                    onClick={() => setCurrentOrder(order)}
+                    className={`flex h-9 shrink-0 items-center gap-1.5 rounded-xl border px-2.5 text-[10px] font-black transition active:scale-95 ${
+                      selected
+                        ? 'border-amber-300/60 bg-amber-600/70 text-white'
+                        : 'border-stone-700 bg-stone-900/80 text-stone-300 hover:bg-stone-800'
                     }`}
                   >
-                    <div className="w-4 h-4 relative shrink-0">
-                      <Image
-                        src={dishAsset}
-                        alt={order.dishName}
-                        width={16}
-                        height={16}
-                        className="object-contain"
-                      />
-                    </div>
-                    <span className="truncate max-w-[90px]">{order.customerName}</span>
-                    {order.spiceLevel !== undefined && order.spiceLevel > 0 && (
-                      <span className="text-[10px] text-red-300">
-                        Lv.{order.spiceLevel}
+                    {dishAsset && (
+                      <span className="relative h-5 w-5 shrink-0">
+                        <Image src={dishAsset} alt="" fill sizes="20px" className="object-contain" />
                       </span>
                     )}
+                    <span className="max-w-[92px] truncate">{order.customerName}</span>
                   </button>
                 );
               })
             )}
           </div>
 
-          {/* 3. Main Cooking Area (CookingEngine or Specific Stations) */}
-          <div className="game-scrollbar flex-1 overflow-y-auto p-2 sm:p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          <main className="game-scrollbar min-h-0 flex-1 overflow-y-auto p-2.5 pb-[max(1rem,env(safe-area-inset-bottom))] sm:p-4">
             {currentOrder ? (
               <CookingEngine
                 key={`${currentOrder.orderType}-${currentOrder.orderId || currentOrder.dishId}-${currentOrder.tableId || 'free'}`}
                 order={currentOrder}
                 inventory={inventory}
-                onFinishCook={handleFinishCustomCook}
+                onFinishCook={handleFinish}
                 onClose={() => setCurrentOrder(null)}
               />
             ) : (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="w-16 h-16 relative mb-2 opacity-75">
-                  <Image
-                    src={GAME_ASSETS.cooking.pot}
-                    alt="Nồi nấu"
-                    width={64}
-                    height={64}
-                    className="object-contain"
-                  />
-                </div>
-                <h3 className="text-sm font-black text-amber-200 mb-1">
-                  Chưa chọn món để chế biến
-                </h3>
-                <p className="text-xs text-stone-400 max-w-xs mb-3">
-                  Chọn một đơn hàng chờ bên trên hoặc mở Thực Đơn Nấu Tự Do để thỏa sức sáng tạo.
+              <div className="flex min-h-[360px] flex-col items-center justify-center text-center">
+                <span className="relative mb-2 h-20 w-20 opacity-80">
+                  <Image src={GAME_ASSETS.cooking.pot} alt="" fill sizes="80px" className="object-contain" />
+                </span>
+                <h3 className="text-sm font-black text-amber-100">Chưa chọn món</h3>
+                <p className="mt-1 max-w-xs text-[11px] leading-relaxed text-stone-400">
+                  Chọn một đơn phía trên hoặc mở danh sách món để nấu tự do.
                 </p>
-                <button
-                  type="button"
-                  onClick={() => setIsDishPickerOpen(true)}
-                  className="px-4 py-2 bg-gradient-to-r from-red-600 via-amber-600 to-red-600 hover:brightness-110 text-white rounded-2xl font-black text-xs sm:text-sm shadow-lg border border-amber-300 active:scale-95 transition-all cursor-pointer flex items-center gap-2"
-                >
-                  <GameAssetIcon name="menu" size={16} />
-                  <span>Mở Menu Chọn Món Tự Do</span>
-                </button>
+                <GameButton className="mt-3" onClick={() => setIsDishPickerOpen(true)}>
+                  Chọn món
+                </GameButton>
               </div>
             )}
-          </div>
+          </main>
 
-          {/* 4. Drawer Footer: Prepared Dishes Tray */}
           {preparedDishes.length > 0 && (
-            <div className="shrink-0 p-2 sm:p-3 bg-stone-950 border-t border-amber-600/30 flex items-center justify-between gap-2">
+            <footer className="shrink-0 border-t border-amber-500/20 bg-black/25 px-3 py-2">
               <div className="game-scrollbar flex items-center gap-1.5 overflow-x-auto">
-                <span className="text-[10px] font-bold text-amber-300/80 shrink-0 uppercase">
-                  Món Đã Nấu Xong:
+                <span className="shrink-0 text-[9px] font-black uppercase text-amber-200/60">
+                  Khay món
                 </span>
                 {preparedDishes.map((dish) => {
-                  const dishAsset =
-                    (GAME_ASSETS.dishes as Record<string, string>)[dish.dishId] ||
-                    GAME_ASSETS.dishes.ramyeon;
+                  const dishAsset = (GAME_ASSETS.dishes as Record<string, string>)[dish.dishId];
                   return (
                     <div
                       key={dish.id}
-                      className="shrink-0 flex items-center gap-1.5 px-2 py-1 rounded-xl bg-amber-950/80 border border-amber-500/50 text-xs font-black text-amber-200"
+                      className="flex h-9 shrink-0 items-center gap-1.5 rounded-xl border border-amber-500/25 bg-amber-950/40 px-2"
                     >
-                      <div className="w-4 h-4 relative shrink-0">
-                        <Image
-                          src={dishAsset}
-                          alt={dish.name}
-                          width={16}
-                          height={16}
-                          className="object-contain"
-                        />
-                      </div>
-                      <span className="truncate max-w-[80px]">{dish.name}</span>
+                      {dishAsset && (
+                        <span className="relative h-5 w-5">
+                          <Image src={dishAsset} alt="" fill sizes="20px" className="object-contain" />
+                        </span>
+                      )}
+                      <span className="max-w-[90px] truncate text-[10px] font-black text-amber-100">{dish.name}</span>
                       <button
                         type="button"
                         onClick={() => discardPreparedDish(dish.id)}
-                        className="text-stone-400 hover:text-red-400 text-xs ml-1 cursor-pointer"
-                        title="Hủy món này"
+                        className="ml-1 rounded-md px-1.5 py-1 text-[8px] font-black text-red-300 hover:bg-red-950/50"
                       >
-                        <span className="text-[9px] font-black">BỎ</span>
+                        BỎ
                       </button>
                     </div>
                   );
                 })}
               </div>
-            </div>
+            </footer>
           )}
-        </motion.div>
-      </div>
+        </motion.section>
 
-      {/* 5. Dish Picker Modal */}
-      <DishPicker
-        isOpen={isDishPickerOpen}
-        onClose={() => setIsDishPickerOpen(false)}
-        onSelectDish={handleSelectFreeDish}
-      />
+        <DishPicker
+          isOpen={isDishPickerOpen}
+          onClose={() => setIsDishPickerOpen(false)}
+          onSelectDish={handleSelectFreeDish}
+        />
+      </div>
     </AnimatePresence>
   );
 };
