@@ -3,44 +3,89 @@
 @tailwind utilities;
 
 :root {
-  --background: #1c1917;
-  --foreground: #fef3c7;
+  --background: #120e0c;
+  --foreground: #fff7e8;
+  --game-panel: rgba(27, 20, 17, 0.94);
+  --game-panel-soft: rgba(28, 25, 23, 0.62);
+  --game-border: rgba(245, 158, 11, 0.24);
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  background: var(--background);
 }
 
 body {
   color: var(--foreground);
-  background: var(--background);
   font-family: var(--font-game), cursive, sans-serif;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: hidden;
 }
 
-*, button, input, select, textarea {
+*,
+button,
+input,
+select,
+textarea {
   font-family: var(--font-game), cursive, sans-serif !important;
+  box-sizing: border-box;
 }
 
-/* Custom Cozy Scrollbars */
-::-webkit-scrollbar {
+button {
+  -webkit-touch-callout: none;
+}
+
+img {
+  -webkit-user-drag: none;
+}
+
+::selection {
+  background: rgba(245, 158, 11, 0.35);
+  color: #fff7e8;
+}
+
+.game-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(217, 119, 6, 0.55) rgba(28, 25, 23, 0.2);
+}
+
+.game-scrollbar::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
-::-webkit-scrollbar-track {
-  background: #f4ece4;
+
+.game-scrollbar::-webkit-scrollbar-track {
+  background: rgba(28, 25, 23, 0.2);
   border-radius: 9999px;
-}
-::-webkit-scrollbar-thumb {
-  background: #d4c2b0;
-  border-radius: 9999px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #bfa792;
 }
 
-/* Subtle Korean Tile Background Pattern */
-.bg-kitchen-pattern {
-  background-color: #fdf8f3;
-  background-image: radial-gradient(#e5d7c5 0.75px, transparent 0.75px), radial-gradient(#e5d7c5 0.75px, #fdf8f3 0.75px);
-  background-size: 30px 30px;
-  background-position: 0 0, 15px 15px;
+.game-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(217, 119, 6, 0.55);
+  border-radius: 9999px;
+}
+
+.game-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(245, 158, 11, 0.75);
+}
+
+@media (max-width: 640px) {
+  .game-scrollbar::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
