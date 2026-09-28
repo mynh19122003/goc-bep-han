@@ -78,7 +78,7 @@ export const MarketModal: React.FC = () => {
           return (
             <article
               key={item.id}
-              className={`flex items-center gap-2 rounded-2xl border p-2.5 ${
+              className={`grid grid-cols-[44px_minmax(0,1fr)] gap-2 rounded-2xl border p-2.5 sm:grid-cols-[44px_minmax(0,1fr)_auto] sm:items-center ${
                 banned ? 'border-red-900/40 bg-red-950/20 opacity-60' : 'border-stone-700 bg-stone-900/65'
               }`}
             >
@@ -112,9 +112,9 @@ export const MarketModal: React.FC = () => {
               </div>
 
               {banned ? (
-                <span className="shrink-0 rounded-xl border border-red-800/40 px-2 py-1 text-[9px] font-black text-red-300">Tạm khóa</span>
+                <span className="col-span-2 inline-flex min-h-[36px] items-center justify-center rounded-xl border border-red-800/40 px-2 py-1 text-[9px] font-black text-red-300 sm:col-span-1">Tạm khóa</span>
               ) : (
-                <div className="flex shrink-0 items-center gap-1">
+                <div className="col-span-2 flex shrink-0 items-center justify-end gap-1 sm:col-span-1 sm:justify-start">
                   <button
                     type="button"
                     onClick={() => startBargain(item.id, Math.max(3, qty || 3))}
@@ -132,7 +132,7 @@ export const MarketModal: React.FC = () => {
         })}
       </div>
 
-      <div className="sticky bottom-0 mt-3 flex items-center justify-between gap-3 rounded-2xl border border-amber-500/20 bg-[#17110f]/96 p-3 shadow-lg">
+      <div className="sticky bottom-0 z-10 mt-3 flex items-center justify-between gap-3 rounded-2xl border border-amber-500/25 bg-[#17110f]/98 p-3 shadow-xl backdrop-blur">
         <div>
           <p className="text-[9px] font-bold uppercase text-stone-500">Tổng đơn</p>
           <p className="text-base font-black text-amber-200">{totalCost.toLocaleString()} Xu</p>
