@@ -32,7 +32,7 @@ export const UpgradeModal: React.FC = () => {
           const maxed = upgrade.level >= upgrade.maxLevel;
           const canBuy = !maxed && coins >= upgrade.cost;
           return (
-            <article key={upgrade.id} className="flex items-center gap-3 rounded-2xl border border-stone-700 bg-stone-900/65 p-3">
+            <article key={upgrade.id} className="grid grid-cols-[48px_minmax(0,1fr)] gap-3 rounded-2xl border border-stone-700 bg-stone-900/65 p-3 sm:grid-cols-[48px_minmax(0,1fr)_auto] sm:items-center">
               <span className="relative h-12 w-12 shrink-0 rounded-xl border border-amber-500/20 bg-black/20 p-1">
                 <Image src={upgradeAsset(upgrade.id)} alt="" fill sizes="48px" className="object-contain p-1" />
               </span>
@@ -48,13 +48,13 @@ export const UpgradeModal: React.FC = () => {
                 <p className="mt-1 text-[10px] font-bold text-emerald-300">{upgrade.effectDescription}</p>
               </div>
 
-              <div className="shrink-0">
+              <div className="col-span-2 shrink-0 sm:col-span-1">
                 {maxed ? (
-                  <span className="rounded-xl border border-emerald-500/25 bg-emerald-950/50 px-3 py-2 text-[10px] font-black text-emerald-300">
+                  <span className="inline-flex min-h-[40px] w-full items-center justify-center rounded-xl border border-emerald-500/25 bg-emerald-950/50 px-3 py-2 text-[10px] font-black text-emerald-300 sm:w-auto">
                     Tối đa
                   </span>
                 ) : (
-                  <GameButton compact disabled={!canBuy} onClick={() => buyUpgrade(upgrade.id)}>
+                  <GameButton fullWidth compact disabled={!canBuy} onClick={() => buyUpgrade(upgrade.id)} className="sm:w-auto">
                     {upgrade.cost} Xu
                   </GameButton>
                 )}
