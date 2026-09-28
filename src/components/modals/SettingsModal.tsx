@@ -4,6 +4,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/stores/useGameStore';
 import { GameAssetIcon } from '@/components/ui/game/GameAssetIcon';
+import { CloseButton } from '@/components/ui/game/CloseButton';
 
 export const SettingsModal: React.FC = () => {
   const {
@@ -27,14 +28,11 @@ export const SettingsModal: React.FC = () => {
           exit={{ opacity: 0, scale: 0.9, y: 15 }}
           className="bg-stone-900 rounded-3xl max-w-md w-full p-4 sm:p-5 shadow-2xl border-4 border-amber-600/60 relative flex flex-col text-stone-100"
         >
-          {/* Close button */}
-          <button
-            type="button"
+          <CloseButton
             onClick={() => setActiveModal('none')}
-            className="absolute top-3.5 right-3.5 p-1.5 rounded-full bg-stone-800 hover:bg-stone-700 text-stone-400 hover:text-stone-100 border border-stone-700 transition-colors cursor-pointer"
-          >
-            <GameAssetIcon name="close" size={18} />
-          </button>
+            label="Đóng"
+            className="absolute top-3 right-3"
+          />
 
           {/* Modal Header */}
           <div className="flex items-center gap-2.5 mb-4">
