@@ -96,7 +96,7 @@ export const GameIntroModal: React.FC<GameIntroModalProps> = ({ isOpen, onClose 
               ))}
             </div>
 
-            <main className="game-scrollbar min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
+            <main className="game-scrollbar min-h-0 flex-1 overflow-y-auto p-3 sm:p-5">
               {tab === 'intro' && (
                 <div>
                   <div className="grid gap-3 sm:grid-cols-[1.25fr_.75fr]">
@@ -128,7 +128,7 @@ export const GameIntroModal: React.FC<GameIntroModalProps> = ({ isOpen, onClose 
                   <div className="mt-3 rounded-2xl border border-emerald-500/20 bg-emerald-950/18 p-3">
                     <span className="text-[10px] font-black uppercase tracking-wider text-emerald-300">Mẹo bắt đầu</span>
                     <p className="mt-1 text-[11px] leading-relaxed text-stone-300">
-                      Đừng nấu theo tên món בלבד. Hãy đọc cả topping và cấp cay của từng khách — game chấm đúng toàn bộ order.
+                      Đừng chỉ nấu theo tên món. Hãy đọc cả topping và cấp cay của từng khách — game chấm đúng toàn bộ order.
                     </p>
                   </div>
                 </div>
@@ -179,7 +179,7 @@ export const GameIntroModal: React.FC<GameIntroModalProps> = ({ isOpen, onClose 
               )}
             </main>
 
-            <footer className="shrink-0 border-t border-stone-800 bg-black/20 p-3 sm:px-4">
+            <footer className="shrink-0 border-t border-stone-800 bg-black/30 p-2.5 sm:px-4 sm:py-3">
               <GameButton fullWidth tone="success" onClick={onClose}>
                 Vào quán
               </GameButton>
