@@ -114,7 +114,6 @@ export const GAME_ASSETS = {
   },
 
   toppings: {
-    beef: '/assets/game/dishes/pho_bo.png',
     sausage: '/assets/game/ingredients/xuc_xich.png',
     kimchi: '/assets/game/ingredients/bap_cai_kimchi.png',
     egg: '/assets/game/ingredients/trung.png',
@@ -152,7 +151,6 @@ export const GAME_ASSETS = {
     toi: '/assets/game/ingredients/toi.png',
     rong_bien: '/assets/game/ingredients/rong_bien.png',
     me_rang: '/assets/game/ingredients/me_rang.png',
-    beef: '/assets/game/dishes/pho_bo.png',
     rice: '/assets/game/props/rice_sack.png',
     banana_milk_carton: '/assets/game/props/drinks_carrier.png',
   },
@@ -294,7 +292,7 @@ export const GAME_ASSETS = {
     chilli: '/assets/game/ingredients/ot_do.png',
     sauce: '/assets/game/ingredients/tuong_ot_gochujang.png',
     menu: '/assets/game/ui/sign_menu.png',
-    cooking: '/assets/game/ui/sign_cooking.png',
+    cooking: '/assets/game/props/cooking_pot.png',
     recipe: '/assets/game/ui/sign_recipe.png',
     ingredient: '/assets/game/ui/sign_ingredient.png',
     lantern: '/assets/game/props/red_lantern.png',
