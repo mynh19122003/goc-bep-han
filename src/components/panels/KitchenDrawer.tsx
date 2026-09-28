@@ -156,7 +156,7 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
     toppings: any[];
     spiceLevel: number;
   }) => {
-    completeCustomOrder({
+    const completed = completeCustomOrder({
       orderType: result.order.orderType,
       orderId: result.order.orderId,
       tableId: result.order.tableId,
@@ -167,6 +167,10 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
       spiceLevel: result.spiceLevel,
       usedIngredients: result.usedIngredients,
     });
+
+    if (!completed) {
+      return;
+    }
 
     // Auto advance to next waiting order or close if none left
     const remaining = waitingOrders.filter(
@@ -209,7 +213,7 @@ export const KitchenDrawer: React.FC<KitchenDrawerProps> = ({
                 <h2 className="text-sm sm:text-base font-black text-amber-200 uppercase tracking-wide flex items-center gap-2 leading-tight">
                   <span>GIAN BẾP NẤU HÀN QUỐC</span>
                   <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-500/40">
-                    Khay: {preparedDishes.length}/4
+                    Khay: {preparedDishes.length}/8
                   </span>
                 </h2>
                 <span className="text-[11px] text-amber-300/80 font-bold block leading-none">
