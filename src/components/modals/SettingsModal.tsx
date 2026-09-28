@@ -4,6 +4,7 @@ import React from 'react';
 import { useGameStore } from '@/stores/useGameStore';
 import { GameModal } from '@/components/ui/game/GameModal';
 import { GameButton } from '@/components/ui/game/GameButton';
+import { GAME_BUILD_LABEL, GAME_VERSION } from '@/config/version';
 
 export const SettingsModal: React.FC = () => {
   const {
@@ -59,6 +60,11 @@ export const SettingsModal: React.FC = () => {
             <li>• Theo dõi độ tươi nguyên liệu trước khi nhập thêm hàng.</li>
           </ul>
         </section>
+
+        <div className="flex items-center justify-between rounded-xl border border-stone-800 bg-black/20 px-3 py-2 text-[9px] font-bold text-stone-500">
+          <span>Phiên bản v{GAME_VERSION}</span>
+          <span>{GAME_BUILD_LABEL}</span>
+        </div>
 
         <GameButton
           fullWidth
