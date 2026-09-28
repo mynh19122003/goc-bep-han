@@ -15,6 +15,18 @@ export function cloneInventory(
   );
 }
 
+export function mergeInventoryWithDefaults(
+  defaults: Record<string, Ingredient>,
+  persisted?: Record<string, Ingredient>
+): Record<string, Ingredient> {
+  return Object.fromEntries(
+    Object.entries(defaults).map(([id, item]) => [
+      id,
+      { ...item, ...(persisted?.[id] || {}) },
+    ])
+  );
+}
+
 export function cloneDishes<T extends Record<string, Dish>>(source: T): T {
   return Object.fromEntries(
     Object.entries(source).map(([id, dish]) => [
@@ -25,6 +37,29 @@ export function cloneDishes<T extends Record<string, Dish>>(source: T): T {
         recipeSteps: [...dish.recipeSteps],
       },
     ])
+  ) as T;
+}
+
+export function mergeDishesWithDefaults<T extends Record<string, Dish>>(
+  defaults: T,
+  persisted?: Partial<T>
+): T {
+  return Object.fromEntries(
+    Object.entries(defaults).map(([id, dish]) => {
+      const saved = persisted?.[id] as Dish | undefined;
+      return [
+        id,
+        {
+          ...dish,
+          ...(saved || {}),
+          requiredIngredients: {
+            ...dish.requiredIngredients,
+            ...(saved?.requiredIngredients || {}),
+          },
+          recipeSteps: saved?.recipeSteps ? [...saved.recipeSteps] : [...dish.recipeSteps],
+        },
+      ];
+    })
   ) as T;
 }
 
@@ -63,7 +98,8 @@ export function hasIngredients(
 ): boolean {
   return Object.entries(requirements).every(([id, qty]) => {
     const needed = qty || 0;
-    return needed <= 0 || (inventory[id]?.stock || 0) >= needed;
+    const item = inventory[id];
+    return needed <= 0 || Boolean(item && item.stock >= needed && item.freshness > 0);
   });
 }
 
