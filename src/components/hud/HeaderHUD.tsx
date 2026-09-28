@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useGameStore } from '@/stores/useGameStore';
 import { GAME_ASSETS } from '@/game/assets/gameAssets';
 import { GameIconButton } from '@/components/ui/game/GameIconButton';
+import { restaurantProgress } from '@/core/gameCore';
 
 interface HeaderHUDProps {
   onOpenDelivery?: () => void;
@@ -22,6 +23,7 @@ export const HeaderHUD: React.FC<HeaderHUDProps> = ({
     isDayActive,
     isPaused,
     rating,
+    reputationPoints,
     deliveryQueue,
     sfxEnabled,
     startDay,
@@ -32,6 +34,7 @@ export const HeaderHUD: React.FC<HeaderHUDProps> = ({
   } = useGameStore();
 
   const totalDaySeconds = 100;
+  const progression = restaurantProgress(reputationPoints);
   const progressPercent = Math.min(100, (dayTimeSeconds / totalDaySeconds) * 100);
 
   // Business clock: 10:00 to 22:00
@@ -81,6 +84,25 @@ export const HeaderHUD: React.FC<HeaderHUDProps> = ({
               />
             </div>
             <span className="tracking-tight">{coins.toLocaleString()}</span>
+          </div>
+
+          {/* Restaurant Level / Reputation */}
+          <div
+            className="hidden md:flex min-w-[122px] flex-col gap-0.5 bg-stone-950/80 border border-emerald-500/30 px-2.5 py-1 rounded-2xl shadow-inner"
+            title={`Danh tiếng ${reputationPoints} • Cấp quán ${progression.level}`}
+          >
+            <div className="flex items-center justify-between gap-2 text-[10px] font-black">
+              <span className="text-emerald-300">Cấp {progression.level}</span>
+              <span className="text-stone-400">
+                {progression.currentXp}/{progression.nextLevelXp}
+              </span>
+            </div>
+            <div className="h-1.5 rounded-full bg-stone-800 overflow-hidden">
+              <div
+                className="h-full bg-emerald-500 transition-all"
+                style={{ width: `${progression.progressPercent}%` }}
+              />
+            </div>
           </div>
 
           {/* Rating Heart */}
