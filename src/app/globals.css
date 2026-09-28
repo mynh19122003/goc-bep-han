@@ -44,3 +44,32 @@ body {
   background-size: 30px 30px;
   background-position: 0 0, 15px 15px;
 }
+
+
+/* Compact in-game scroll areas. Keep scrollable content usable without giant browser chrome. */
+.game-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(217, 119, 6, 0.55) rgba(28, 25, 23, 0.35);
+}
+.game-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.game-scrollbar::-webkit-scrollbar-track {
+  background: rgba(28, 25, 23, 0.35);
+  border-radius: 9999px;
+}
+.game-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(217, 119, 6, 0.55);
+  border-radius: 9999px;
+}
+.game-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(245, 158, 11, 0.75);
+}
+
+@media (max-width: 640px) {
+  .game-scrollbar::-webkit-scrollbar {
+    height: 4px;
+    width: 4px;
+  }
+}
