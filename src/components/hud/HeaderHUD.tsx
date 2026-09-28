@@ -42,7 +42,7 @@ export const HeaderHUD: React.FC<HeaderHUDProps> = ({
 
   return (
     <header className="w-full bg-stone-900/95 backdrop-blur-md border-b-2 border-amber-600/40 px-2 sm:px-4 py-2 shrink-0 z-40 shadow-lg text-stone-100 select-none font-baloo">
-      <div className="flex items-center justify-between gap-1.5 sm:gap-3 max-w-[1720px] mx-auto">
+      <div className="flex flex-wrap items-center justify-between gap-1.5 sm:gap-3 max-w-[1720px] mx-auto">
         {/* Left: Brand & Day/Time */}
         <div className="flex items-center gap-1.5 sm:gap-2.5">
           <div className="flex items-center gap-1.5 bg-gradient-to-r from-red-600 to-amber-600 text-white font-black px-2.5 py-1 rounded-2xl text-xs sm:text-sm shadow-md border border-red-400/30">
@@ -55,7 +55,7 @@ export const HeaderHUD: React.FC<HeaderHUDProps> = ({
                 className="object-contain w-full h-full"
               />
             </div>
-            <span className="tracking-wide hidden xs:inline">GÓC BẾP HÀN</span>
+            <span className="tracking-wide hidden md:inline">GÓC BẾP HÀN</span>
           </div>
 
           {/* Day & Business Time */}
@@ -69,7 +69,7 @@ export const HeaderHUD: React.FC<HeaderHUDProps> = ({
         </div>
 
         {/* Center: Currencies & Rating */}
-        <div className="flex items-center gap-1.5 sm:gap-3">
+        <div className="flex items-center gap-1 sm:gap-3 order-2 sm:order-none">
           {/* Coin Counter */}
           <div className="flex items-center gap-1.5 bg-amber-950/90 border border-amber-500/50 text-amber-200 font-black px-2.5 sm:px-3 py-1 rounded-2xl shadow-inner text-xs sm:text-sm">
             <div className="w-6 h-6 sm:w-7 sm:h-7 relative shrink-0">
@@ -124,7 +124,7 @@ export const HeaderHUD: React.FC<HeaderHUDProps> = ({
         </div>
 
         {/* Right: Sound, Day Action & Settings */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        <div className="flex items-center gap-1 sm:gap-2 order-3 sm:order-none ml-auto">
           <button
             type="button"
             onClick={toggleSfx}
@@ -175,7 +175,7 @@ export const HeaderHUD: React.FC<HeaderHUDProps> = ({
             className="min-w-[44px] h-9 px-2 rounded-xl bg-stone-950/80 hover:bg-stone-800 border border-amber-500/30 text-amber-200 text-[10px] font-black active:scale-95 transition-all"
             title="Cài đặt trò chơi"
           >
-            CÀI ĐẶT
+            <span className="sm:hidden">CÀI</span><span className="hidden sm:inline">CÀI ĐẶT</span>
           </button>
         </div>
       </div>
