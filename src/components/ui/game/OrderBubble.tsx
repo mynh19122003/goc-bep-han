@@ -78,7 +78,6 @@ export const OrderBubble: React.FC<OrderBubbleProps> = ({
           </span>
           {secondsRemaining !== undefined && (
             <span className="text-[10px] text-amber-800 font-bold block flex items-center gap-1">
-              <GameAssetIcon name="clock" size={10} />
               <span>{Math.ceil(secondsRemaining)}s</span>
             </span>
           )}
