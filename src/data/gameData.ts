@@ -364,7 +364,7 @@ export const INITIAL_DISHES: Record<string, Dish> = {
     koreanName: '떡볶이',
     category: 'main',
     stationType: 'tokbokki',
-    price: 38,
+    price: 56,
     prepTime: 7,
     emoji: '🥘',
     requiredIngredients: {
@@ -375,7 +375,8 @@ export const INITIAL_DISHES: Record<string, Dish> = {
     },
     recipeSteps: [
       'Đong tỷ lệ thìa sốt: Tương ớt + Nước tương + Đường',
-      'Chạm giữ nút để khuấy chảo và duy trì nhiệt vùng Xanh',
+      'Chạm giữ để khuấy và duy trì nhiệt trong vùng Xanh',
+      'Lật chảo ít nhất 2 lần để sốt áo đều bánh gạo',
       'Đạt độ sánh dẻo thơm thì cho ra đĩa!',
     ],
     unlockLevel: 1,
@@ -389,7 +390,7 @@ export const INITIAL_DISHES: Record<string, Dish> = {
     koreanName: '치즈 떡볶이',
     category: 'main',
     stationType: 'tokbokki',
-    price: 54,
+    price: 72,
     prepTime: 8,
     emoji: '🧀',
     requiredIngredients: {
@@ -414,7 +415,7 @@ export const INITIAL_DISHES: Record<string, Dish> = {
     koreanName: '김밥',
     category: 'main',
     stationType: 'kimbap',
-    price: 42,
+    price: 58,
     prepTime: 6,
     emoji: '🍱',
     requiredIngredients: {
@@ -441,7 +442,7 @@ export const INITIAL_DISHES: Record<string, Dish> = {
     koreanName: '치즈 김밥',
     category: 'main',
     stationType: 'kimbap',
-    price: 52,
+    price: 66,
     prepTime: 7,
     emoji: '🍙',
     requiredIngredients: {
