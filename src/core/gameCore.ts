@@ -99,7 +99,7 @@ export function hasIngredients(
   return Object.entries(requirements).every(([id, qty]) => {
     const needed = qty || 0;
     const item = inventory[id];
-    return needed <= 0 || Boolean(item && item.stock >= needed && item.freshness > 0);
+    return needed <= 0 || Boolean(item && item.stock >= needed && item.freshness > 10);
   });
 }
 
@@ -162,6 +162,43 @@ export function preparedDishMatchesOrder(params: {
 
 export function restaurantLevelFromReputation(reputationPoints: number): number {
   return Math.max(1, Math.floor(Math.max(0, reputationPoints) / 100) + 1);
+}
+
+export function restaurantProgress(reputationPoints: number): {
+  level: number;
+  currentXp: number;
+  nextLevelXp: number;
+  progressPercent: number;
+} {
+  const safeReputation = Math.max(0, reputationPoints);
+  const level = restaurantLevelFromReputation(safeReputation);
+  const levelStart = (level - 1) * 100;
+  const currentXp = safeReputation - levelStart;
+  const nextLevelXp = 100;
+  return {
+    level,
+    currentXp,
+    nextLevelXp,
+    progressPercent: Math.min(100, (currentXp / nextLevelXp) * 100),
+  };
+}
+
+export function averageFreshnessForRequirements(
+  inventory: Record<string, Ingredient>,
+  requirements: IngredientRequirements
+): number {
+  let weightedFreshness = 0;
+  let totalUnits = 0;
+
+  for (const [id, qty] of Object.entries(requirements)) {
+    const units = qty || 0;
+    const item = inventory[id];
+    if (!item || units <= 0) continue;
+    weightedFreshness += item.freshness * units;
+    totalUnits += units;
+  }
+
+  return totalUnits > 0 ? weightedFreshness / totalUnits : 100;
 }
 
 export function createGameId(prefix: string): string {
