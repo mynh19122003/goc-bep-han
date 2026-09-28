@@ -13,6 +13,7 @@ export const TokbokkiStation: React.FC = () => {
     startTokbokki,
     addTokbokkiSauceSpoon,
     setTokbokkiStirring,
+    flipTokbokkiPan,
     finishTokbokki,
     discardTokbokki,
   } = useGameStore();
@@ -239,10 +240,18 @@ export const TokbokkiStation: React.FC = () => {
             {/* Hold to Stir Button */}
             <button
               type="button"
-              onMouseDown={() => setTokbokkiStirring(true)}
-              onMouseUp={() => setTokbokkiStirring(false)}
-              onTouchStart={() => setTokbokkiStirring(true)}
-              onTouchEnd={() => setTokbokkiStirring(false)}
+              onPointerDown={(event) => {
+                event.currentTarget.setPointerCapture(event.pointerId);
+                setTokbokkiStirring(true);
+              }}
+              onPointerUp={(event) => {
+                if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+                  event.currentTarget.releasePointerCapture(event.pointerId);
+                }
+                setTokbokkiStirring(false);
+              }}
+              onPointerCancel={() => setTokbokkiStirring(false)}
+              onPointerLeave={() => setTokbokkiStirring(false)}
               className="w-full py-3 bg-gradient-to-r from-orange-500 to-red-600 active:scale-95 text-white font-black text-xs rounded-2xl shadow-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer touch-none border border-amber-300/40"
             >
               <GameAssetIcon name="fire" size={18} />
@@ -250,13 +259,29 @@ export const TokbokkiStation: React.FC = () => {
             </button>
           </div>
         ) : tokbokkiSession.status === 'cooking_stir' ? (
-          <div className="flex gap-2">
+          <div className="grid grid-cols-[1fr_auto] gap-2">
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={flipTokbokkiPan}
+                className="py-3 font-black text-xs rounded-2xl shadow-xl active:scale-95 bg-orange-700 hover:bg-orange-600 text-white border border-amber-300/30 cursor-pointer"
+              >
+                LẬT CHẢO ({tokbokkiSession.flipCount}/2)
+              </button>
             <button
               type="button"
-              onMouseDown={() => setTokbokkiStirring(true)}
-              onMouseUp={() => setTokbokkiStirring(false)}
-              onTouchStart={() => setTokbokkiStirring(true)}
-              onTouchEnd={() => setTokbokkiStirring(false)}
+              onPointerDown={(event) => {
+                event.currentTarget.setPointerCapture(event.pointerId);
+                setTokbokkiStirring(true);
+              }}
+              onPointerUp={(event) => {
+                if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+                  event.currentTarget.releasePointerCapture(event.pointerId);
+                }
+                setTokbokkiStirring(false);
+              }}
+              onPointerCancel={() => setTokbokkiStirring(false)}
+              onPointerLeave={() => setTokbokkiStirring(false)}
               className={`flex-1 py-3 font-black text-xs rounded-2xl shadow-xl transition-all active:scale-95 flex items-center justify-center gap-1.5 touch-none cursor-pointer border border-amber-300/30 ${
                 tokbokkiSession.isStirring
                   ? 'bg-red-600 text-white animate-pulse'
@@ -265,6 +290,7 @@ export const TokbokkiStation: React.FC = () => {
             >
               <span>{tokbokkiSession.isStirring ? 'ĐANG KHUẤY MẠNH' : 'CHẠM GIỮ ĐỂ KHUẤY'}</span>
             </button>
+            </div>
             <button
               type="button"
               onClick={discardTokbokki}
