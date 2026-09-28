@@ -7,6 +7,7 @@ import { useGameStore } from '@/stores/useGameStore';
 import { DishCategory } from '@/types/game';
 import { GAME_ASSETS } from '@/config/gameAssets';
 import { GameAssetIcon } from '@/components/ui/game/GameAssetIcon';
+import { CloseButton } from '@/components/ui/game/CloseButton';
 import { restaurantLevelFromReputation } from '@/core/gameCore';
 
 export const MenuModal: React.FC = () => {
@@ -36,14 +37,11 @@ export const MenuModal: React.FC = () => {
           exit={{ opacity: 0, scale: 0.9, y: 15 }}
           className="bg-stone-900 rounded-3xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl border-4 border-amber-600/60 relative flex flex-col max-h-[90vh] text-stone-100"
         >
-          {/* Close button */}
-          <button
-            type="button"
+          <CloseButton
             onClick={() => setActiveModal('none')}
-            className="absolute top-4 right-4 p-1.5 rounded-full bg-stone-800 hover:bg-stone-700 text-stone-400 hover:text-stone-100 border border-stone-700 transition-colors cursor-pointer"
-          >
-            <GameAssetIcon name="close" size={18} />
-          </button>
+            label="Đóng"
+            className="absolute top-3 right-3 sm:top-4 sm:right-4"
+          />
 
           {/* Modal Header */}
           <div className="flex items-center gap-2.5 mb-4">
