@@ -52,7 +52,7 @@ export const ToppingSelector: React.FC<ToppingSelectorProps> = ({
       </div>
 
       {/* Horizontal Scroll Topping Bar: Cards min 76-90px on mobile, 80-105px on desktop, flex: 0 0 auto */}
-      <div className="flex gap-2 sm:gap-2.5 overflow-x-auto pb-2 px-1 scrollbar-thin scrollbar-thumb-amber-600/40">
+      <div className="game-scrollbar flex gap-2 sm:gap-2.5 overflow-x-auto overscroll-x-contain snap-x snap-mandatory pb-2 px-1">
         {allowedToppings.map((toppingId) => {
           const item = inventory[toppingId];
           const stock = item ? item.stock : 0;
@@ -65,14 +65,14 @@ export const ToppingSelector: React.FC<ToppingSelectorProps> = ({
           const assetSrc =
             (GAME_ASSETS.toppings as Record<string, string>)[toppingId] ||
             (GAME_ASSETS.ingredients as Record<string, string>)[toppingId] ||
-            GAME_ASSETS.ingredients.trung;
+            null;
 
           const displayName = item ? item.vietnameseName : toppingId;
 
           return (
             <div
               key={toppingId}
-              className="flex-shrink-0 flex flex-col items-center"
+              className="flex-shrink-0 flex flex-col items-center snap-start"
               style={{ flex: '0 0 auto' }}
             >
               <button
@@ -83,7 +83,7 @@ export const ToppingSelector: React.FC<ToppingSelectorProps> = ({
                 className={`relative w-[76px] sm:w-[92px] h-[96px] sm:h-[108px] rounded-2xl p-1.5 flex flex-col items-center justify-between border-2 transition-all duration-150 cursor-pointer shadow-md ${
                   isSelected
                     ? 'bg-amber-950/90 border-amber-400 shadow-amber-500/20 scale-[1.03]'
-                    : 'bg-stone-900/90 hover:bg-stone-850 border-amber-600/50 hover:border-amber-400'
+                    : 'bg-stone-900/90 hover:bg-stone-800 border-amber-600/50 hover:border-amber-400'
                 } ${
                   isOutOfStock
                     ? 'opacity-40 grayscale cursor-not-allowed border-stone-700'
@@ -99,14 +99,20 @@ export const ToppingSelector: React.FC<ToppingSelectorProps> = ({
 
                 {/* Topping Image Asset */}
                 <div className="w-10 h-10 sm:w-12 sm:h-12 relative flex items-center justify-center shrink-0 my-auto">
-                  <Image
-                    src={assetSrc}
-                    alt={displayName}
-                    width={48}
-                    height={48}
-                    className="w-full h-full object-contain pointer-events-none drop-shadow-sm"
-                    draggable={false}
-                  />
+                  {assetSrc ? (
+                    <Image
+                      src={assetSrc}
+                      alt={displayName}
+                      width={48}
+                      height={48}
+                      className="w-full h-full object-contain pointer-events-none drop-shadow-sm"
+                      draggable={false}
+                    />
+                  ) : (
+                    <span className="text-[9px] font-black text-red-300 text-center leading-tight">
+                      Thiếu asset
+                    </span>
+                  )}
                 </div>
 
                 {/* Topping Name with 2-line clamp to prevent ugly clipping */}
@@ -117,7 +123,7 @@ export const ToppingSelector: React.FC<ToppingSelectorProps> = ({
                 {/* Stock Counter Pill at bottom */}
                 <div className="w-full flex items-center justify-center mt-0.5">
                   <span
-                    className={`text-[10px] font-black px-2 py-0.2 rounded-full border ${
+                    className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${
                       isOutOfStock
                         ? 'bg-red-950 text-red-300 border-red-800'
                         : isSelected
