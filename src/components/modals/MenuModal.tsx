@@ -75,8 +75,8 @@ export const MenuModal: React.FC = () => {
                   : 'border-stone-700 bg-black/20'
               }`}
             >
-              <div className="flex items-start gap-3">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-amber-500/15 bg-black/20 p-1">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center self-start rounded-xl border border-amber-500/15 bg-black/20 p-1 sm:self-auto">
                   {asset ? (
                     <div className="relative h-12 w-12">
                       <Image src={asset} alt={dish.name} fill sizes="48px" className="object-contain" />
@@ -129,13 +129,13 @@ export const MenuModal: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="shrink-0">
+                <div className="shrink-0 sm:self-center">
                   {dish.isUnlocked ? (
-                    <span className="inline-flex min-h-[40px] items-center rounded-xl border border-emerald-500/20 bg-emerald-950/45 px-3 text-[10px] font-black text-emerald-300">
+                    <span className="inline-flex min-h-[40px] w-full items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-950/45 px-3 text-[10px] font-black text-emerald-300 sm:w-auto">
                       Đang bán
                     </span>
                   ) : (
-                    <GameButton compact disabled={!canUnlock} onClick={() => unlockDish(dish.id)}>
+                    <GameButton fullWidth compact disabled={!canUnlock} onClick={() => unlockDish(dish.id)} className="sm:w-auto">
                       {meetsLevel ? `${dish.unlockCost} Xu` : `Cấp ${dish.unlockLevel}`}
                     </GameButton>
                   )}
