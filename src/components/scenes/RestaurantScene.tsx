@@ -2,15 +2,15 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/stores/useGameStore';
 import { GAME_ASSETS } from '@/game/assets/gameAssets';
 import { CustomerSprite } from '@/components/ui/game/CustomerSprite';
 import { ShipperSprite } from '@/components/ui/game/ShipperSprite';
 import { OrderBubble } from '@/components/ui/game/OrderBubble';
-import { GameAssetIcon } from '@/components/ui/game/GameAssetIcon';
 import { CookingTargetOrder } from '@/components/cooking/CookingEngine';
 import { preparedDishMatchesOrder } from '@/core/gameCore';
+import { GameButton } from '@/components/ui/game/GameButton';
+import { GameSurface } from '@/components/ui/game/GameSurface';
 
 interface RestaurantSceneProps {
   onCookOrder: (order: CookingTargetOrder) => void;
@@ -35,384 +35,263 @@ export const RestaurantScene: React.FC<RestaurantSceneProps> = ({
     serveDeliveryOrder,
   } = useGameStore();
 
-  const activeShipperOrder = deliveryQueue.length > 0 ? deliveryQueue[0] : null;
+  const activeShipperOrder = deliveryQueue[0] || null;
+  const waitingTables = tables.filter((t) => t.status === 'seated').length;
 
   return (
-    <div className="relative w-full h-full flex flex-col justify-between overflow-hidden select-none font-baloo">
-      {/* 1. Real Korean Hanok Restaurant Background Image with Bright Warm Lighting */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <Image
-          src={GAME_ASSETS.backgrounds.restaurant}
-          alt="Không gian quán ăn truyền thống Hàn Quốc"
-          fill
-          sizes="100vw"
-          className="object-cover object-center filter brightness-[0.88] contrast-[1.03] saturate-[1.08]"
-          priority
-        />
-        {/* Soft top & bottom gradient for text contrast without making the scene dark */}
-        <div className="absolute inset-0 bg-gradient-to-b from-stone-950/30 via-transparent to-stone-950/45 pointer-events-none" />
-      </div>
+    <section className="relative h-full w-full overflow-hidden">
+      <Image
+        src={GAME_ASSETS.backgrounds.restaurant}
+        alt="Phòng ăn Hanok"
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover object-center brightness-[0.93] saturate-[1.05]"
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/5 to-black/45" />
 
-      {/* 2. Top Restaurant Banner & Day Controls */}
-      <div className="relative z-10 p-2 sm:p-3 flex items-center justify-between gap-2 max-w-6xl mx-auto w-full">
-        {/* Left: Storefront status tag */}
-        <div className="flex items-center gap-2 bg-stone-900/85 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-amber-500/40 shadow-lg">
-          <div className="w-6 h-6 relative shrink-0">
-            <Image
-              src={GAME_ASSETS.props.red_lantern}
-              alt="Lồng đèn"
-              width={24}
-              height={24}
-              className="object-contain"
-            />
-          </div>
-          <div>
-            <h1 className="text-xs sm:text-sm font-black text-amber-200 uppercase tracking-wide leading-tight">
-              TIỆM ĂN HÀN QUỐC HANOK
-            </h1>
-            <span className="text-[10px] text-amber-300/80 font-bold block leading-none">
-              {isDayActive
-                ? `Đang phục vụ • ${tables.filter((t) => t.status === 'seated').length} bàn đợi món`
-                : 'Cửa hàng đang đóng • Hãy mở quán'}
+      <div className="relative z-10 flex h-full flex-col">
+        <div className="mx-auto flex w-full max-w-[1380px] items-center justify-between gap-2 px-2 pt-2 sm:px-4 sm:pt-3">
+          <GameSurface className="flex min-w-0 items-center gap-2 px-3 py-2">
+            <span className="relative h-7 w-7 shrink-0">
+              <Image src={GAME_ASSETS.props.red_lantern} alt="" fill sizes="28px" className="object-contain" />
             </span>
-          </div>
+            <div className="min-w-0">
+              <h1 className="truncate text-xs font-black uppercase tracking-wide text-amber-100 sm:text-sm">
+                Phòng ăn Hanok
+              </h1>
+              <p className="truncate text-[10px] font-bold text-amber-200/70">
+                {isDayActive ? `${waitingTables} bàn đang chờ món` : 'Quán đang đóng cửa'}
+              </p>
+            </div>
+          </GameSurface>
+
+          {!isDayActive && (
+            <GameButton tone="success" compact onClick={startDay}>
+              Mở cửa đón khách
+            </GameButton>
+          )}
         </div>
 
-        {/* Right: Quick Start Day Button if idle */}
-        {!isDayActive && (
-          <button
-            type="button"
-            onClick={startDay}
-            className="bg-gradient-to-r from-red-600 via-amber-600 to-red-600 hover:brightness-110 text-white font-black px-4 py-2 rounded-2xl shadow-xl border border-amber-300/60 flex items-center gap-2 active:scale-95 transition-all text-xs sm:text-sm cursor-pointer animate-bounce-slight"
-          >
-            <div className="w-5 h-5 relative shrink-0">
-              <Image
-                src={GAME_ASSETS.actions.start}
-                alt="Bắt đầu"
-                width={20}
-                height={20}
-                className="object-contain"
-              />
-            </div>
-            <span>Mở Cửa Đón Khách</span>
-          </button>
-        )}
-      </div>
-
-      {/* 3. Main Restaurant Space: Delivery Spot + 4 Dining Table Zones */}
-      <div className="game-scrollbar relative z-10 flex-1 px-2 sm:px-4 py-1 grid grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)] gap-3 max-w-6xl mx-auto w-full overflow-y-auto pb-20">
-        {/* ========================================================================= */}
-        {/* A. DELIVERY SPOT (Góc Chờ Shipper Giao Hàng Trực Tuyến)                  */}
-        {/* ========================================================================= */}
-        <div className="shrink-0 flex flex-col justify-start">
-          <div
-            onClick={onOpenDelivery}
-            className="bg-stone-950/55 hover:bg-stone-950/70 backdrop-blur-[3px] border border-teal-400/45 hover:border-teal-300 p-2.5 rounded-2xl shadow-lg transition-all cursor-pointer group"
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-1.5">
-                <div className="w-6 h-6 relative shrink-0">
-                  <Image
-                    src={GAME_ASSETS.navigation.delivery}
-                    alt="Giao hàng"
-                    width={24}
-                    height={24}
-                    className="object-contain"
-                  />
-                </div>
-                <span className="text-xs font-black text-teal-300">Góc Giao Hàng</span>
-              </div>
-              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-teal-950/80 text-teal-300 border border-teal-500/40">
-                {deliveryQueue.length} Đơn
-              </span>
-            </div>
-
-            {/* Shipper Stage */}
-            <div className="min-h-[120px] flex flex-col items-center justify-center p-2 rounded-2xl bg-stone-950/60 border border-teal-500/20 group-hover:border-teal-500/40 transition-colors">
-              {activeShipperOrder ? (
-                <div className="flex flex-col items-center w-full">
-                  {/* Floating delivery order bubble */}
-                  <div className="w-full mb-1">
-                    <OrderBubble
-                      dishName={activeShipperOrder.dishName}
-                      dishId={activeShipperOrder.dishId}
-                      secondsRemaining={
-                        activeShipperOrder.shipperStatus === 'arrived'
-                          ? activeShipperOrder.shipperWaitSeconds
-                          : activeShipperOrder.shipperArriveSeconds
-                      }
-                      canServe={preparedDishes.some((p) =>
-                        preparedDishMatchesOrder({
-                          prepared: p,
-                          orderId: activeShipperOrder.id,
-                          dishId: activeShipperOrder.dishId,
-                          requiredToppings: activeShipperOrder.requiredToppings,
-                          excludedToppings: activeShipperOrder.excludedToppings,
-                          spiceLevel: activeShipperOrder.spiceLevel,
-                        })
-                      )}
-                      onServeClick={(e?: any) => {
-                        if (e?.stopPropagation) e.stopPropagation();
-                        serveDeliveryOrder(activeShipperOrder.id);
-                      }}
-                    />
-                  </div>
-
-                  {/* Shipper character */}
-                  <ShipperSprite
-                    color={activeShipperOrder.shipperColor || 'green'}
-                    status={activeShipperOrder.shipperStatus}
-                    size="sm"
-                  />
-                  <span className="text-[10px] text-teal-200/90 font-bold mt-1">
-                    {activeShipperOrder.customerName}
-                  </span>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center text-center py-2">
-                  <div className="w-12 h-12 relative mb-1 opacity-70">
-                    <Image
-                      src={GAME_ASSETS.props.delivery_crate}
-                      alt="Thùng hàng"
-                      width={48}
-                      height={48}
-                      className="object-contain"
-                    />
-                  </div>
-                  <span className="text-[11px] font-bold text-stone-400">
-                    Chưa có đơn online
-                  </span>
-                  <span className="text-[9px] text-stone-500">
-                    Shipper sẽ tới khi có khách đặt
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* ========================================================================= */}
-        {/* B. 4 COZY DINE-IN TABLE ZONES (4 Khu Vực Bàn Ăn Hanok)                     */}
-        {/* ========================================================================= */}
-        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
-          {tables.map((table, index) => {
-            const hasCustomer = table.status === 'seated' && table.customer;
-            const isEating = table.status === 'eating';
-            const isDirty = table.status === 'dirty';
-            const isEmpty = table.status === 'empty';
-
-            const canServe = Boolean(
-              hasCustomer &&
-                table.customer &&
-                preparedDishes.some((prepared) =>
-                  preparedDishMatchesOrder({
-                    prepared,
-                    orderId: table.customer!.id,
-                    dishId: table.customer!.orderDishId,
-                    requiredToppings: table.customer!.requiredToppings,
-                    excludedToppings: table.customer!.excludedToppings,
-                    spiceLevel: table.customer!.spiceLevel,
-                  })
-                )
-            );
-
-            const patiencePercent = hasCustomer
-              ? Math.max(
-                  0,
-                  Math.min(100, (table.customer!.currentPatience / table.customer!.maxPatience) * 100)
-                )
-              : 0;
-
-            return (
-              <div
-                key={table.id}
-                className="relative rounded-2xl p-2.5 sm:p-3 flex flex-col justify-between transition-all bg-stone-950/45 backdrop-blur-[3px] border border-amber-400/35 hover:bg-stone-950/60 hover:border-amber-300/70 shadow-lg"
-              >
-                {/* 1. Table Header: Table Name & Waiting Seconds */}
-                <div className="flex items-center justify-between mb-1.5 z-10">
+        <div className="game-scrollbar mx-auto grid w-full max-w-[1380px] flex-1 grid-cols-1 gap-3 overflow-y-auto px-2 pb-24 pt-2 sm:px-4 lg:grid-cols-[210px_minmax(0,1fr)]">
+          <aside>
+            <button type="button" onClick={onOpenDelivery} className="block w-full text-left">
+              <GameSurface className="p-2.5 transition hover:border-teal-300/60" strong>
+                <div className="mb-2 flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
-                    <span className="w-5 h-5 rounded-full bg-amber-600/30 border border-amber-400/50 flex items-center justify-center text-[10px] font-black text-amber-300">
-                      {index + 1}
+                    <span className="relative h-6 w-6">
+                      <Image src={GAME_ASSETS.navigation.delivery} alt="" fill sizes="24px" className="object-contain" />
                     </span>
-                    <span className="text-xs font-black text-amber-200">{table.name}</span>
+                    <span className="text-[11px] font-black text-teal-200">Giao hàng</span>
                   </div>
-
-                  {hasCustomer && (
-                    <span
-                      className={`text-[10px] font-black px-2 py-0.5 rounded-full border flex items-center gap-1 ${
-                        patiencePercent < 30
-                          ? 'bg-red-950 text-red-300 border-red-500 animate-pulse'
-                          : 'bg-amber-950/90 text-amber-300 border-amber-500/50'
-                      }`}
-                    >
-                      <span>{Math.ceil(table.customer!.currentPatience)}s</span>
-                    </span>
-                  )}
+                  <span className="rounded-full bg-teal-950/80 px-2 py-0.5 text-[9px] font-black text-teal-300">
+                    {deliveryQueue.length}
+                  </span>
                 </div>
 
-                {/* 2. Table Area Content (Customer + Order Bubble or Clean Table Graphic) */}
-                <div className="min-h-[128px] sm:min-h-[142px] flex flex-col items-center justify-center relative my-1">
-                  {/* CASE 1: Customer Seated Waiting for Food */}
-                  {hasCustomer && table.customer && (
-                    <div className="flex flex-col items-center w-full z-10">
-                      {/* Floating Order Bubble */}
-                      <div
-                        onClick={() => {
-                          if (canServe) {
-                            serveTable(table.id);
-                          } else {
-                            onCookOrder({
-                              orderType: 'dine_in',
-                              orderId: table.customer!.id,
-                              tableId: table.id,
-                              customerName: table.customer!.name,
-                              dishId: table.customer!.orderDishId,
-                              dishName: table.customer!.orderDishName,
-                              dishEmoji: table.customer!.orderDishEmoji,
-                              requiredToppings: table.customer!.requiredToppings,
-                              excludedToppings: table.customer!.excludedToppings,
-                              spiceLevel: table.customer!.spiceLevel,
-                              price: dishes[table.customer!.orderDishId]?.price || 50,
-                            });
-                          }
-                        }}
-                        className="w-full mb-1 cursor-pointer transition-transform hover:scale-[1.02] active:scale-95"
-                      >
+                <div className="flex min-h-[112px] flex-col items-center justify-center rounded-xl border border-teal-400/15 bg-black/20 p-2">
+                  {activeShipperOrder ? (
+                    <>
+                      <div className="mb-1 w-full">
                         <OrderBubble
-                          dishName={table.customer.orderDishName}
-                          dishId={table.customer.orderDishId}
-                          patiencePercent={patiencePercent}
-                          secondsRemaining={table.customer.currentPatience}
-                          canServe={canServe}
-                          onServeClick={() => serveTable(table.id)}
+                          dishName={activeShipperOrder.dishName}
+                          dishId={activeShipperOrder.dishId}
+                          secondsRemaining={
+                            activeShipperOrder.shipperStatus === 'arrived'
+                              ? activeShipperOrder.shipperWaitSeconds
+                              : activeShipperOrder.shipperArriveSeconds
+                          }
+                          canServe={preparedDishes.some((prepared) =>
+                            preparedDishMatchesOrder({
+                              prepared,
+                              orderId: activeShipperOrder.id,
+                              dishId: activeShipperOrder.dishId,
+                              requiredToppings: activeShipperOrder.requiredToppings,
+                              excludedToppings: activeShipperOrder.excludedToppings,
+                              spiceLevel: activeShipperOrder.spiceLevel,
+                            })
+                          )}
+                          onServeClick={(event?: any) => {
+                            event?.stopPropagation?.();
+                            serveDeliveryOrder(activeShipperOrder.id);
+                          }}
                         />
                       </div>
+                      <ShipperSprite
+                        color={activeShipperOrder.shipperColor || 'green'}
+                        status={activeShipperOrder.shipperStatus}
+                        size="sm"
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <span className="relative mb-1 h-10 w-10 opacity-70">
+                        <Image src={GAME_ASSETS.props.delivery_crate} alt="" fill sizes="40px" className="object-contain" />
+                      </span>
+                      <span className="text-[10px] font-bold text-stone-400">Chưa có đơn online</span>
+                    </>
+                  )}
+                </div>
+              </GameSurface>
+            </button>
+          </aside>
 
-                      {/* Customer Sprite sitting behind wooden table */}
-                      <div className="relative flex flex-col items-center">
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+            {tables.map((table, index) => {
+              const customer = table.customer;
+              const seated = table.status === 'seated' && customer;
+              const eating = table.status === 'eating' && customer;
+              const dirty = table.status === 'dirty';
+              const empty = table.status === 'empty';
+
+              const canServe = Boolean(
+                seated &&
+                  customer &&
+                  preparedDishes.some((prepared) =>
+                    preparedDishMatchesOrder({
+                      prepared,
+                      orderId: customer.id,
+                      dishId: customer.orderDishId,
+                      requiredToppings: customer.requiredToppings,
+                      excludedToppings: customer.excludedToppings,
+                      spiceLevel: customer.spiceLevel,
+                    })
+                  )
+              );
+
+              const patiencePercent = seated && customer
+                ? Math.max(0, Math.min(100, (customer.currentPatience / customer.maxPatience) * 100))
+                : 0;
+
+              const cookOrder = () => {
+                if (!customer) return;
+                onCookOrder({
+                  orderType: 'dine_in',
+                  orderId: customer.id,
+                  tableId: table.id,
+                  customerName: customer.name,
+                  dishId: customer.orderDishId,
+                  dishName: customer.orderDishName,
+                  dishEmoji: customer.orderDishEmoji,
+                  requiredToppings: customer.requiredToppings,
+                  excludedToppings: customer.excludedToppings,
+                  spiceLevel: customer.spiceLevel,
+                  price: dishes[customer.orderDishId]?.price || 50,
+                });
+              };
+
+              return (
+                <GameSurface
+                  key={table.id}
+                  className="relative flex min-h-[190px] flex-col p-2.5 sm:min-h-[205px] sm:p-3"
+                >
+                  <div className="mb-1 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5">
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full border border-amber-400/35 bg-amber-600/15 text-[9px] font-black text-amber-200">
+                        {index + 1}
+                      </span>
+                      <span className="truncate text-[11px] font-black text-amber-100">{table.name}</span>
+                    </div>
+                    {seated && customer && (
+                      <span className={`rounded-full border px-2 py-0.5 text-[9px] font-black ${
+                        patiencePercent < 30
+                          ? 'border-red-500/60 bg-red-950/80 text-red-300'
+                          : 'border-amber-500/30 bg-black/25 text-amber-200'
+                      }`}>
+                        {Math.ceil(customer.currentPatience)}s
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex flex-1 items-center justify-center">
+                    {seated && customer && (
+                      <div className="flex w-full flex-col items-center">
+                        <button
+                          type="button"
+                          onClick={canServe ? () => serveTable(table.id) : cookOrder}
+                          className="mb-1 w-full transition active:scale-[.98]"
+                        >
+                          <OrderBubble
+                            dishName={customer.orderDishName}
+                            dishId={customer.orderDishId}
+                            patiencePercent={patiencePercent}
+                            secondsRemaining={customer.currentPatience}
+                            canServe={canServe}
+                            onServeClick={() => serveTable(table.id)}
+                          />
+                        </button>
                         <CustomerSprite
-                          spriteSrc={table.customer.visualSprite || table.customer.avatar}
-                          name={table.customer.name}
-                          mood={table.customer.mood}
+                          spriteSrc={customer.visualSprite || customer.avatar}
+                          name={customer.name}
+                          mood={customer.mood}
                           size="md"
                           isEating={false}
                         />
-                        <span className="text-[10px] font-black text-amber-200 block text-center mt-0.5 truncate max-w-[120px]">
-                          {table.customer.name}
+                        <span className="mt-0.5 max-w-[130px] truncate text-[10px] font-black text-amber-100">
+                          {customer.name}
                         </span>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* CASE 2: Customer Happily Eating */}
-                  {isEating && table.customer && (
-                    <div className="flex flex-col items-center justify-center py-2 z-10">
-                      <CustomerSprite
-                        spriteSrc={table.customer.visualSprite || table.customer.avatar}
-                        name={table.customer.name}
-                        mood="happy"
-                        size="md"
-                        isEating={true}
-                      />
-                      <span className="mt-1 text-[11px] font-black text-emerald-300 bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-500/40">
-                        Đang dùng món ngon lành...
-                      </span>
-                    </div>
-                  )}
-
-                  {/* CASE 3: Table is Dirty after eating */}
-                  {isDirty && (
-                    <div
-                      onClick={() => cleanTable(table.id)}
-                      className="flex flex-col items-center justify-center p-3 rounded-2xl bg-amber-950/60 border-2 border-dashed border-amber-400 hover:border-amber-300 cursor-pointer transition-all active:scale-95 z-10 text-center w-full"
-                    >
-                      <div className="w-10 h-10 relative mb-1 animate-bounce-slight">
-                        <Image
-                          src={GAME_ASSETS.props.rice_bowl}
-                          alt="Bát đĩa"
-                          width={40}
-                          height={40}
-                          className="object-contain"
+                    {eating && customer && (
+                      <div className="flex flex-col items-center">
+                        <CustomerSprite
+                          spriteSrc={customer.visualSprite || customer.avatar}
+                          name={customer.name}
+                          mood="happy"
+                          size="md"
+                          isEating
                         />
+                        <span className="mt-1 rounded-full border border-emerald-400/25 bg-emerald-950/70 px-2 py-0.5 text-[10px] font-black text-emerald-300">
+                          Đang dùng món
+                        </span>
                       </div>
-                      <span className="text-xs font-black text-amber-200">
-                        Bàn Ăn Cần Dọn Dẹp
-                      </span>
-                      <span className="text-[10px] font-bold text-amber-400 mt-0.5">
-                        Nhấn để dọn bàn & thu tiền
-                      </span>
-                    </div>
-                  )}
+                    )}
 
-                  {/* CASE 4: Table is Empty and Ready for Guests */}
-                  {isEmpty && (
-                    <div className="flex flex-col items-center justify-center py-4 text-center z-10">
-                      <div className="w-12 h-12 relative mb-1 opacity-75">
-                        <Image
-                          src={GAME_ASSETS.props.condiment_tray}
-                          alt="Bàn sẵn sàng"
-                          width={48}
-                          height={48}
-                          className="object-contain"
-                        />
-                      </div>
-                      <span className="text-xs font-black text-stone-300">
-                        Bàn Ăn Sẵn Sàng
-                      </span>
-                      <span className="text-[10px] text-stone-400 font-bold">
-                        Đang chờ khách vào ngồi
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* 3. Action bar for Seated Table: Cook / Serve */}
-                {hasCustomer && table.customer && (
-                  <div className="mt-1.5 pt-1.5 border-t border-amber-500/30 flex items-center gap-1.5 z-10">
-                    {canServe ? (
+                    {dirty && (
                       <button
                         type="button"
-                        onClick={() => serveTable(table.id)}
-                        className="w-full py-1.5 px-3 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-black rounded-xl text-xs shadow-md border border-emerald-300 flex items-center justify-center gap-1 active:scale-95 transition-all cursor-pointer"
+                        onClick={() => cleanTable(table.id)}
+                        className="flex w-full flex-col items-center justify-center rounded-xl border border-dashed border-amber-400/45 bg-amber-950/30 p-4 transition hover:bg-amber-950/45 active:scale-95"
                       >
-                        <GameAssetIcon name="bowl" size={14} />
-                        <span>Giao Món Cho Khách</span>
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          onCookOrder({
-                            orderType: 'dine_in',
-                            orderId: table.customer!.id,
-                            tableId: table.id,
-                            customerName: table.customer!.name,
-                            dishId: table.customer!.orderDishId,
-                            dishName: table.customer!.orderDishName,
-                            dishEmoji: table.customer!.orderDishEmoji,
-                            requiredToppings: table.customer!.requiredToppings,
-                            excludedToppings: table.customer!.excludedToppings,
-                            spiceLevel: table.customer!.spiceLevel,
-                            price: dishes[table.customer!.orderDishId]?.price || 50,
-                          })
-                        }
-                        className="w-full py-1.5 px-3 bg-amber-600/90 hover:bg-amber-500 text-white font-black rounded-xl text-xs shadow-md border border-amber-400/50 flex items-center justify-center gap-1 active:scale-95 transition-all cursor-pointer"
-                      >
-                        <GameAssetIcon name="cooking" size={14} />
-                        <span>Nấu Món Cho Bàn Này</span>
+                        <span className="relative mb-1 h-10 w-10">
+                          <Image src={GAME_ASSETS.props.rice_bowl} alt="" fill sizes="40px" className="object-contain" />
+                        </span>
+                        <span className="text-xs font-black text-amber-200">Dọn bàn</span>
+                        <span className="text-[9px] text-amber-200/60">Nhấn để thu dọn</span>
                       </button>
                     )}
+
+                    {empty && (
+                      <div className="flex flex-col items-center py-3 opacity-70">
+                        <span className="relative mb-1 h-10 w-10">
+                          <Image src={GAME_ASSETS.props.condiment_tray} alt="" fill sizes="40px" className="object-contain" />
+                        </span>
+                        <span className="text-[11px] font-black text-stone-300">Bàn sẵn sàng</span>
+                        <span className="text-[9px] text-stone-400">Chờ khách vào bàn</span>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            );
-          })}
+
+                  {seated && customer && (
+                    <div className="mt-1.5">
+                      {canServe ? (
+                        <GameButton fullWidth compact tone="success" onClick={() => serveTable(table.id)}>
+                          Giao món
+                        </GameButton>
+                      ) : (
+                        <GameButton fullWidth compact onClick={cookOrder} iconSrc={GAME_ASSETS.navigation.kitchen}>
+                          Nấu món này
+                        </GameButton>
+                      )}
+                    </div>
+                  )}
+                </GameSurface>
+              );
+            })}
+          </div>
         </div>
       </div>
-
-      {/* 4. Bottom Spacer to avoid overlapping with GameActionDock */}
-      <div className="h-12 shrink-0 pointer-events-none" />
-    </div>
+    </section>
   );
 };
