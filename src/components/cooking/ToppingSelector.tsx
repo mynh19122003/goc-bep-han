@@ -38,7 +38,7 @@ export const ToppingSelector: React.FC<ToppingSelectorProps> = ({
             Topping
           </h3>
         </div>
-        <span className="text-[9px] font-bold text-stone-500">Chạm để thêm • Bỏ bớt bên dưới</span>
+        <span className="text-[9px] font-bold text-stone-500">Chạm để thêm • bấm − để bớt</span>
       </div>
 
       <div className="game-scrollbar flex snap-x snap-mandatory gap-2 overflow-x-auto overscroll-x-contain pb-2">
@@ -52,12 +52,12 @@ export const ToppingSelector: React.FC<ToppingSelectorProps> = ({
             (GAME_ASSETS.ingredients as Record<string, string>)[id];
 
           return (
-            <div key={id} className="w-[82px] shrink-0 snap-start sm:w-[94px]">
+            <div key={id} className="relative w-[78px] shrink-0 snap-start sm:w-[90px]">
               <button
                 type="button"
                 disabled={disabled || unavailable}
                 onClick={() => onAddTopping(id)}
-                className={`relative flex h-[104px] w-full flex-col items-center justify-between rounded-2xl border p-1.5 transition active:scale-95 ${
+                className={`relative flex h-[92px] w-full flex-col items-center justify-between rounded-2xl border p-1.5 transition active:scale-95 sm:h-[100px] ${
                   selected > 0
                     ? 'border-amber-300/55 bg-amber-950/65'
                     : 'border-stone-700 bg-stone-900/70 hover:border-amber-500/35'
@@ -69,17 +69,17 @@ export const ToppingSelector: React.FC<ToppingSelectorProps> = ({
                   </span>
                 )}
 
-                <div className="flex h-12 w-12 items-center justify-center">
+                <div className="flex h-10 w-10 items-center justify-center sm:h-11 sm:w-11">
                   {asset ? (
-                    <div className="relative h-11 w-11">
-                      <Image src={asset} alt={item?.vietnameseName || id} fill sizes="44px" className="object-contain drop-shadow" />
+                    <div className="relative h-9 w-9 sm:h-10 sm:w-10">
+                      <Image src={asset} alt={item?.vietnameseName || id} fill sizes="40px" className="object-contain drop-shadow" />
                     </div>
                   ) : (
                     <span className="text-center text-[8px] font-black leading-tight text-red-300">Thiếu asset</span>
                   )}
                 </div>
 
-                <span className="line-clamp-2 min-h-[24px] max-w-full text-center text-[10px] font-black leading-tight text-amber-100">
+                <span className="line-clamp-2 min-h-[22px] max-w-full text-center text-[9px] font-black leading-tight text-amber-100 sm:text-[10px]">
                   {item?.vietnameseName || id}
                 </span>
 
@@ -95,10 +95,14 @@ export const ToppingSelector: React.FC<ToppingSelectorProps> = ({
               {selected > 0 && (
                 <button
                   type="button"
-                  onClick={() => onRemoveTopping(id)}
-                  className="mt-1 w-full rounded-lg py-1 text-[9px] font-black text-red-300 transition hover:bg-red-950/30 active:scale-95"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onRemoveTopping(id);
+                  }}
+                  className="absolute -left-1 -top-1 z-20 flex h-6 w-6 items-center justify-center rounded-full border border-red-300/40 bg-red-700 text-[11px] font-black text-white shadow transition active:scale-90"
+                  aria-label={`Bớt ${item?.vietnameseName || id}`}
                 >
-                  Bỏ bớt
+                  −
                 </button>
               )}
             </div>
